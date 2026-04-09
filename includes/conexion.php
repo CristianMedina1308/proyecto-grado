@@ -1,13 +1,24 @@
 <?php
 
-$host = getenv('DB_HOST') ?: '127.0.0.1';
-$db = getenv('DB_NAME') ?: 'maquillaje';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+// Detecta si estás en Railway (variables reales)
+$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
+$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'maquillaje';
+$user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
+$pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASS') ?: '';
+$port = getenv('MYSQLPORT') ?: 3306;
 
 try {
-    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+
+    $conn = new PDO($dsn, $user, $pass);
+
+    // Configuración recomendada
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+    // Opcional (para debug)
+    // echo "✅ Conectado a Railway";
+
 } catch (PDOException $e) {
-    die('Error de conexion: ' . $e->getMessage());
+    die('❌ Error de conexión: ' . $e->getMessage());
 }
