@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Banner editorial Tauro Store</title>
+  <desc id="desc">Composicion premium con seleccion masculina Tauro en tonos carbon y dorado envejecido.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#17120f"/>
+      <stop offset="0.55" stop-color="#241b14"/>
+      <stop offset="1" stop-color="#120e0b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.18" cy="0.16" r="0.9">
+      <stop offset="0" stop-color="#d6b469" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#d6b469" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="line" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#f0d28d"/>
+      <stop offset="1" stop-color="#8a6521"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" x2="0.9" y1="0" y2="1">
+      <stop offset="0" stop-color="#221a13"/>
+      <stop offset="1" stop-color="#17120f"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="22" flood-color="#0a0806" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect width="1600" height="1000" fill="url(#glow)"/>
+
+  <g opacity="0.08" stroke="#f4d99e">
+    <path d="M0 140 H1600"/>
+    <path d="M0 320 H1600"/>
+    <path d="M0 500 H1600"/>
+    <path d="M0 680 H1600"/>
+    <path d="M0 860 H1600"/>
+    <path d="M180 0 V1000"/>
+    <path d="M520 0 V1000"/>
+    <path d="M860 0 V1000"/>
+    <path d="M1200 0 V1000"/>
+    <path d="M1440 0 V1000"/>
+  </g>
+
+  <circle cx="1320" cy="160" r="190" fill="#d6b469" opacity="0.12"/>
+  <circle cx="1190" cy="790" r="240" fill="#d6b469" opacity="0.09"/>
+  <circle cx="270" cy="820" r="180" fill="#a27a34" opacity="0.08"/>
+
+  <g transform="translate(94 110)">
+    <rect x="0" y="0" width="164" height="36" rx="18" fill="#fff8ea" fill-opacity="0.08" stroke="#9e7836" stroke-opacity="0.55"/>
+    <text x="82" y="24" text-anchor="middle" font-size="15" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#efd18a" letter-spacing="3">
+      TAURO EDIT
+    </text>
+
+    <text x="0" y="132" font-size="104" font-family="Cormorant Garamond, Georgia, serif" font-weight="700" fill="#fff6e8">
+      Coleccion
+    </text>
+    <text x="0" y="224" font-size="104" font-family="Cormorant Garamond, Georgia, serif" font-weight="700" fill="#d8b66d">
+      Masculina
+    </text>
+
+    <text x="2" y="300" font-size="30" font-family="Manrope, Arial, sans-serif" fill="#e9dbc0" opacity="0.88">
+      Chaquetas, denim y esenciales con una direccion
+    </text>
+    <text x="2" y="344" font-size="30" font-family="Manrope, Arial, sans-serif" fill="#e9dbc0" opacity="0.88">
+      mas sobria, premium y limpia para vestir hombre.
+    </text>
+
+    <rect x="0" y="404" width="360" height="4" rx="2" fill="url(#line)"/>
+
+    <g transform="translate(0 452)">
+      <rect x="0" y="0" width="164" height="52" rx="18" fill="#f8efe0"/>
+      <text x="82" y="33" text-anchor="middle" font-size="19" font-family="Manrope, Arial, sans-serif" font-weight="800" fill="#18130f">
+        PREMIUM DROP
+      </text>
+
+      <rect x="182" y="0" width="214" height="52" rx="18" fill="#fff8ea" fill-opacity="0.06" stroke="#9e7836" stroke-opacity="0.45"/>
+      <text x="289" y="33" text-anchor="middle" font-size="18" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#f0d79c">
+        BLACK • GOLD • IVORY
+      </text>
+    </g>
+
+    <g transform="translate(0 606)">
+      <text x="0" y="0" font-size="16" font-family="Manrope, Arial, sans-serif" fill="#f0d79c" letter-spacing="3" opacity="0.88">
+        SELECCION DESTACADA
+      </text>
+      <text x="0" y="52" font-size="28" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#fff5e8">
+        Bomber negra, denim slim y tenis urbanos
+      </text>
+      <text x="0" y="96" font-size="22" font-family="Manrope, Arial, sans-serif" fill="#dac8a7" opacity="0.84">
+        Listos para combinar con una base masculina y elegante.
+      </text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <g transform="translate(876 114) rotate(-6 168 0)">
+      <rect x="0" y="0" width="336" height="474" rx="32" fill="url(#card)" stroke="#6e5425" stroke-opacity="0.45"/>
+      <rect x="20" y="20" width="296" height="310" rx="24" fill="#faf4ea"/>
+      <image href="productos/prod-31-chaqueta-bomber-negra.svg" x="20" y="20" width="296" height="310" preserveAspectRatio="xMidYMid slice"/>
+      <text x="30" y="366" font-size="18" font-family="Manrope, Arial, sans-serif" fill="#d6b469" letter-spacing="3">OUTERWEAR</text>
+      <text x="30" y="410" font-size="34" font-family="Manrope, Arial, sans-serif" font-weight="800" fill="#fff7eb">CHAQUETA BOMBER</text>
+      <text x="30" y="448" font-size="24" font-family="Manrope, Arial, sans-serif" fill="#d7c3a1">Negra • Presencia limpia</text>
+    </g>
+
+    <g transform="translate(1132 190) rotate(7 156 0)">
+      <rect x="0" y="0" width="312" height="434" rx="30" fill="url(#card)" stroke="#7a6030" stroke-opacity="0.42"/>
+      <rect x="18" y="18" width="276" height="270" rx="22" fill="#faf4ea"/>
+      <image href="productos/prod-28-jean-slim-fit-azul-oscuro.svg" x="18" y="18" width="276" height="270" preserveAspectRatio="xMidYMid slice"/>
+      <text x="28" y="322" font-size="17" font-family="Manrope, Arial, sans-serif" fill="#d6b469" letter-spacing="3">DENIM</text>
+      <text x="28" y="362" font-size="30" font-family="Manrope, Arial, sans-serif" font-weight="800" fill="#fff7eb">JEAN SLIM FIT</text>
+      <text x="28" y="396" font-size="21" font-family="Manrope, Arial, sans-serif" fill="#d7c3a1">Azul oscuro • Base versatil</text>
+    </g>
+
+    <g transform="translate(1016 540) rotate(-2 150 0)">
+      <rect x="0" y="0" width="300" height="384" rx="28" fill="url(#card)" stroke="#8c6b2e" stroke-opacity="0.4"/>
+      <rect x="18" y="18" width="264" height="236" rx="20" fill="#faf4ea"/>
+      <image href="productos/prod-33-tenis-urban-classic-blanco.svg" x="18" y="18" width="264" height="236" preserveAspectRatio="xMidYMid slice"/>
+      <text x="28" y="288" font-size="16" font-family="Manrope, Arial, sans-serif" fill="#d6b469" letter-spacing="3">FOOTWEAR</text>
+      <text x="28" y="326" font-size="28" font-family="Manrope, Arial, sans-serif" font-weight="800" fill="#fff7eb">TENIS URBAN</text>
+      <text x="28" y="358" font-size="20" font-family="Manrope, Arial, sans-serif" fill="#d7c3a1">Classic blanco • Remate limpio</text>
+    </g>
+  </g>
+</svg>

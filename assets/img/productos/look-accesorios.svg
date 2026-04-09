@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Accesorios</title>
+  <desc id="desc">Imagen de ejemplo para accesorios de moda masculina.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eef4f8" />
+      <stop offset="1" stop-color="#d8e3ec" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)" />
+  <rect x="280" y="520" width="640" height="120" rx="40" fill="#2a4b5f" />
+  <rect x="320" y="548" width="220" height="64" rx="20" fill="#f4f9fd" />
+  <rect x="760" y="470" width="220" height="220" rx="26" fill="#304f62" />
+  <circle cx="870" cy="580" r="72" fill="#f4f9fd" />
+  <rect x="420" y="760" width="360" height="320" rx="42" fill="#2d4f61" />
+  <rect x="500" y="700" width="200" height="90" rx="26" fill="#587a90" />
+  <text x="600" y="1320" text-anchor="middle" font-size="86" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#223441">
+    ACCESORIOS
+  </text>
+  <text x="600" y="1400" text-anchor="middle" font-size="50" font-family="Manrope, Arial, sans-serif" fill="#466073">
+    DETAILS THAT ELEVATE
+  </text>
+</svg>

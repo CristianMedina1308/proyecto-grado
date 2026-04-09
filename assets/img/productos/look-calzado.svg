@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Calzado</title>
+  <desc id="desc">Imagen de ejemplo para calzado de moda masculina.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f3f7fa" />
+      <stop offset="1" stop-color="#dbe6ee" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)" />
+  <path d="M220 920C260 860 360 820 500 820H750C860 820 960 860 980 920L1020 1030H180Z" fill="#2e4d60" />
+  <path d="M260 840C320 780 410 760 520 760H740C820 760 890 790 940 840L900 900H300Z" fill="#f7fbff" />
+  <rect x="330" y="900" width="520" height="40" rx="20" fill="#b3c9d8" />
+  <circle cx="390" cy="920" r="8" fill="#7e9aab" />
+  <circle cx="450" cy="920" r="8" fill="#7e9aab" />
+  <circle cx="510" cy="920" r="8" fill="#7e9aab" />
+  <circle cx="570" cy="920" r="8" fill="#7e9aab" />
+  <text x="600" y="1320" text-anchor="middle" font-size="86" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#223441">
+    CALZADO
+  </text>
+  <text x="600" y="1400" text-anchor="middle" font-size="50" font-family="Manrope, Arial, sans-serif" fill="#466073">
+    SNEAKERS AND BOOTS
+  </text>
+</svg>

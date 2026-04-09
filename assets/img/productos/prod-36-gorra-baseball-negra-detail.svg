@@ -1,0 +1,42 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">TS 36 BORDADO FRONTAL</title>
+  <desc id="desc">Imagen detalle para catalogo premium Tauro.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eff5f9" />
+      <stop offset="1" stop-color="#dae4ec" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#3a576d" />
+      <stop offset="1" stop-color="#97adbe" />
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="1500" fill="url(#bg)" />
+
+  <rect x="110" y="130" width="980" height="1240" rx="56" fill="#ffffff" opacity="0.35" />
+  <rect x="170" y="210" width="860" height="980" rx="42" fill="url(#panel)" />
+  <rect x="170" y="210" width="860" height="980" rx="42" fill="url(#grid)" />
+
+  <rect x="250" y="320" width="700" height="150" rx="24" fill="#ffffff" opacity="0.22" />
+  <rect x="250" y="520" width="700" height="460" rx="30" fill="#ffffff" opacity="0.16" />
+
+  <circle cx="330" cy="880" r="66" fill="#ffffff" opacity="0.26" />
+  <circle cx="870" cy="880" r="66" fill="#ffffff" opacity="0.26" />
+
+  <text x="600" y="410" text-anchor="middle" font-size="74" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#f8fcff" letter-spacing="3">
+    DETAIL SHOT
+  </text>
+  <text x="600" y="810" text-anchor="middle" font-size="124" font-family="Manrope, Arial, sans-serif" font-weight="800" fill="#ffffff" letter-spacing="4">
+    TS 36
+  </text>
+  <text x="600" y="1080" text-anchor="middle" font-size="50" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#edf5fb" letter-spacing="2">
+    BORDADO FRONTAL
+  </text>
+  <text x="600" y="1270" text-anchor="middle" font-size="52" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#243746">
+    TAURO DETAIL EDITION
+  </text>
+</svg>

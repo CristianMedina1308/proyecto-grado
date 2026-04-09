@@ -1,0 +1,56 @@
+/* ========================================= */
+/* RESPONSIVE HELPERS */
+/* ========================================= */
+@media (max-width: 992px) {
+  .navbar-nav {
+    gap: 8px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+
+  .site-navbar .nav-link {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn,
+  button {
+    width: 100%;
+  }
+
+  .chatbot-toggle,
+  .chatbot-chip,
+  .chatbot-send,
+  .chatbot-close,
+  .talla-btn,
+  .favorito-toggle,
+  .bag-button,
+  .navbar-toggler {
+    width: auto;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .category-tile {
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2.45rem;
+  }
+
+  .coleccion-titulo {
+    font-size: 1.9rem;
+  }
+
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+  }
+}

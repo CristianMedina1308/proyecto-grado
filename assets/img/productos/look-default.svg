@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Producto Tauro</title>
+  <desc id="desc">Imagen de ejemplo para catalogo de moda masculina.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eef4f7" />
+      <stop offset="1" stop-color="#dbe6ee" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)" />
+  <circle cx="600" cy="520" r="210" fill="#aac2d3" />
+  <rect x="350" y="760" width="500" height="450" rx="28" fill="#2b6f91" opacity="0.88" />
+  <rect x="380" y="790" width="440" height="390" rx="20" fill="#f7fbff" opacity="0.15" />
+  <text x="600" y="1320" text-anchor="middle" font-size="92" font-family="Manrope, Arial, sans-serif" font-weight="700" fill="#223441">
+    TAURO
+  </text>
+  <text x="600" y="1410" text-anchor="middle" font-size="54" font-family="Manrope, Arial, sans-serif" fill="#466073">
+    LOOK DE TEMPORADA
+  </text>
+</svg>
