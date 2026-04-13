@@ -54,9 +54,30 @@ function facturaGenerarCodigo(int $idPedido): string
 
 function facturaConstruirBaseUrl(): string
 {
+  $explicitBaseUrl = trim((string) (getenv('APP_URL') ?: getenv('PUBLIC_URL') ?: ''));
+  if ($explicitBaseUrl !== '') {
+    return rtrim($explicitBaseUrl, '/');
+  }
+
+  $forwardedProto = trim((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+  if (strpos($forwardedProto, ',') !== false) {
+    $forwardedProto = trim((string) explode(',', $forwardedProto)[0]);
+  }
+
   $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
   $scheme = $https ? 'https' : 'http';
-  $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+  if ($forwardedProto !== '') {
+    $scheme = strtolower($forwardedProto) === 'https' ? 'https' : 'http';
+  } elseif (getenv('RAILWAY_PUBLIC_DOMAIN')) {
+    $scheme = 'https';
+  }
+
+  $host = trim((string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? getenv('RAILWAY_PUBLIC_DOMAIN') ?: 'localhost'));
+  if (strpos($host, ',') !== false) {
+    $host = trim((string) explode(',', $host)[0]);
+  }
+
   $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
   $dir = rtrim($dir, '/');
   return $scheme . '://' . $host . ($dir !== '' ? $dir : '');
@@ -88,18 +109,63 @@ function facturaDescargarQrTemporal(string $url): ?string
     return null;
   }
 
-  $endpoint = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' . rawurlencode($url);
-  $context = stream_context_create([
-    'http' => ['timeout' => 6],
-    'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
-  ]);
+  $providers = [
+    'https://api.qrserver.com/v1/create-qr-code/?size=320x320&qzone=2&format=png&data=' . rawurlencode($url),
+    'https://quickchart.io/qr?size=320&margin=2&ecLevel=H&format=png&text=' . rawurlencode($url),
+  ];
 
-  $contenido = @file_get_contents($endpoint, false, $context);
-  if ($contenido === false || strlen($contenido) < 100) {
+  $contenido = null;
+
+  foreach ($providers as $endpoint) {
+    if (function_exists('curl_init')) {
+      $ch = curl_init($endpoint);
+      curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 8,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_HTTPHEADER => ['Accept: image/png'],
+      ]);
+      $respuesta = curl_exec($ch);
+      $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      curl_close($ch);
+
+      if (is_string($respuesta) && $respuesta !== '' && $status >= 200 && $status < 300) {
+        $contenido = $respuesta;
+      }
+    }
+
+    if ($contenido === null) {
+      $context = stream_context_create([
+        'http' => ['timeout' => 8, 'header' => "Accept: image/png\r\n"],
+        'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+      ]);
+      $respuesta = @file_get_contents($endpoint, false, $context);
+      if (is_string($respuesta) && $respuesta !== '') {
+        $contenido = $respuesta;
+      }
+    }
+
+    if (is_string($contenido) && strlen($contenido) > 100 && str_starts_with($contenido, "\x89PNG")) {
+      break;
+    }
+
+    $contenido = null;
+  }
+
+  if (!is_string($contenido) || strlen($contenido) < 100 || !str_starts_with($contenido, "\x89PNG")) {
     return null;
   }
 
-  $tmp = @tempnam(sys_get_temp_dir(), 'qr_');
+  $tmpBase = @tempnam(sys_get_temp_dir(), 'qr_');
+  if (!$tmpBase) {
+    return null;
+  }
+
+  $tmp = $tmpBase . '.png';
+  @rename($tmpBase, $tmp);
   if (!$tmp) {
     return null;
   }
@@ -110,6 +176,26 @@ function facturaDescargarQrTemporal(string $url): ?string
   }
 
   return $tmp;
+}
+
+function facturaTokenVisible(string $urlPublica): string
+{
+  $query = parse_url($urlPublica, PHP_URL_QUERY);
+  if (!is_string($query) || $query === '') {
+    return '-';
+  }
+
+  parse_str($query, $params);
+  $token = trim((string) ($params['token'] ?? ''));
+  if ($token === '') {
+    return '-';
+  }
+
+  if (strlen($token) <= 18) {
+    return $token;
+  }
+
+  return substr($token, 0, 10) . '...' . substr($token, -8);
 }
 
 function facturaPdfMoney(float $amount): string
@@ -352,32 +438,47 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $yQr = $pdf->GetY();
   $pdf->SetDrawColor($colorBorder[0], $colorBorder[1], $colorBorder[2]);
   $pdf->SetFillColor($colorSurface[0], $colorSurface[1], $colorSurface[2]);
-  $pdf->Rect(10, $yQr, 190, 38, 'DF');
+  $pdf->Rect(10, $yQr, 190, 48, 'DF');
+
+  $qrBoxX = 14;
+  $qrBoxY = $yQr + 4;
+  $qrBoxSize = 38;
+  $contentX = 58;
+  $contentWidth = 136;
 
   $qrTemp = facturaDescargarQrTemporal($urlPublica);
   if ($qrTemp && file_exists($qrTemp)) {
-    $pdf->Image($qrTemp, 13, $yQr + 3, 30, 30, 'PNG');
+    $pdf->SetDrawColor($colorBorder[0], $colorBorder[1], $colorBorder[2]);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->Rect($qrBoxX, $qrBoxY, $qrBoxSize, $qrBoxSize, 'DF');
+    $pdf->Image($qrTemp, $qrBoxX + 3, $qrBoxY + 3, 32, 32, 'PNG');
     @unlink($qrTemp);
   } else {
     $pdf->SetFont('Helvetica', 'B', 9);
     $pdf->SetTextColor($colorAccentStrong[0], $colorAccentStrong[1], $colorAccentStrong[2]);
-    $pdf->SetXY(14, $yQr + 14);
-    $pdf->Cell(28, 6, facturaPdfText('QR'), 0, 0, 'C');
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->Rect($qrBoxX, $qrBoxY, $qrBoxSize, $qrBoxSize, 'DF');
+    $pdf->SetXY($qrBoxX, $qrBoxY + 14);
+    $pdf->Cell($qrBoxSize, 6, facturaPdfText('QR'), 0, 0, 'C');
     $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
   }
 
-  $pdf->SetXY(47, $yQr + 4);
+  $pdf->SetXY($contentX, $yQr + 5);
   $pdf->SetFont('Helvetica', 'B', 9);
-  $pdf->Cell(150, 5, facturaPdfText('Verificacion digital de factura'), 0, 2, 'L');
+  $pdf->Cell($contentWidth, 5, facturaPdfText('Verificacion digital de factura'), 0, 2, 'L');
   $pdf->SetFont('Helvetica', '', 8.5);
   $pdf->SetTextColor($colorTextSoft[0], $colorTextSoft[1], $colorTextSoft[2]);
-  $pdf->Cell(150, 5, facturaPdfText('Escanea el QR o abre el enlace para consultar esta factura.'), 0, 2, 'L');
+  $pdf->Cell($contentWidth, 5, facturaPdfText('Escanea el QR para abrir la factura publica desde tu celular.'), 0, 2, 'L');
+  $pdf->Cell($contentWidth, 5, facturaPdfText('Token publico: ' . facturaTokenVisible($urlPublica)), 0, 2, 'L');
+
   $pdf->SetTextColor($colorAccentStrong[0], $colorAccentStrong[1], $colorAccentStrong[2]);
-  $pdf->SetFont('Helvetica', 'U', 8);
-  $pdf->Cell(150, 5, facturaPdfText(facturaTruncar($urlPublica, 90)), 0, 1, 'L', false, $urlPublica);
+  $pdf->SetFont('Helvetica', 'B', 8.5);
+  $pdf->SetFillColor($colorSoft[0], $colorSoft[1], $colorSoft[2]);
+  $pdf->SetX($contentX);
+  $pdf->Cell(56, 7, facturaPdfText('Abrir factura publica'), 1, 1, 'C', true, $urlPublica);
   $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
 
-  $pdf->Ln(8);
+  $pdf->Ln(10);
   $pdf->SetTextColor($colorTextSoft[0], $colorTextSoft[1], $colorTextSoft[2]);
   $pdf->SetFont('Helvetica', '', 8.2);
   $pdf->MultiCell(190, 4.8, facturaPdfText('Observaciones: Esta factura respalda la compra realizada en Tauro Store. Si necesitas soporte, escribe a soporte@taurostore.com con el numero de pedido o consulta tu factura publica.'));
