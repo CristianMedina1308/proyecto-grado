@@ -2,6 +2,30 @@
 // CARRITO PROFESIONAL CON TALLA
 // ===========================
 
+function mostrarAlertaCarrito(nombre, cantidad, talla = null) {
+  const titulo = cantidad > 1 ? "Producto actualizado" : "Producto agregado";
+  const detalleTalla = talla ? ` Talla ${talla}.` : "";
+  const mensaje = `${nombre} ahora está en tu carrito.${detalleTalla}`;
+
+  if (window.Swal) {
+    window.Swal.fire({
+      icon: "success",
+      title: titulo,
+      text: mensaje,
+      timer: 1800,
+      showConfirmButton: false,
+      toast: true,
+      position: "top-end",
+      customClass: {
+        popup: "app-swal-popup"
+      }
+    });
+    return;
+  }
+
+  alert("✅ " + mensaje);
+}
+
 function agregarCarrito(nombre, precio, id, talla = null) {
 
   if (!id || isNaN(id)) {
@@ -32,8 +56,7 @@ function agregarCarrito(nombre, precio, id, talla = null) {
 
   actualizarContadorCarrito();
   mostrarMiniCarrito();
-
-  alert("✅ Producto agregado al carrito");
+  mostrarAlertaCarrito(nombre, producto ? producto.cantidad : 1, talla);
 }
 
 function actualizarContadorCarrito() {

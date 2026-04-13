@@ -73,6 +73,20 @@ function agregarCarrito(nombre, precio, id) {
     carrito.push({ id, nombre, precio, cantidad: 1 });
   }
   localStorage.setItem("carrito", JSON.stringify(carrito));
+
+  if (typeof actualizarContadorCarrito === "function") {
+    actualizarContadorCarrito();
+  }
+
+  if (typeof mostrarMiniCarrito === "function") {
+    mostrarMiniCarrito();
+  }
+
+  if (typeof mostrarAlertaCarrito === "function") {
+    mostrarAlertaCarrito(nombre, existe ? existe.cantidad : 1);
+    return;
+  }
+
   alert("✅ Producto agregado al carrito");
 }
 
