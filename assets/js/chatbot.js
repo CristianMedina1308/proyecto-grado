@@ -43,15 +43,15 @@
     return [
       {
         role: "bot",
-        text: "Hola. Soy el asistente de Tauro Store y puedo ayudarte sin necesidad de iniciar sesion."
+        text: "Hola. Soy el asistente de Tauro Store. Puedo ayudarte sin necesidad de iniciar sesion."
       },
       {
         role: "bot",
-        text: "Puedes preguntarme por prendas reales del catalogo, estilo masculino, tallas, envios, compras o incluso dudas generales."
+        text: "Puedes preguntarme por productos del catalogo, tallas, envios, compras, estilo masculino o dudas generales."
       },
       {
         role: "bot",
-        text: "Si tienes un token publico de factura, tambien puedo revisar el estado general de tu pedido. Y si necesitas apoyo humano, puedes escribir a WhatsApp al " + config.whatsapp + "."
+        text: "Si tienes un token publico de factura, tambien puedo revisar el estado general de tu pedido. Acepto el token completo, el enlace publico o un token abreviado tipo abc123...xyz789. Si necesitas apoyo humano, puedes escribir a WhatsApp al " + config.whatsapp + "."
       }
     ];
   }

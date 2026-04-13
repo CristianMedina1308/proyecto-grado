@@ -54,9 +54,30 @@ function tauroChatbotNormalizeText(string $text): string
 
 function tauroChatbotBaseUrl(): string
 {
+    $explicitBaseUrl = trim((string) (tauroChatbotEnv('APP_URL') ?: tauroChatbotEnv('PUBLIC_URL')));
+    if ($explicitBaseUrl !== '') {
+        return rtrim($explicitBaseUrl, '/');
+    }
+
+    $forwardedProto = trim((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    if (strpos($forwardedProto, ',') !== false) {
+        $forwardedProto = trim((string) explode(',', $forwardedProto)[0]);
+    }
+
     $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     $scheme = $https ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    if ($forwardedProto !== '') {
+        $scheme = strtolower($forwardedProto) === 'https' ? 'https' : 'http';
+    } elseif (tauroChatbotEnv('RAILWAY_PUBLIC_DOMAIN') !== '') {
+        $scheme = 'https';
+    }
+
+    $host = trim((string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? tauroChatbotEnv('RAILWAY_PUBLIC_DOMAIN', 'localhost')));
+    if (strpos($host, ',') !== false) {
+        $host = trim((string) explode(',', $host)[0]);
+    }
+
     $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
     $dir = rtrim($dir, '/');
 
@@ -106,7 +127,7 @@ function tauroChatbotKnowledgeBase(): array
         [
             'keywords' => ['hola', 'buenas', 'buenos dias', 'buenas tardes', 'buenas noches', 'hey'],
             'answer' => [
-                'text' => 'Hola. Soy el asistente de Tauro Store. Puedo ayudarte con compras, envios, tallas, estilo masculino, cuidado de prendas y preguntas generales.',
+                'text' => 'Hola. Soy el asistente de Tauro Store. Puedo ayudarte con productos, tallas, envios, compras, estilo masculino y seguimiento publico con token.',
                 'suggestions' => tauroChatbotDefaultSuggestions()
             ]
         ],
@@ -677,6 +698,18 @@ function tauroChatbotExtractPublicToken(string $message): string
     return '';
 }
 
+function tauroChatbotExtractShortPublicToken(string $message): array
+{
+    if (preg_match('/\b([a-f0-9]{6,24})\s*\.\.\.\s*([a-f0-9]{6,24})\b/i', $message, $match)) {
+        return [
+            'prefix' => strtolower((string) $match[1]),
+            'suffix' => strtolower((string) $match[2]),
+        ];
+    }
+
+    return [];
+}
+
 function tauroChatbotExtractOrderId(string $message): int
 {
     if (preg_match('/(?:pedido|orden|compra|factura)\s*#?\s*(\d{1,10})/iu', $message, $match)) {
@@ -698,7 +731,11 @@ function tauroChatbotLooksLikeSpecificOrderQuery(string $message): bool
         return false;
     }
 
-    if (tauroChatbotExtractPublicToken($message) !== '' || tauroChatbotExtractOrderId($message) > 0) {
+    if (
+        tauroChatbotExtractPublicToken($message) !== '' ||
+        tauroChatbotExtractShortPublicToken($message) !== [] ||
+        tauroChatbotExtractOrderId($message) > 0
+    ) {
         return true;
     }
 
@@ -722,7 +759,7 @@ function tauroChatbotBuildNeedTokenReply(int $orderId = 0): array
     }
 
     $lines[] = 'Con solo el numero de pedido no puedo exponer informacion privada.';
-    $lines[] = 'Puedes pegar aqui el token o el enlace de factura_publica.php?token=...';
+    $lines[] = 'Puedes pegar aqui el token completo, el token abreviado tipo abc123...789xyz o el enlace de factura_publica.php?token=...';
 
     return [
         'mode' => 'order_guard',
@@ -772,37 +809,62 @@ function tauroChatbotFetchPublicOrder(PDO $conn, string $token, int $orderId = 0
     return $pedido ?: null;
 }
 
-function tauroChatbotBuildPublicOrderReply(PDO $conn, string $message): ?array
+function tauroChatbotFetchPublicOrderByShortToken(PDO $conn, string $prefix, string $suffix, int $orderId = 0): array
 {
-    $token = tauroChatbotExtractPublicToken($message);
-    $orderId = tauroChatbotExtractOrderId($message);
-
-    if ($token === '') {
-        if (tauroChatbotLooksLikeSpecificOrderQuery($message) && $orderId > 0) {
-            return tauroChatbotBuildNeedTokenReply($orderId);
-        }
-
-        return null;
+    if ($prefix === '' || $suffix === '' || strlen($prefix) < 6 || strlen($suffix) < 6) {
+        return ['status' => 'invalid', 'pedido' => null];
     }
 
-    if (!preg_match('/^[a-f0-9]{32,64}$/', $token)) {
-        return [
-            'mode' => 'order_invalid_token',
-            'text' => 'El token publico que compartiste no tiene un formato valido. Puedes pegar el token hexadecimal o el enlace completo de la factura publica.',
-            'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
-        ];
+    $sql = "
+      SELECT
+        p.id,
+        p.fecha,
+        p.estado,
+        p.total,
+        p.subtotal_productos,
+        p.costo_envio,
+        p.metodo_pago,
+        p.ciudad_envio,
+        p.zona_envio,
+        p.dias_entrega_min,
+        p.dias_entrega_max,
+        p.factura_token,
+        (
+          SELECT MAX(h.fecha)
+          FROM pedido_estados_historial h
+          WHERE h.pedido_id = p.id
+        ) AS ultima_actualizacion
+      FROM pedidos p
+      WHERE p.factura_token LIKE ?
+        AND p.factura_token LIKE ?
+    ";
+
+    $params = [$prefix . '%', '%' . $suffix];
+
+    if ($orderId > 0) {
+        $sql .= ' AND p.id = ?';
+        $params[] = $orderId;
     }
 
-    $pedido = tauroChatbotFetchPublicOrder($conn, $token, $orderId);
+    $sql .= ' LIMIT 2';
 
-    if (!$pedido) {
-        return [
-            'mode' => 'order_not_found',
-            'text' => 'No encontre un pedido publico que coincida con esa referencia. Revisa el token o pega el enlace completo de la factura.',
-            'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
-        ];
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$rows) {
+        return ['status' => 'not_found', 'pedido' => null];
     }
 
+    if (count($rows) > 1) {
+        return ['status' => 'ambiguous', 'pedido' => null];
+    }
+
+    return ['status' => 'ok', 'pedido' => $rows[0]];
+}
+
+function tauroChatbotBuildPublicOrderLines(array $pedido, string $token): array
+{
     $estadoKey = normalizarTextoPedido((string) ($pedido['estado'] ?? ''));
     $estadoLabel = etiquetasEstadoPedido()[$estadoKey] ?? ucfirst((string) ($pedido['estado'] ?? 'Pendiente'));
     $invoiceUrl = tauroChatbotAbsoluteUrl('factura_publica.php?token=' . rawurlencode($token));
@@ -831,6 +893,74 @@ function tauroChatbotBuildPublicOrderReply(PDO $conn, string $message): ?array
 
     $lines[] = 'Factura publica: ' . $invoiceUrl;
     $lines[] = 'Si necesitas ayuda humana con este pedido, tambien puedes escribir a WhatsApp al +57 302 334 1713.';
+
+    return $lines;
+}
+
+function tauroChatbotBuildPublicOrderReply(PDO $conn, string $message): ?array
+{
+    $token = tauroChatbotExtractPublicToken($message);
+    $shortToken = tauroChatbotExtractShortPublicToken($message);
+    $orderId = tauroChatbotExtractOrderId($message);
+
+    if ($token === '' && $shortToken === []) {
+        if (tauroChatbotLooksLikeSpecificOrderQuery($message) && $orderId > 0) {
+            return tauroChatbotBuildNeedTokenReply($orderId);
+        }
+
+        return null;
+    }
+
+    if ($token !== '' && !preg_match('/^[a-f0-9]{32,64}$/', $token)) {
+        return [
+            'mode' => 'order_invalid_token',
+            'text' => 'El token publico que compartiste no tiene un formato valido. Puedes pegar el token hexadecimal o el enlace completo de la factura publica.',
+            'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
+        ];
+    }
+
+    $pedido = null;
+    $resolvedToken = $token;
+
+    if ($token !== '') {
+        $pedido = tauroChatbotFetchPublicOrder($conn, $token, $orderId);
+    } elseif ($shortToken !== []) {
+        $lookup = tauroChatbotFetchPublicOrderByShortToken(
+            $conn,
+            (string) ($shortToken['prefix'] ?? ''),
+            (string) ($shortToken['suffix'] ?? ''),
+            $orderId
+        );
+
+        if ($lookup['status'] === 'ambiguous') {
+            return [
+                'mode' => 'order_ambiguous_token',
+                'text' => 'Ese token abreviado coincide con mas de un pedido. Pegame el token completo o el enlace publico de la factura para identificarlo sin riesgo.',
+                'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
+            ];
+        }
+
+        if ($lookup['status'] === 'invalid') {
+            return [
+                'mode' => 'order_invalid_token',
+                'text' => 'El token abreviado que compartiste es demasiado corto. Necesito mas caracteres o, idealmente, el token completo o el enlace de factura publica.',
+                'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
+            ];
+        }
+
+        $pedido = $lookup['pedido'];
+        $resolvedToken = is_array($pedido) ? (string) ($pedido['factura_token'] ?? '') : '';
+    }
+
+    if (!$pedido) {
+        return [
+            'mode' => 'order_not_found',
+            'text' => 'No encontre un pedido publico que coincida con esa referencia. Revisa el token, pega el enlace completo de la factura o comparte mas caracteres del token.',
+            'suggestions' => ['Consultar pedido con token', 'Facturas', 'WhatsApp', 'Contacto']
+        ];
+    }
+
+    $lines = tauroChatbotBuildPublicOrderLines($pedido, $resolvedToken);
 
     return [
         'mode' => 'public_order',
