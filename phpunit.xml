@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         executionOrder="default"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutTestsThatDoNotTestAnything="false">
+    <testsuites>
+        <testsuite name="Tauro Store Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <file>includes/app.php</file>
+            <file>includes/pedidos_utils.php</file>
+            <file>includes/chatbot_utils.php</file>
+            <file>includes/business_rules.php</file>
+        </include>
+    </source>
+</phpunit>
