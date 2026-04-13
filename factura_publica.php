@@ -42,4 +42,6 @@ $urlPublica = facturaConstruirUrlPublica($token);
 $pdf = new FPDF();
 $pdf->AddPage();
 facturaRenderizar($pdf, $pedido, $productos, $urlPublica);
+facturaLimpiarSalidaAntesDePdf();
+header('Content-Type: application/pdf');
 $pdf->Output('I', 'factura_pedido_' . (int) $pedido['id'] . '.pdf');
