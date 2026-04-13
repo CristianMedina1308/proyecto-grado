@@ -139,9 +139,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
     $errores[] = 'La sesion del formulario expiro. Recarga la pagina e intenta de nuevo.';
   }
 
-  $metodosPermitidos = ['entrega', 'transferencia', 'tarjeta'];
+  $metodosPermitidos = ['entrega', 'recoger_tienda'];
   if (!in_array($metodoPago, $metodosPermitidos, true)) {
-    $errores[] = 'Selecciona un metodo de pago valido.';
+    $errores[] = 'Selecciona una modalidad valida para recibir tu pedido.';
   }
 
   if ($metodoPago === 'entrega') {
@@ -186,13 +186,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
         $diasEntregaMax = (int) $tarifaEnvioAplicada['dias_max'];
       }
     }
-  } else {
+  } elseif ($metodoPago === 'recoger_tienda') {
     $nombreEnvio = null;
     $telefonoEnvio = null;
     $direccionEnvio = null;
     $barrioEnvio = null;
     $ciudadEnvio = null;
     $zonaEnvio = null;
+    $costoEnvio = 0.0;
+    $diasEntregaMin = null;
+    $diasEntregaMax = null;
   }
 
   $itemsCarrito = [];
@@ -387,7 +390,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
       $pdf->Cell(0, 8, 'Subtotal productos: $' . number_format($pedidoSubtotal, 0, ',', '.'), 0, 1);
       $pdf->Cell(0, 8, 'Envio: $' . number_format($pedidoEnvio, 0, ',', '.'), 0, 1);
       $pdf->Cell(0, 8, 'Total: $' . number_format($pedidoTotal, 0, ',', '.'), 0, 1);
-      if ($pedidoDiasEntrega !== null) {
+      if ($metodoPago === 'recoger_tienda') {
+        $pdf->Cell(0, 8, 'Modalidad: Recoger en tienda', 0, 1);
+      } elseif ($pedidoDiasEntrega !== null) {
         $pdf->Cell(0, 8, 'Entrega estimada: ' . $pedidoDiasEntrega, 0, 1);
       }
     }
@@ -431,7 +436,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
         <p>Subtotal productos: <strong class="status-price">$' . number_format($pedidoSubtotal, 0, ',', '.') . '</strong></p>
         <p>Envio: <strong class="status-price">$' . number_format($pedidoEnvio, 0, ',', '.') . '</strong></p>
         <p>Total: <strong class="status-price">$' . number_format($pedidoTotal, 0, ',', '.') . '</strong></p>
-        ' . ($pedidoDiasEntrega !== null ? '<p>Entrega estimada: <strong>' . htmlspecialchars($pedidoDiasEntrega) . '</strong></p>' : '') . '
+        ' . ($metodoPago === 'recoger_tienda'
+          ? '<p>Modalidad: <strong>Recoger en tienda</strong></p>'
+          : ($pedidoDiasEntrega !== null ? '<p>Entrega estimada: <strong>' . htmlspecialchars($pedidoDiasEntrega) . '</strong></p>' : '')
+        ) . '
         <a href="ver_pedido.php?id=' . $pedidoId . '" class="btn btn-primary mt-2">Ver pedido</a>
         <a href="factura_pdf.php?id=' . $pedidoId . '" class="btn btn-outline-primary mt-2 ms-2">Factura con QR</a>
         ' . ($facturaPublicaUrl ? '<p class="mt-3 mb-0"><small>Enlace de verificacion: <a href="' . htmlspecialchars($facturaPublicaUrl) . '">' . htmlspecialchars($facturaPublicaUrl) . '</a></small></p>' : '') . '
@@ -484,7 +492,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
   <div class="row g-4">
     <div class="col-lg-7">
       <div class="card p-4">
-        <h5 class="mb-4">Datos de pago</h5>
+        <h5 class="mb-4">Entrega del pedido</h5>
 
         <form method="post"
               id="checkout-form"
@@ -497,13 +505,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
           <input type="hidden" name="carrito_data" id="carrito-data">
 
           <div class="mb-3">
-            <label class="form-label">M&eacute;todo de pago</label>
+            <label class="form-label">Modalidad de entrega</label>
             <select name="metodo_pago" id="metodo_pago" class="form-select" required>
               <option value="">Seleccionar</option>
               <option value="entrega" <?= $metodoPago === 'entrega' ? 'selected' : '' ?>>Contra entrega</option>
-              <option value="transferencia" <?= $metodoPago === 'transferencia' ? 'selected' : '' ?>>Transferencia</option>
-              <option value="tarjeta" <?= $metodoPago === 'tarjeta' ? 'selected' : '' ?>>Tarjeta</option>
+              <option value="recoger_tienda" <?= $metodoPago === 'recoger_tienda' ? 'selected' : '' ?>>Recoger en tienda</option>
             </select>
+            <div class="form-text">Si eliges contra entrega, debes completar los datos de domicilio. Si eliges recoger en tienda, no se cobrara envio.</div>
           </div>
 
           <div id="datos-entrega" class="<?= $metodoPago === 'entrega' ? '' : 'd-none' ?>">
@@ -635,6 +643,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return null;
     }
 
+    if (metodoPago.value === "recoger_tienda") {
+      infoEnvio.textContent = "Retiro en tienda: sin costo de envio.";
+      return null;
+    }
+
     if (metodoPago.value !== "entrega") {
       infoEnvio.textContent = "";
       return null;
@@ -699,6 +712,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const dMax = Number(tarifa.dias_max || 0);
         entrega = `<div class='small text-soft mt-2'>Entrega estimada: ${dMin}-${dMax} dias</div>`;
       }
+    } else if (metodoPago.value === "recoger_tienda") {
+      entrega = "<div class='small text-soft mt-2'>Recogida en tienda: sin costo de envio.</div>";
     }
 
     const totalFinal = total + envio;

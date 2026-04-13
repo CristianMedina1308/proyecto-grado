@@ -46,6 +46,7 @@ $productos = $detalle->fetchAll(PDO::FETCH_ASSOC);
           <a href="pedidos.php" class="btn btn-outline-primary btn-sm">Volver</a>
         </div>
         <p class="mb-1"><strong>Usuario:</strong> <?= htmlspecialchars($info['nombre'] ?? 'No registrado') ?></p>
+        <p class="mb-1"><strong>Modalidad:</strong> <?= htmlspecialchars(etiquetaMetodoPagoPedido((string) ($info['metodo_pago'] ?? ''))) ?></p>
         <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($etiquetasEstado[normalizarTextoPedido((string) $info['estado'])] ?? ucfirst((string) $info['estado'])) ?></p>
         <p class="mb-1"><strong>Subtotal productos:</strong> $<?= number_format((float) ($info['subtotal_productos'] ?? 0), 2) ?></p>
         <p class="mb-1"><strong>Costo envio:</strong> $<?= number_format((float) ($info['costo_envio'] ?? 0), 2) ?></p>
@@ -69,6 +70,15 @@ $productos = $detalle->fetchAll(PDO::FETCH_ASSOC);
               No definida
             <?php endif; ?>
           </p>
+        </div>
+      </div>
+    <?php endif; ?>
+
+    <?php if (($info['metodo_pago'] ?? '') === 'recoger_tienda'): ?>
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Recogida</h2>
+          <p class="mb-0"><strong>Modalidad:</strong> Recoger en tienda</p>
         </div>
       </div>
     <?php endif; ?>

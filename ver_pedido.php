@@ -98,7 +98,7 @@ include 'header.php';
     <div class="card-body">
       <p><strong>Pedido #:</strong> <?= (int) $pedido['id'] ?></p>
       <p><strong>Fecha:</strong> <?= htmlspecialchars((string) $pedido['fecha']) ?></p>
-      <p><strong>Metodo de pago:</strong> <?= htmlspecialchars(ucfirst((string) $pedido['metodo_pago'])) ?></p>
+      <p><strong>Modalidad:</strong> <?= htmlspecialchars(etiquetaMetodoPagoPedido((string) ($pedido['metodo_pago'] ?? ''))) ?></p>
       <p><strong>Estado:</strong>
         <span class="badge bg-secondary">
           <?= htmlspecialchars($etiquetasEstado[normalizarTextoPedido((string) $pedido['estado'])] ?? ucfirst((string) $pedido['estado'])) ?>
@@ -142,6 +142,15 @@ include 'header.php';
             No definida
           <?php endif; ?>
         </p>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if (($pedido['metodo_pago'] ?? '') === 'recoger_tienda'): ?>
+    <div class="card shadow-sm mb-4">
+      <div class="card-header fw-bold">Recogida</div>
+      <div class="card-body">
+        <p class="mb-0"><strong>Modalidad:</strong> Recoger en tienda</p>
       </div>
     </div>
   <?php endif; ?>

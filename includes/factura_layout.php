@@ -318,7 +318,7 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->SetFont('Helvetica', 'B', 11);
   $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
   $pdf->SetX(14);
-  $pdf->Cell(40, 11, facturaPdfText(ucfirst((string) ($pedido['metodo_pago'] ?? 'No definido'))), 0, 0);
+  $pdf->Cell(40, 11, facturaPdfText(etiquetaMetodoPagoPedido((string) ($pedido['metodo_pago'] ?? ''))), 0, 0);
   $pdf->Cell(48, 11, facturaPdfMoney($subtotalProductos), 0, 0);
   $pdf->Cell(40, 11, facturaPdfMoney($costoEnvio), 0, 0);
   $pdf->Cell(44, 11, facturaPdfMoney($totalPedido), 0, 1, 'L');
@@ -344,6 +344,13 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
     $pdf->Cell(122, 5, facturaPdfText('Direccion: ' . facturaTruncar($direccion . ($barrio !== '' ? ' - ' . $barrio : ''), 64)), 0, 0);
     $pdf->Cell(62, 5, facturaPdfText('Entrega: ' . $entregaEstimada), 0, 1);
     $y += 38;
+  } elseif (($pedido['metodo_pago'] ?? '') === 'recoger_tienda') {
+    facturaPdfRectTitle($pdf, 10, $y, 190, 18, 'RECOGIDA', $colorSurface, $colorBorder);
+    $pdf->SetFont('Helvetica', '', 9);
+    $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
+    $pdf->SetXY(14, $y + 10);
+    $pdf->Cell(182, 5, facturaPdfText('Modalidad seleccionada: Recoger en tienda.'), 0, 1);
+    $y += 24;
   }
 
   $pdf->SetFillColor($colorDarkSoft[0], $colorDarkSoft[1], $colorDarkSoft[2]);

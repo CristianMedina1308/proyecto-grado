@@ -139,10 +139,10 @@ function tauroChatbotKnowledgeBase(): array
             ]
         ],
         [
-            'keywords' => ['pago', 'pagos', 'tarjeta', 'transferencia', 'contra entrega', 'metodos de pago'],
+            'keywords' => ['pago', 'pagos', 'contra entrega', 'recoger en tienda', 'recogida', 'metodos de pago'],
             'answer' => [
-                'text' => 'Los metodos de pago se muestran al finalizar la compra. Si quieres, tambien puedo orientarte sobre que opcion suele ser mas practica segun tu caso.',
-                'suggestions' => ['Compra segura', 'Envios', 'Facturas', 'Consultar pedido con token']
+                'text' => 'Ahora mismo la tienda maneja dos modalidades: contra entrega con domicilio y recoger en tienda. Si eliges contra entrega, debes completar los datos de envio durante el checkout.',
+                'suggestions' => ['Contra entrega', 'Recoger en tienda', 'Envios', 'Consultar pedido con token']
             ]
         ],
         [
@@ -249,7 +249,7 @@ function tauroChatbotSuggestPrompts(string $message = ''): array
         'tallas' => ['talla', 'tallas', 'fit', 'medidas', 'size'],
         'estilo' => ['outfit', 'combinar', 'look', 'vestir', 'colores', 'zapatos'],
         'pedido' => ['pedido', 'seguimiento', 'factura', 'cancelar', 'devolucion', 'token'],
-        'pago' => ['pago', 'pagos', 'tarjeta', 'transferencia', 'contra entrega'],
+        'pago' => ['pago', 'pagos', 'contra entrega', 'recoger', 'tienda'],
         'cuidado' => ['lavar', 'cuidar', 'material', 'prenda', 'mancha']
     ];
 
@@ -276,7 +276,7 @@ function tauroChatbotSuggestPrompts(string $message = ''): array
             }
 
             if ($group === 'pago') {
-                return ['Metodos de pago', 'Facturas', 'Compra segura', 'Envios'];
+                return ['Contra entrega', 'Recoger en tienda', 'Envios', 'Facturas'];
             }
 
             if ($group === 'cuidado') {

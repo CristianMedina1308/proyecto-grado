@@ -64,6 +64,26 @@ function etiquetasEstadoPedido(): array
 }
 
 /**
+ * Etiquetas legibles para metodos de pago / entrega.
+ */
+function etiquetasMetodoPagoPedido(): array
+{
+    return [
+        'entrega' => 'Contra entrega',
+        'recoger_tienda' => 'Recoger en tienda'
+    ];
+}
+
+/**
+ * Etiqueta legible de metodo de pago / entrega.
+ */
+function etiquetaMetodoPagoPedido(?string $metodo): string
+{
+    $metodo = normalizarTextoPedido((string) $metodo);
+    return etiquetasMetodoPagoPedido()[$metodo] ?? 'No definido';
+}
+
+/**
  * Define transición válida de estados.
  */
 function puedeTransicionarEstadoPedido(string $estadoActual, string $nuevoEstado): bool
@@ -332,4 +352,3 @@ function actualizarEstadoPedido(PDO $conn, int $pedidoId, string $nuevoEstado, ?
         return ['ok' => false, 'mensaje' => 'No se pudo actualizar el estado: ' . $e->getMessage()];
     }
 }
-
