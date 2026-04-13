@@ -26,6 +26,38 @@ function mostrarAlertaCarrito(nombre, cantidad, talla = null) {
   alert("✅ " + mensaje);
 }
 
+function mostrarAlertaFavorito(agregado = true) {
+  const config = agregado
+    ? {
+        icon: "success",
+        title: "Agregado a favoritos",
+        text: "El producto se guardó en tu lista de deseos."
+      }
+    : {
+        icon: "info",
+        title: "Eliminado de favoritos",
+        text: "El producto se quitó de tu lista de deseos."
+      };
+
+  if (window.Swal) {
+    window.Swal.fire({
+      icon: config.icon,
+      title: config.title,
+      text: config.text,
+      timer: 1700,
+      showConfirmButton: false,
+      toast: true,
+      position: "top-end",
+      customClass: {
+        popup: "app-swal-popup"
+      }
+    });
+    return;
+  }
+
+  alert((agregado ? "💖 " : "❌ ") + config.text);
+}
+
 function agregarCarrito(nombre, precio, id, talla = null) {
 
   if (!id || isNaN(id)) {
@@ -134,10 +166,10 @@ function toggleFavorito(id) {
 
   if (idx !== -1) {
     favoritos.splice(idx, 1);
-    alert("❌ Eliminado de favoritos");
+    mostrarAlertaFavorito(false);
   } else {
     favoritos.push(id);
-    alert("💖 Agregado a favoritos");
+    mostrarAlertaFavorito(true);
   }
 
   localStorage.setItem("favoritos", JSON.stringify(favoritos));

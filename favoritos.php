@@ -96,6 +96,10 @@ function toggleFavorito(id) {
   if (idx !== -1) {
     favs.splice(idx, 1);
     localStorage.setItem("favoritos", JSON.stringify(favs));
+    if (typeof mostrarAlertaFavorito === "function") {
+      mostrarAlertaFavorito(false);
+      return;
+    }
     alert("❌ Producto eliminado de favoritos");
   }
 }
