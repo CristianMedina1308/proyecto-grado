@@ -238,6 +238,9 @@ function inicializarAvisoCookies() {
 
   const storageKey = "tauro_cookie_consent";
 
+  // Exponer key por si otras partes necesitan limpiar/leer.
+  window.__TAURO_COOKIE_STORAGE_KEY__ = storageKey;
+
   function limpiarConsentimiento() {
     try {
       localStorage.removeItem(storageKey);
@@ -263,34 +266,41 @@ function inicializarAvisoCookies() {
   }
 
   function mostrar(forzar = false) {
-    const consent = leerConsentimiento();
-
-    if (!forzar && (consent === "accepted" || consent === "rejected")) {
-      banner.hidden = true;
-      document.body.classList.remove("cookie-banner-open");
-      return;
-    }
-
     // Si se fuerza la apertura (Preferencias), queremos que el usuario pueda decidir otra vez.
-    // Si no limpiamos, algun flujo puede ocultarlo inmediatamente.
     if (forzar) {
       limpiarConsentimiento();
     }
 
+    const consent = leerConsentimiento();
+
+    // Si ya hay consentimiento y no se forzo, no mostramos.
+    if (!forzar && (consent === "accepted" || consent === "rejected")) {
+      ocultar();
+      return;
+    }
+
+    // Mostrar SIEMPRE de forma estable.
     banner.hidden = false;
+    banner.style.display = "block";
+    // Asegurar que sea interactivo aunque haya estilos previos.
+    banner.style.pointerEvents = "auto";
+    const dialog = banner.querySelector(".cookie-banner__dialog");
+    if (dialog) {
+      dialog.style.pointerEvents = "auto";
+    }
     document.body.classList.add("cookie-banner-open");
   }
 
   function ocultar() {
     banner.hidden = true;
+    banner.style.display = "none";
     document.body.classList.remove("cookie-banner-open");
   }
 
   window.tauroMostrarAvisoCookies = mostrar;
 
-  window.requestAnimationFrame(() => {
-    mostrar();
-  });
+  // Mostrar lo antes posible (sin depender de RAF) para evitar parpadeos.
+  mostrar();
 
   // Si el navegador restaura la pagina desde el bfcache (volver/adelante),
   // reiniciamos el estado del banner y evitamos quedar bloqueados.

@@ -157,10 +157,34 @@ window.addEventListener("scroll", function() {
 });
 
 window.abrirPreferenciasCookies = function () {
+  // Limpieza directa del consentimiento para permitir re-decision.
+  try {
+    const key = window.__TAURO_COOKIE_STORAGE_KEY__ || "tauro_cookie_consent";
+    localStorage.removeItem(key);
+  } catch (e) {
+    // ignore
+  }
+
+  // Si aun no existe el handler, mostramos el banner manualmente como fallback.
+  const bannerFallback = () => {
+    const banner = document.getElementById("cookieBanner");
+    if (!banner) return;
+    banner.hidden = false;
+    banner.style.display = "block";
+    banner.style.pointerEvents = "auto";
+    document.body.classList.remove("cookie-banner-open");
+    const dialog = banner.querySelector(".cookie-banner__dialog");
+    if (dialog) {
+      dialog.style.pointerEvents = "auto";
+      dialog.setAttribute("tabindex", "-1");
+      dialog.focus({ preventScroll: true });
+    }
+    banner.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+
   const intentoMostrar = () => {
     if (typeof window.tauroMostrarAvisoCookies === "function") {
-      // Forzamos en el siguiente frame para evitar condiciones de carrera con la primera inicializacion.
-      window.requestAnimationFrame(() => window.tauroMostrarAvisoCookies(true));
+      window.tauroMostrarAvisoCookies(true);
       // Asegurar que sea visible para el usuario.
       const banner = document.getElementById("cookieBanner");
       if (banner) {
@@ -173,6 +197,8 @@ window.abrirPreferenciasCookies = function () {
       }
       return true;
     }
+
+    bannerFallback();
     return false;
   };
 
