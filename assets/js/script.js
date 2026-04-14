@@ -234,20 +234,33 @@ function inicializarAvisoCookies() {
   const storageKey = "tauro_cookie_consent";
   const consent = localStorage.getItem(storageKey);
 
-  if (consent === "accepted" || consent === "rejected") {
-    banner.hidden = true;
-    return;
+  function mostrar(forzar = false) {
+    if (!forzar && (consent === "accepted" || consent === "rejected")) {
+      banner.hidden = true;
+      document.body.classList.remove("cookie-banner-open");
+      return;
+    }
+
+    banner.hidden = false;
+    document.body.classList.add("cookie-banner-open");
   }
 
-  banner.hidden = false;
+  function ocultar() {
+    banner.hidden = true;
+    document.body.classList.remove("cookie-banner-open");
+  }
+
+  window.tauroMostrarAvisoCookies = mostrar;
+
+  mostrar();
 
   acceptButton.addEventListener("click", () => {
     localStorage.setItem(storageKey, "accepted");
-    banner.hidden = true;
+    ocultar();
   });
 
   rejectButton.addEventListener("click", () => {
     localStorage.setItem(storageKey, "rejected");
-    banner.hidden = true;
+    ocultar();
   });
 }

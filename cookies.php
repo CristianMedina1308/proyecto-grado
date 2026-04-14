@@ -103,6 +103,12 @@
             cuenta que hacerlo puede cerrar tu sesion o afectar funciones como carrito, favoritos o formularios.
           </p>
         </div>
+
+        <div class="mt-4">
+          <button type="button" class="btn btn-outline-primary" onclick="window.abrirPreferenciasCookies && window.abrirPreferenciasCookies()">
+            Cambiar preferencias de cookies
+          </button>
+        </div>
       </div>
     </div>
   </div>

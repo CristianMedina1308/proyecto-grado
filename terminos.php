@@ -86,6 +86,15 @@
             publicada en este sitio sera la referencia aplicable al momento de cada compra o registro.
           </p>
         </div>
+
+        <div>
+          <h5>9. Cookies y almacenamiento local</h5>
+          <p class="mb-0">
+            Este sitio utiliza una cookie tecnica de sesion y almacenamiento local del navegador para funciones
+            esenciales como autenticacion, carrito, favoritos y recordatorio del aviso de cookies. El detalle
+            puede consultarse en la <a href="cookies.php">politica de cookies</a>.
+          </p>
+        </div>
       </div>
     </div>
   </div>

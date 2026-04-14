@@ -38,23 +38,31 @@
 
     <div class="text-center footer-muted small">
       &copy; <?= date('Y') ?> Tauro Store. Todos los derechos reservados.
+      <span class="mx-2">|</span>
+      <button type="button" class="footer-link-button" onclick="window.abrirPreferenciasCookies && window.abrirPreferenciasCookies()">
+        Preferencias de cookies
+      </button>
     </div>
   </div>
 </footer>
 
 <div class="cookie-banner" id="cookieBanner" hidden aria-live="polite" aria-label="Aviso de cookies">
-  <div class="cookie-banner__content">
-    <div class="cookie-banner__text">
-      <strong>Uso de cookies y almacenamiento local</strong>
-      <p class="mb-0">
-        Tauro Store usa una cookie tecnica de sesion para funciones esenciales y almacenamiento local para carrito,
-        favoritos y tu preferencia del aviso. Puedes aceptar o rechazar este aviso y consultar el detalle en la
-        <a href="cookies.php">politica de cookies</a>.
-      </p>
-    </div>
-    <div class="cookie-banner__actions">
-      <button type="button" class="btn btn-outline-primary" id="cookieReject">Rechazar</button>
-      <button type="button" class="btn btn-primary" id="cookieAccept">Aceptar</button>
+  <div class="cookie-banner__backdrop"></div>
+  <div class="cookie-banner__dialog" role="dialog" aria-modal="true" aria-labelledby="cookieBannerTitle">
+    <div class="cookie-banner__content">
+      <div class="cookie-banner__text">
+        <span class="cookie-banner__eyebrow">Privacidad</span>
+        <strong id="cookieBannerTitle">Uso de cookies y almacenamiento local</strong>
+        <p class="mb-0">
+          Tauro Store usa una cookie tecnica de sesion para funciones esenciales y almacenamiento local para carrito,
+          favoritos y tu preferencia del aviso. Puedes aceptar o rechazar este aviso y consultar el detalle en la
+          <a href="cookies.php">politica de cookies</a>.
+        </p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn-outline-primary" id="cookieReject">Rechazar</button>
+        <button type="button" class="btn btn-primary" id="cookieAccept">Aceptar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -147,6 +155,12 @@ window.addEventListener("scroll", function() {
     navbar.classList.remove("scrolled");
   }
 });
+
+window.abrirPreferenciasCookies = function () {
+  if (typeof window.tauroMostrarAvisoCookies === "function") {
+    window.tauroMostrarAvisoCookies(true);
+  }
+};
 </script>
 
 </body>
