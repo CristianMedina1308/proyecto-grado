@@ -241,13 +241,8 @@ function inicializarAvisoCookies() {
   // Exponer key por si otras partes necesitan limpiar/leer.
   window.__TAURO_COOKIE_STORAGE_KEY__ = storageKey;
 
-  function limpiarConsentimiento() {
-    try {
-      localStorage.removeItem(storageKey);
-    } catch (error) {
-      // ignore
-    }
-  }
+  // Flag en memoria para mostrar el banner aunque exista consentimiento (Preferencias).
+  let forcedVisible = false;
 
   function leerConsentimiento() {
     try {
@@ -266,15 +261,14 @@ function inicializarAvisoCookies() {
   }
 
   function mostrar(forzar = false) {
-    // Si se fuerza la apertura (Preferencias), queremos que el usuario pueda decidir otra vez.
     if (forzar) {
-      limpiarConsentimiento();
+      forcedVisible = true;
     }
 
     const consent = leerConsentimiento();
 
-    // Si ya hay consentimiento y no se forzo, no mostramos.
-    if (!forzar && (consent === "accepted" || consent === "rejected")) {
+    // Si ya hay consentimiento y no esta forzado por Preferencias, no mostramos.
+    if (!forcedVisible && (consent === "accepted" || consent === "rejected")) {
       ocultar();
       return;
     }
@@ -288,7 +282,8 @@ function inicializarAvisoCookies() {
     if (dialog) {
       dialog.style.pointerEvents = "auto";
     }
-    document.body.classList.add("cookie-banner-open");
+    // No bloquear el body.
+    document.body.classList.remove("cookie-banner-open");
   }
 
   function ocultar() {
@@ -313,11 +308,13 @@ function inicializarAvisoCookies() {
 
   acceptButton.addEventListener("click", () => {
     guardarConsentimiento("accepted");
+    forcedVisible = false;
     ocultar();
   });
 
   rejectButton.addEventListener("click", () => {
     guardarConsentimiento("rejected");
+    forcedVisible = false;
     ocultar();
   });
 }

@@ -157,13 +157,6 @@ window.addEventListener("scroll", function() {
 });
 
 window.abrirPreferenciasCookies = function () {
-  // Limpieza directa del consentimiento para permitir re-decision.
-  try {
-    const key = window.__TAURO_COOKIE_STORAGE_KEY__ || "tauro_cookie_consent";
-    localStorage.removeItem(key);
-  } catch (e) {
-    // ignore
-  }
 
   // Si aun no existe el handler, mostramos el banner manualmente como fallback.
   const bannerFallback = () => {
