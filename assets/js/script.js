@@ -227,7 +227,12 @@ function inicializarAvisoCookies() {
   const acceptButton = document.getElementById("cookieAccept");
   const rejectButton = document.getElementById("cookieReject");
 
+  // Seguridad: si la pagina se recarga/entra desde cache (bfcache) y la clase queda aplicada,
+  // puede bloquear el scroll. La limpiamos y solo la volvemos a poner cuando toque.
+  document.body.classList.remove("cookie-banner-open");
+
   if (!banner || !acceptButton || !rejectButton) {
+    // Si el markup del banner no existe en esta pagina, aseguramos no dejar el body bloqueado.
     return;
   }
 
@@ -271,6 +276,15 @@ function inicializarAvisoCookies() {
 
   window.requestAnimationFrame(() => {
     mostrar();
+  });
+
+  // Si el navegador restaura la pagina desde el bfcache (volver/adelante),
+  // reiniciamos el estado del banner y evitamos quedar bloqueados.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      document.body.classList.remove("cookie-banner-open");
+      mostrar();
+    }
   });
 
   acceptButton.addEventListener("click", () => {
