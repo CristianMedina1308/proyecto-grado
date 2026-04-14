@@ -3,6 +3,7 @@ include 'includes/conexion.php';
 require_once 'includes/app.php';
 
 $mensajeError = '';
+$aceptaTerminos = isset($_POST['acepta_terminos']);
 
 if (isset($_POST['registro'])) {
   if (!appValidarCsrf('registro_form', $_POST['csrf_token'] ?? null)) {
@@ -15,6 +16,8 @@ if (isset($_POST['registro'])) {
 
     if ($nombre === '' || $telefono === '' || $email === '' || $passwordPlano === '') {
       $mensajeError = 'Todos los campos son obligatorios.';
+    } elseif (!$aceptaTerminos) {
+      $mensajeError = 'Debes aceptar los terminos y condiciones para registrarte.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
       $mensajeError = 'Ingresa un correo electronico valido.';
     } elseif (!preg_match('/^[0-9+ ]{7,20}$/', $telefono)) {
@@ -53,7 +56,7 @@ include 'header.php';
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(appCsrfToken('registro_form')) ?>">
           <div class="mb-4">
             <label class="form-label">Nombre completo</label>
-            <input type="text" name="nombre" class="form-control" required>
+            <input type="text" name="nombre" class="form-control" required value="<?= htmlspecialchars($_POST['nombre'] ?? '') ?>">
           </div>
 
           <div class="mb-4">
@@ -62,18 +65,26 @@ include 'header.php';
                    name="telefono"
                    class="form-control"
                    required
+                   value="<?= htmlspecialchars($_POST['telefono'] ?? '') ?>"
                    pattern="[0-9+ ]{7,20}"
                    title="Ingresa un numero de telefono valido">
           </div>
 
           <div class="mb-4">
             <label class="form-label">Correo electronico</label>
-            <input type="email" name="email" class="form-control" required>
+            <input type="email" name="email" class="form-control" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
           </div>
 
           <div class="mb-4">
             <label class="form-label">Contrasena</label>
             <input type="password" name="password" class="form-control" required>
+          </div>
+
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?> required>
+            <label class="form-check-label text-soft" for="acepta_terminos_registro">
+              He leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a>.
+            </label>
           </div>
 
           <button type="submit" name="registro" class="btn btn-primary w-100">Registrarse</button>

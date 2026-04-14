@@ -16,6 +16,7 @@
           <li><a href="productos.php">Coleccion</a></li>
           <li><a href="carrito.php">Carrito</a></li>
           <li><a href="contacto.php">Contacto</a></li>
+          <li><a href="terminos.php">Terminos y condiciones</a></li>
         </ul>
       </div>
 

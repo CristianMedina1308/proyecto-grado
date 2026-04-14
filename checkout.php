@@ -105,6 +105,7 @@ $direccionEnvio = trim((string) ($_POST['direccion'] ?? ''));
 $barrioEnvio = trim((string) ($_POST['barrio'] ?? ''));
 $ciudadEnvio = trim((string) ($_POST['ciudad'] ?? ''));
 $zonaEnvio = trim((string) ($_POST['zona'] ?? ''));
+$aceptaTerminos = isset($_POST['acepta_terminos']);
 
 $ciudadesEnvio = [
   'bogota' => 'Bogota',
@@ -142,6 +143,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
   $metodosPermitidos = ['entrega', 'recoger_tienda'];
   if (!in_array($metodoPago, $metodosPermitidos, true)) {
     $errores[] = 'Selecciona una modalidad valida para recibir tu pedido.';
+  }
+
+  if (!$aceptaTerminos) {
+    $errores[] = 'Debes aceptar los terminos y condiciones para finalizar tu pedido.';
   }
 
   if ($metodoPago === 'entrega') {
@@ -563,6 +568,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
             </div>
           </div>
 
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?> required>
+            <label class="form-check-label text-soft" for="acepta_terminos_checkout">
+              Declaro que he leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
+            </label>
+          </div>
+
           <button type="submit" name="finalizar_pedido" class="btn w-100 mt-3">Confirmar pedido</button>
         </form>
       </div>
@@ -871,9 +883,28 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     const carritoActual = leerCarrito();
+    const aceptaTerminos = document.getElementById("acepta_terminos_checkout");
 
     if (!carritoActual.length) {
       alert("Tu carrito est&aacute; vac&iacute;o.");
+      return;
+    }
+
+    if (aceptaTerminos && !aceptaTerminos.checked) {
+      if (window.Swal) {
+        window.Swal.fire({
+          icon: "warning",
+          title: "Acepta los terminos",
+          text: "Debes aceptar los terminos y condiciones antes de finalizar la compra.",
+          confirmButtonText: "Entendido",
+          customClass: {
+            confirmButton: "btn btn-primary"
+          },
+          buttonsStyling: false
+        });
+      } else {
+        alert("Debes aceptar los terminos y condiciones antes de finalizar la compra.");
+      }
       return;
     }
 
