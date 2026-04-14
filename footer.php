@@ -159,7 +159,8 @@ window.addEventListener("scroll", function() {
 window.abrirPreferenciasCookies = function () {
   const intentoMostrar = () => {
     if (typeof window.tauroMostrarAvisoCookies === "function") {
-      window.tauroMostrarAvisoCookies(true);
+      // Forzamos en el siguiente frame para evitar condiciones de carrera con la primera inicializacion.
+      window.requestAnimationFrame(() => window.tauroMostrarAvisoCookies(true));
       // Asegurar que sea visible para el usuario.
       const banner = document.getElementById("cookieBanner");
       if (banner) {

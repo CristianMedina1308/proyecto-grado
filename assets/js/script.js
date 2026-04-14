@@ -238,6 +238,14 @@ function inicializarAvisoCookies() {
 
   const storageKey = "tauro_cookie_consent";
 
+  function limpiarConsentimiento() {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (error) {
+      // ignore
+    }
+  }
+
   function leerConsentimiento() {
     try {
       return localStorage.getItem(storageKey);
@@ -261,6 +269,12 @@ function inicializarAvisoCookies() {
       banner.hidden = true;
       document.body.classList.remove("cookie-banner-open");
       return;
+    }
+
+    // Si se fuerza la apertura (Preferencias), queremos que el usuario pueda decidir otra vez.
+    // Si no limpiamos, algun flujo puede ocultarlo inmediatamente.
+    if (forzar) {
+      limpiarConsentimiento();
     }
 
     banner.hidden = false;
