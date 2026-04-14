@@ -65,9 +65,8 @@
           <p class="mb-0">
             Los datos suministrados por el usuario se utilizan para registro, atencion, gestion de pedidos,
             soporte, facturacion y comunicaciones relacionadas con la compra. Al aceptar estos terminos,
-            autorizas su tratamiento para esas finalidades. Si vas a presentar este proyecto formalmente,
-            conviene complementar este apartado con una politica de tratamiento de datos mas detallada segun
-            la normativa aplicable.
+            autorizas su tratamiento para esas finalidades dentro del funcionamiento de Tauro Store y
+            reconoces que la informacion entregada debe ser veraz, suficiente y actualizada.
           </p>
         </div>
 
@@ -86,11 +85,6 @@
             Tauro Store puede actualizar estos terminos y condiciones cuando sea necesario. La version
             publicada en este sitio sera la referencia aplicable al momento de cada compra o registro.
           </p>
-        </div>
-
-        <div class="alert alert-light border mb-0">
-          Puedes editar este contenido en <strong><a href="terminos.php">terminos.php</a></strong> para
-          adaptarlo a tus datos legales definitivos, politica de garantias, cambios y tratamiento de datos.
         </div>
       </div>
     </div>
