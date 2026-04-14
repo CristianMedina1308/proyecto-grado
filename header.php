@@ -64,6 +64,12 @@ $logoExiste = file_exists($logoPath);
 
   window.addEventListener("load", hideLoader, { once: true });
   window.setTimeout(hideLoader, 900);
+
+  // Hardening: En algunos navegadores/hosts, el evento load puede no dispararse como se espera
+  // (o la pagina puede volver desde bfcache). Si el loader quedara encima, bloquearia toda la UI.
+  // Estos failsafes aseguran que nunca quede atrapado.
+  window.addEventListener("pageshow", hideLoader);
+  window.setTimeout(hideLoader, 3000);
 })();
 </script>
 
