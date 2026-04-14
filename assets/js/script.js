@@ -232,9 +232,26 @@ function inicializarAvisoCookies() {
   }
 
   const storageKey = "tauro_cookie_consent";
-  const consent = localStorage.getItem(storageKey);
+
+  function leerConsentimiento() {
+    try {
+      return localStorage.getItem(storageKey);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function guardarConsentimiento(valor) {
+    try {
+      localStorage.setItem(storageKey, valor);
+    } catch (error) {
+      // Si el navegador bloquea storage, el aviso sigue funcionando en la sesion actual.
+    }
+  }
 
   function mostrar(forzar = false) {
+    const consent = leerConsentimiento();
+
     if (!forzar && (consent === "accepted" || consent === "rejected")) {
       banner.hidden = true;
       document.body.classList.remove("cookie-banner-open");
@@ -252,15 +269,17 @@ function inicializarAvisoCookies() {
 
   window.tauroMostrarAvisoCookies = mostrar;
 
-  mostrar();
+  window.requestAnimationFrame(() => {
+    mostrar();
+  });
 
   acceptButton.addEventListener("click", () => {
-    localStorage.setItem(storageKey, "accepted");
+    guardarConsentimiento("accepted");
     ocultar();
   });
 
   rejectButton.addEventListener("click", () => {
-    localStorage.setItem(storageKey, "rejected");
+    guardarConsentimiento("rejected");
     ocultar();
   });
 }

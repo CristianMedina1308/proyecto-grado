@@ -1101,7 +1101,11 @@ body.page-loaded {
 .cookie-banner {
   position: fixed;
   inset: 0;
-  z-index: 1090;
+  z-index: 100001;
+}
+
+.cookie-banner[hidden] {
+  display: none !important;
 }
 
 .cookie-banner__backdrop {
