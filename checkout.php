@@ -608,6 +608,57 @@ document.addEventListener("DOMContentLoaded", function () {
       .trim();
   }
 
+  function leerCarrito() {
+    return JSON.parse(localStorage.getItem("carrito")) || [];
+  }
+
+  function guardarCarrito(carrito) {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+  }
+
+  function mergeItems(carrito) {
+    const agrupado = [];
+
+    carrito.forEach((item) => {
+      const existente = agrupado.find((actual) =>
+        Number(actual.id) === Number(item.id) &&
+        String(actual.talla || "") === String(item.talla || "")
+      );
+
+      if (existente) {
+        existente.cantidad = Number(existente.cantidad || 1) + Number(item.cantidad || 1);
+      } else {
+        agrupado.push({
+          ...item,
+          id: Number(item.id),
+          cantidad: Number(item.cantidad || 1)
+        });
+      }
+    });
+
+    return agrupado;
+  }
+
+  async function cargarMetaProductos(ids) {
+    if (!ids.length) {
+      return {};
+    }
+
+    try {
+      const respuesta = await fetch("api_carrito_productos.php?ids=" + ids.join(","));
+      const data = await respuesta.json();
+      const mapa = {};
+
+      (Array.isArray(data.products) ? data.products : []).forEach((producto) => {
+        mapa[Number(producto.id)] = producto;
+      });
+
+      return mapa;
+    } catch (error) {
+      return {};
+    }
+  }
+
   function buscarTarifa(ciudad, zona) {
     const ciudadNorm = normalizarTexto(ciudad);
     const zonaNorm = normalizarTexto(zona) || "estandar";
@@ -676,29 +727,62 @@ document.addEventListener("DOMContentLoaded", function () {
     actualizarInfoEnvio();
   }
 
-  function renderizarResumen(carrito) {
+  async function renderizarResumen(carrito) {
     if (!carrito.length) {
       resumen.innerHTML = "<div class='alert alert-warning mb-0'>Tu carrito est&aacute; vac&iacute;o.</div>";
       return;
     }
 
+    const ids = [...new Set(carrito.map((item) => Number(item.id)).filter(Boolean))];
+    const metaProductos = await cargarMetaProductos(ids);
     let total = 0;
-    let html = "<div class='table-responsive'><table class='table table-sm text-center align-middle'><thead><tr><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th></tr></thead><tbody>";
+    let faltanTallas = false;
+    let html = "<div class='table-responsive'><table class='table table-sm text-center align-middle'><thead><tr><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead><tbody>";
 
-    carrito.forEach(item => {
+    carrito.forEach((item, index) => {
       const cantidad = Number(item.cantidad ?? 1);
       const precio = Number(item.precio ?? 0);
       const subtotal = precio * cantidad;
       total += subtotal;
 
       const nombre = String(item.nombre ?? "Producto");
-      const talla = item.talla ? ` - Talla ${item.talla}` : "";
+      const meta = metaProductos[Number(item.id)] || null;
+      const requiereTalla = !!(meta && meta.requires_size);
+      if (requiereTalla && !String(item.talla || "").trim()) {
+        faltanTallas = true;
+      }
+
+      let productoHtml = `<div class="fw-semibold">${nombre}</div>`;
+
+      if (requiereTalla) {
+        const opciones = (meta.sizes || []).map((size) => `
+          <option value="${size.name}" ${String(item.talla || "") === String(size.name) ? "selected" : ""} ${!size.available ? "disabled" : ""}>
+            ${size.name}${size.available ? "" : " - Sin stock"}
+          </option>
+        `).join("");
+
+        productoHtml += `
+          <div class="mt-2">
+            <select class="form-select form-select-sm" onchange="window.cambiarTallaCheckout(${index}, this.value)">
+              <option value="">Seleccionar talla</option>
+              ${opciones}
+            </select>
+          </div>
+        `;
+      } else if (item.talla) {
+        productoHtml += `<div class="small text-soft mt-1">Talla ${item.talla}</div>`;
+      }
 
       html += `<tr>
-        <td>${nombre}${talla}</td>
+        <td>${productoHtml}</td>
         <td>$${precio.toLocaleString()}</td>
         <td>${cantidad}</td>
         <td>$${subtotal.toLocaleString()}</td>
+        <td>
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.eliminarDelCheckout(${index})">
+            Quitar
+          </button>
+        </td>
       </tr>`;
     });
 
@@ -718,50 +802,110 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const totalFinal = total + envio;
     html += `<tr>
-      <td colspan="3"><strong>Subtotal productos</strong></td>
+      <td colspan="4"><strong>Subtotal productos</strong></td>
       <td><strong>$${total.toLocaleString()}</strong></td>
     </tr>
     <tr>
-      <td colspan="3"><strong>Envio</strong></td>
+      <td colspan="4"><strong>Envio</strong></td>
       <td><strong>$${envio.toLocaleString()}</strong></td>
     </tr>
     <tr>
-      <td colspan="3"><strong>Total a pagar</strong></td>
+      <td colspan="4"><strong>Total a pagar</strong></td>
       <td><strong>$${totalFinal.toLocaleString()}</strong></td>
     </tr></tbody></table></div>`;
 
+    if (faltanTallas) {
+      html += "<div class='alert alert-warning mt-3 mb-0'>Hay productos que requieren talla. Seleccionala antes de finalizar la compra.</div>";
+    }
+
     resumen.innerHTML = html + entrega;
+    hiddenCarrito.value = JSON.stringify(carrito);
   }
 
-  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+  function eliminarDelCheckout(index) {
+    const carrito = leerCarrito();
+    carrito.splice(index, 1);
+    guardarCarrito(carrito);
+    renderizarResumen(carrito);
+    if (typeof actualizarContadorCarrito === "function") {
+      actualizarContadorCarrito();
+    }
+  }
+
+  function cambiarTallaCheckout(index, nuevaTalla) {
+    const carrito = leerCarrito();
+    if (!carrito[index]) {
+      return;
+    }
+
+    carrito[index].talla = nuevaTalla || null;
+    guardarCarrito(mergeItems(carrito));
+    renderizarResumen(leerCarrito());
+    if (typeof actualizarContadorCarrito === "function") {
+      actualizarContadorCarrito();
+    }
+  }
+
+  const carrito = leerCarrito();
   hiddenCarrito.value = JSON.stringify(carrito);
   renderizarResumen(carrito);
   actualizarCamposEntrega();
   actualizarInfoEnvio();
 
+  window.eliminarDelCheckout = eliminarDelCheckout;
+  window.cambiarTallaCheckout = cambiarTallaCheckout;
+
   metodoPago.addEventListener("change", function () {
     actualizarCamposEntrega();
-    renderizarResumen(JSON.parse(localStorage.getItem("carrito")) || []);
+    renderizarResumen(leerCarrito());
   });
   campoCiudad.addEventListener("change", function () {
     actualizarInfoEnvio();
-    renderizarResumen(JSON.parse(localStorage.getItem("carrito")) || []);
+    renderizarResumen(leerCarrito());
   });
   campoZona.addEventListener("change", function () {
     actualizarInfoEnvio();
-    renderizarResumen(JSON.parse(localStorage.getItem("carrito")) || []);
+    renderizarResumen(leerCarrito());
   });
 
   form.addEventListener("submit", function (event) {
-    const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+    event.preventDefault();
+    const carritoActual = leerCarrito();
 
     if (!carritoActual.length) {
-      event.preventDefault();
       alert("Tu carrito est&aacute; vac&iacute;o.");
       return;
     }
 
     hiddenCarrito.value = JSON.stringify(carritoActual);
+
+    const ids = [...new Set(carritoActual.map((item) => Number(item.id)).filter(Boolean))];
+    cargarMetaProductos(ids).then((metaProductos) => {
+      const faltanTallas = carritoActual.some((item) => {
+        const meta = metaProductos[Number(item.id)] || null;
+        return meta && meta.requires_size && !String(item.talla || "").trim();
+      });
+
+      if (faltanTallas) {
+        if (window.Swal) {
+          window.Swal.fire({
+            icon: "warning",
+            title: "Faltan tallas por seleccionar",
+            text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
+            confirmButtonText: "Entendido",
+            customClass: {
+              confirmButton: "btn btn-primary"
+            },
+            buttonsStyling: false
+          });
+        } else {
+          alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
+        }
+        return;
+      }
+
+      form.submit();
+    });
   });
 });
 </script>

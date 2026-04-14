@@ -36,35 +36,142 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
   const tabla = document.querySelector("#tabla-carrito tbody");
   const totalSpan = document.getElementById("total-carrito");
 
-  let total = 0;
-  tabla.innerHTML = "";
+  function leerCarrito() {
+    return JSON.parse(localStorage.getItem("carrito")) || [];
+  }
 
-  if (carrito.length === 0) {
-    tabla.innerHTML = `
-      <tr>
-        <td colspan="5" class="py-5 text-soft">
-          Tu carrito esta vacio.
-        </td>
-      </tr>
-    `;
-  } else {
+  function guardarCarrito(carrito) {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+  }
+
+  function mergeItems(carrito) {
+    const agrupado = [];
+
+    carrito.forEach((item) => {
+      const existente = agrupado.find((actual) =>
+        Number(actual.id) === Number(item.id) &&
+        String(actual.talla || "") === String(item.talla || "")
+      );
+
+      if (existente) {
+        existente.cantidad = Number(existente.cantidad || 1) + Number(item.cantidad || 1);
+      } else {
+        agrupado.push({
+          ...item,
+          id: Number(item.id),
+          cantidad: Number(item.cantidad || 1)
+        });
+      }
+    });
+
+    return agrupado;
+  }
+
+  async function cargarMetaProductos(ids) {
+    if (!ids.length) {
+      return {};
+    }
+
+    try {
+      const respuesta = await fetch("api_carrito_productos.php?ids=" + ids.join(","));
+      const data = await respuesta.json();
+      const mapa = {};
+
+      (Array.isArray(data.products) ? data.products : []).forEach((producto) => {
+        mapa[Number(producto.id)] = producto;
+      });
+
+      return mapa;
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function actualizarContadorCarrito() {
+    const carrito = leerCarrito();
+    const contador = document.getElementById("contador-carrito");
+    if (contador) {
+      const total = carrito.reduce((acc, item) => acc + Number(item.cantidad || 1), 0);
+      contador.textContent = total;
+    }
+  }
+
+  function eliminarDelCarrito(index) {
+    const carrito = leerCarrito();
+    carrito.splice(index, 1);
+    guardarCarrito(carrito);
+    renderizar();
+  }
+
+  function cambiarTalla(index, nuevaTalla) {
+    const carrito = leerCarrito();
+
+    if (!carrito[index]) {
+      return;
+    }
+
+    carrito[index].talla = nuevaTalla || null;
+    guardarCarrito(mergeItems(carrito));
+    renderizar();
+  }
+
+  async function renderizar() {
+    const carrito = leerCarrito();
+    const ids = [...new Set(carrito.map((item) => Number(item.id)).filter(Boolean))];
+    const metaProductos = await cargarMetaProductos(ids);
+    let total = 0;
+
+    tabla.innerHTML = "";
+
+    if (carrito.length === 0) {
+      tabla.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-5 text-soft">
+            Tu carrito esta vacio.
+          </td>
+        </tr>
+      `;
+      totalSpan.textContent = "0";
+      actualizarContadorCarrito();
+      return;
+    }
+
     carrito.forEach((item, index) => {
       const cantidad = Number(item.cantidad ?? 1);
       const precio = Number(item.precio ?? 0);
       const subtotal = precio * cantidad;
       total += subtotal;
+      const meta = metaProductos[Number(item.id)] || null;
+      const requiereTalla = !!(meta && meta.requires_size);
 
-      const nombreProducto = item.talla
-        ? `${item.nombre} - Talla ${item.talla}`
-        : item.nombre;
+      let contenidoProducto = `<div class="fw-semibold">${item.nombre}</div>`;
+
+      if (requiereTalla) {
+        const opciones = (meta.sizes || []).map((size) => `
+          <option value="${size.name}" ${String(item.talla || "") === String(size.name) ? "selected" : ""} ${!size.available ? "disabled" : ""}>
+            ${size.name}${size.available ? "" : " - Sin stock"}
+          </option>
+        `).join("");
+
+        contenidoProducto += `
+          <div class="mt-2">
+            <label class="form-label small text-soft mb-1">Talla</label>
+            <select class="form-select form-select-sm" onchange="window.cambiarTallaCarrito(${index}, this.value)">
+              <option value="">Seleccionar talla</option>
+              ${opciones}
+            </select>
+          </div>
+        `;
+      } else if (item.talla) {
+        contenidoProducto += `<div class="small text-soft mt-1">Talla ${item.talla}</div>`;
+      }
 
       const fila = document.createElement("tr");
       fila.innerHTML = `
-        <td>${nombreProducto}</td>
+        <td></td>
         <td class="status-price">$${precio.toLocaleString()}</td>
         <td>${cantidad}</td>
         <td class="status-price">$${subtotal.toLocaleString()}</td>
@@ -74,28 +181,19 @@ document.addEventListener("DOMContentLoaded", function () {
           </button>
         </td>
       `;
+      fila.children[0].innerHTML = contenidoProducto;
       tabla.appendChild(fila);
     });
+
+    totalSpan.textContent = total.toLocaleString();
+    actualizarContadorCarrito();
   }
 
-  totalSpan.textContent = total.toLocaleString();
-  actualizarContadorCarrito();
+  window.eliminarDelCarrito = eliminarDelCarrito;
+  window.cambiarTallaCarrito = cambiarTalla;
+
+  renderizar();
 });
-
-function eliminarDelCarrito(index) {
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-  carrito.splice(index, 1);
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-  location.reload();
-}
-
-function actualizarContadorCarrito() {
-  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-  const contador = document.getElementById("contador-carrito");
-  if (contador) {
-    contador.textContent = carrito.length;
-  }
-}
 </script>
 
 <?php include 'footer.php'; ?>
