@@ -157,9 +157,36 @@ window.addEventListener("scroll", function() {
 });
 
 window.abrirPreferenciasCookies = function () {
-  if (typeof window.tauroMostrarAvisoCookies === "function") {
-    window.tauroMostrarAvisoCookies(true);
-  }
+  const intentoMostrar = () => {
+    if (typeof window.tauroMostrarAvisoCookies === "function") {
+      window.tauroMostrarAvisoCookies(true);
+      // Asegurar que sea visible para el usuario.
+      const banner = document.getElementById("cookieBanner");
+      if (banner) {
+        banner.scrollIntoView({ behavior: "smooth", block: "end" });
+        const dialog = banner.querySelector(".cookie-banner__dialog");
+        if (dialog) {
+          dialog.setAttribute("tabindex", "-1");
+          dialog.focus({ preventScroll: true });
+        }
+      }
+      return true;
+    }
+    return false;
+  };
+
+  // Intento inmediato.
+  if (intentoMostrar()) return;
+
+  // Si el usuario hace click antes de que cargue script.js, reintentamos unas veces.
+  let tries = 0;
+  const maxTries = 10;
+  const timer = window.setInterval(() => {
+    tries += 1;
+    if (intentoMostrar() || tries >= maxTries) {
+      window.clearInterval(timer);
+    }
+  }, 150);
 };
 </script>
 

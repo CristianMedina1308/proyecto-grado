@@ -1100,10 +1100,13 @@ body.page-loaded {
 
 .cookie-banner {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
   z-index: 100001;
-  /* No debe bloquear toda la pagina si el banner queda visible por error/latencia */
-  pointer-events: none;
+  /* Banner no-modal: debe permitir usar el sitio, pero el propio banner debe ser clickeable */
+  pointer-events: auto;
 }
 
 .cookie-banner[hidden] {
@@ -1111,27 +1114,22 @@ body.page-loaded {
 }
 
 .cookie-banner__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(10, 8, 6, 0.48);
-  backdrop-filter: blur(4px);
-  /* El fondo no debe capturar clicks */
-  pointer-events: none;
+  display: none;
 }
 
 .cookie-banner__dialog {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  /* Solo el dialogo debe ser interactivo */
-  pointer-events: auto;
+  padding: 18px 18px 22px;
 }
 
 .cookie-banner__content {
+  max-width: 920px;
+  margin: 0 auto;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -1189,7 +1187,7 @@ body.page-loaded {
 }
 
 .cookie-banner-open {
-  /* Mantener la clase por compatibilidad con JS, pero no bloquear scroll */
+  /* Mantener clase por compatibilidad; no bloquear scroll */
   overflow: auto;
 }
 
