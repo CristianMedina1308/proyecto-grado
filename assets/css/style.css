@@ -1102,6 +1102,8 @@ body.page-loaded {
   position: fixed;
   inset: 0;
   z-index: 100001;
+  /* No debe bloquear toda la pagina si el banner queda visible por error/latencia */
+  pointer-events: none;
 }
 
 .cookie-banner[hidden] {
@@ -1113,6 +1115,8 @@ body.page-loaded {
   inset: 0;
   background: rgba(10, 8, 6, 0.48);
   backdrop-filter: blur(4px);
+  /* El fondo no debe capturar clicks */
+  pointer-events: none;
 }
 
 .cookie-banner__dialog {
@@ -1123,6 +1127,8 @@ body.page-loaded {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  /* Solo el dialogo debe ser interactivo */
+  pointer-events: auto;
 }
 
 .cookie-banner__content {
@@ -1183,7 +1189,8 @@ body.page-loaded {
 }
 
 .cookie-banner-open {
-  overflow: hidden;
+  /* Mantener la clase por compatibilidad con JS, pero no bloquear scroll */
+  overflow: auto;
 }
 
 .footer-link-button {
