@@ -204,6 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mostrarMiniCarrito();
   actualizarContadorCarrito();
   updateFavoriteIcons();
+  inicializarAvisoCookies();
 
   // Cerrar mini carrito al hacer click fuera
   document.addEventListener("click", function (e) {
@@ -220,3 +221,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
+function inicializarAvisoCookies() {
+  const banner = document.getElementById("cookieBanner");
+  const acceptButton = document.getElementById("cookieAccept");
+  const rejectButton = document.getElementById("cookieReject");
+
+  if (!banner || !acceptButton || !rejectButton) {
+    return;
+  }
+
+  const storageKey = "tauro_cookie_consent";
+  const consent = localStorage.getItem(storageKey);
+
+  if (consent === "accepted" || consent === "rejected") {
+    banner.hidden = true;
+    return;
+  }
+
+  banner.hidden = false;
+
+  acceptButton.addEventListener("click", () => {
+    localStorage.setItem(storageKey, "accepted");
+    banner.hidden = true;
+  });
+
+  rejectButton.addEventListener("click", () => {
+    localStorage.setItem(storageKey, "rejected");
+    banner.hidden = true;
+  });
+}

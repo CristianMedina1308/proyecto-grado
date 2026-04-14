@@ -42,6 +42,23 @@
   </div>
 </footer>
 
+<div class="cookie-banner" id="cookieBanner" hidden aria-live="polite" aria-label="Aviso de cookies">
+  <div class="cookie-banner__content">
+    <div class="cookie-banner__text">
+      <strong>Uso de cookies y almacenamiento local</strong>
+      <p class="mb-0">
+        Tauro Store usa una cookie tecnica de sesion para funciones esenciales y almacenamiento local para carrito,
+        favoritos y tu preferencia del aviso. Puedes aceptar o rechazar este aviso y consultar el detalle en la
+        <a href="cookies.php">politica de cookies</a>.
+      </p>
+    </div>
+    <div class="cookie-banner__actions">
+      <button type="button" class="btn btn-outline-primary" id="cookieReject">Rechazar</button>
+      <button type="button" class="btn btn-primary" id="cookieAccept">Aceptar</button>
+    </div>
+  </div>
+</div>
+
 <?php
 $appAssetPrefix = '';
 include __DIR__ . '/includes/ui_footer.php';
