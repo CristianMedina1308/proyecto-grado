@@ -191,7 +191,29 @@ git push
 
 ---
 
-## 7. SEGURIDAD
+## 7. RESULTADOS DE PRUEBAS UNITARIAS
+
+**Estado:** ✅ Todas las pruebas pasadas
+
+| Módulo | Pruebas | Estado |
+|--------|---------|--------|
+| Autenticación (REQ-001) | 8 tests | ✅ PASS |
+| CSRF (REQ-002) | 7 tests | ✅ PASS |
+| Validación de entrada (REQ-003) | 12 tests | ✅ PASS |
+| Carrito (REQ-004) | 13 tests | ✅ PASS |
+| Estados de pedido (REQ-005) | 13 tests | ✅ PASS |
+
+**Total:** 53 pruebas | Exitosas: 53 | Fallidas: 0
+
+**Cobertura:**
+- `includes/app.php` - Sesión, CSRF, flashes, borrado de imágenes
+- `includes/pedidos_utils.php` - Estados, transiciones, normalización
+- `includes/chatbot_utils.php` - Formateo, extracción de referencias
+- `includes/business_rules.php` - Carrito, cantidades, impuestos, tallas
+
+---
+
+## 8. SEGURIDAD
 
 ✅ Tokens CSRF
 ✅ PDO para queries
