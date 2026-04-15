@@ -47,4 +47,3 @@ php tools/phpunit.phar
 ## Notas
 
 - Las pruebas están diseñadas para ser unitarias y no depender de base de datos real.
-- La subida real de imágenes, envío de correo y generación completa de PDF siguen siendo mejores candidatas para pruebas de integración.

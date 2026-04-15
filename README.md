@@ -332,9 +332,3 @@ El sistema está preparado para:
 - conexión a MySQL por variables de entorno,
 - ejecución de pruebas unitarias.
 
-## Recomendaciones
-
-- Unificar definitivamente el nombre de la base de datos si `maquillaje` ya no corresponde al dominio real.
-- Mover almacenamiento de imágenes a un servicio persistente si Railway será el entorno principal.
-- Agregar CI/CD para correr pruebas en cada push.
-- Separar más lógica pura del controlador PHP para seguir mejorando testabilidad.
