@@ -882,30 +882,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
    form.addEventListener("submit", function (event) {
      event.preventDefault();
-     const carritoActual = leerCarrito();
-     const aceptaTerminos = document.getElementById("acepta_terminos_checkout");
-
-     if (!carritoActual.length) {
-       alert("Tu carrito está vacío.");
-       return;
-     }
-
-     // Validar que el checkbox esté marcado
-     if (!aceptaTerminos || !aceptaTerminos.checked) {
+     
+     // Validar términos PRIMERO
+     const aceptaTerminosCheckbox = document.getElementById("acepta_terminos_checkout");
+     if (!aceptaTerminosCheckbox || !aceptaTerminosCheckbox.checked) {
        if (window.Swal) {
          window.Swal.fire({
            icon: "warning",
-           title: "Acepta los términos",
+           title: "Términos no aceptados",
            text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
            confirmButtonText: "Entendido",
-           customClass: {
-             confirmButton: "btn btn-primary"
-           },
-           buttonsStyling: false
+           confirmButtonColor: "#b89247"
          });
        } else {
          alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
        }
+       return false;
+     }
+     
+     // Luego validar carrito y tallas
+     const carritoActual = leerCarrito();
+
+     if (!carritoActual.length) {
+       alert("Tu carrito está vacío.");
        return;
      }
 
@@ -936,27 +935,11 @@ document.addEventListener("DOMContentLoaded", function () {
          return;
        }
 
+       // Si pasó todas las validaciones, enviar
        form.submit();
      });
    });
  });
  </script>
 
-<script>
-// La validación se maneja en assets/js/terminos.js
-document.addEventListener("DOMContentLoaded", function() {
-  const checkboxTerminos = document.getElementById("acepta_terminos_checkout");
-  const btnFinalizar = document.querySelector("button[name='finalizar_pedido']");
-
-  if (checkboxTerminos && btnFinalizar) {
-    // Actualizar estado visual según checkbox
-    checkboxTerminos.addEventListener("change", function() {
-      console.log("Términos checkout:", this.checked ? "aceptados" : "no aceptados");
-    });
-
-    btnFinalizar.disabled = false;
-  }
-});
-</script>
-
- <?php include 'footer.php'; ?>
+  <?php include 'footer.php'; ?>

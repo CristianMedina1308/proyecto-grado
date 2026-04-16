@@ -100,18 +100,34 @@ include 'header.php';
  </div>
 
 <script>
-// La validación se maneja en assets/js/terminos.js
+// Validar términos al enviar
 document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("form");
   const checkboxTerminos = document.getElementById("acepta_terminos_registro");
-  const btnRegistro = document.querySelector("button[name='registro']");
 
-  if (checkboxTerminos && btnRegistro) {
-    // Actualizar estado visual del botón según checkbox
-    checkboxTerminos.addEventListener("change", function() {
-      console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
-    });
+  if (form && checkboxTerminos) {
+    form.addEventListener("submit", function(event) {
+      if (!checkboxTerminos.checked) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-    btnRegistro.disabled = false;
+        if (window.Swal) {
+          Swal.fire({
+            icon: "warning",
+            title: "Términos no aceptados",
+            text: "Debes aceptar los términos y condiciones para registrarte.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#b89247"
+          });
+        } else {
+          alert("Debes aceptar los términos y condiciones para registrarte.");
+        }
+
+        checkboxTerminos.focus();
+        return false;
+      }
+    }, true); // capturing phase para ejecutar antes que otros listeners
   }
 });
 </script>
