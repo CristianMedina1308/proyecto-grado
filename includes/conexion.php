@@ -2,7 +2,7 @@
 
 // Detecta si estás en Railway (variables reales)
 $host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'maquillaje';
+$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'tiendaropa';
 $user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
 $pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASS') ?: '';
 $port = getenv('MYSQLPORT') ?: 3306;

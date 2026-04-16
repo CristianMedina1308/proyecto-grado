@@ -1,6 +1,6 @@
 <?php
 $host = getenv('DB_HOST') ?: '127.0.0.1';
-$dbname = getenv('DB_NAME') ?: 'maquillaje';
+$dbname = getenv('DB_NAME') ?: 'tiendaropa';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASS') ?: '';
 

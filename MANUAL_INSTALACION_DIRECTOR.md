@@ -42,11 +42,11 @@ git clone <repositorio> C:\xampp\htdocs\integrador-main
 #### 1.3 Crear base de datos
 ```sql
 -- En phpMyAdmin (http://localhost/phpmyadmin)
-CREATE DATABASE maquillaje CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE tiendaropa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 #### 1.4 Importar estructura SQL
-1. Ve a phpMyAdmin → Base de datos `maquillaje`
+1. Ve a phpMyAdmin → Base de datos `tiendaropa`
 2. Tab **Importar** → Carga `migracion_realismo.sql`
 3. Ejecuta
 
@@ -165,7 +165,7 @@ integrador-main/
 | Problema | Solución |
 |----------|----------|
 | **"Connection refused"** | Verifica que MySQL esté running en XAMPP |
-| **Error "maquillaje database not found"** | Ejecuta paso 1.3 (crear BD) |
+| **Error "tiendaropa database not found"** | Ejecuta paso 1.3 (crear BD) |
 | **Imágenes rotas en local** | Verifica permisos en `assets/img/` |
 | **En Railway: "Bad gateway"** | Espera 2-3 minutos tras deploy. Verifica logs en Railway. |
 | **Correos no salen** | Valida credenciales SMTP en variables de entorno |

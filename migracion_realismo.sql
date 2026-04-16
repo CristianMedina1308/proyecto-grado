@@ -1,4 +1,4 @@
-USE maquillaje;
+USE tiendaropa;
 
 START TRANSACTION;
 

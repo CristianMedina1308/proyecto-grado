@@ -111,7 +111,7 @@ integrador-main/
 La aplicación usa MySQL. En local, si no defines variables de entorno, el proyecto cae por defecto sobre:
 
 - `DB_HOST=127.0.0.1`
-- `DB_NAME=maquillaje`
+- `DB_NAME=tiendaropa`
 - `DB_USER=root`
 - `DB_PASS=`
 
