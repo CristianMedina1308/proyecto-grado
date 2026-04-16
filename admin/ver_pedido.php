@@ -45,12 +45,24 @@ $productos = $detalle->fetchAll(PDO::FETCH_ASSOC);
           <h1 class="h3 mb-0">Detalle del pedido #<?= (int) $info['id'] ?></h1>
           <a href="pedidos.php" class="btn btn-outline-primary btn-sm">Volver</a>
         </div>
+        <?php
+          $subtotalProductos = (float) ($info['subtotal_productos'] ?? 0);
+          $costoEnvio = (float) ($info['costo_envio'] ?? 0);
+          $totalPedido = (float) ($info['total'] ?? 0);
+          $ivaMonto = isset($info['iva_monto']) ? (float) $info['iva_monto'] : max($totalPedido - $subtotalProductos - $costoEnvio, 0);
+          $ivaRate = isset($info['iva_rate']) ? (float) $info['iva_rate'] : 0.19;
+          $mostrarIva = $ivaMonto > 0.005;
+        ?>
+
         <p class="mb-1"><strong>Usuario:</strong> <?= htmlspecialchars($info['nombre'] ?? 'No registrado') ?></p>
         <p class="mb-1"><strong>Modalidad:</strong> <?= htmlspecialchars(etiquetaMetodoPagoPedido((string) ($info['metodo_pago'] ?? ''))) ?></p>
         <p class="mb-1"><strong>Estado:</strong> <?= htmlspecialchars($etiquetasEstado[normalizarTextoPedido((string) $info['estado'])] ?? ucfirst((string) $info['estado'])) ?></p>
-        <p class="mb-1"><strong>Subtotal productos:</strong> $<?= number_format((float) ($info['subtotal_productos'] ?? 0), 2) ?></p>
-        <p class="mb-1"><strong>Costo envio:</strong> $<?= number_format((float) ($info['costo_envio'] ?? 0), 2) ?></p>
-        <p class="mb-1"><strong>Total:</strong> $<?= number_format((float) $info['total'], 2) ?></p>
+        <p class="mb-1"><strong>Subtotal productos<?= $mostrarIva ? ' (sin IVA)' : '' ?>:</strong> $<?= number_format($subtotalProductos, 2) ?></p>
+        <?php if ($mostrarIva): ?>
+          <p class="mb-1"><strong>IVA (<?= (int) round($ivaRate * 100) ?>%):</strong> $<?= number_format($ivaMonto, 2) ?></p>
+        <?php endif; ?>
+        <p class="mb-1"><strong>Costo envio:</strong> $<?= number_format($costoEnvio, 2) ?></p>
+        <p class="mb-1"><strong>Total:</strong> $<?= number_format($totalPedido, 2) ?></p>
         <p class="mb-0"><strong>Fecha:</strong> <?= htmlspecialchars($info['fecha']) ?></p>
       </div>
     </div>
@@ -119,8 +131,8 @@ $productos = $detalle->fetchAll(PDO::FETCH_ASSOC);
                 <th>Producto</th>
                 <th>Talla</th>
                 <th>Cantidad</th>
-                <th>Precio unitario</th>
-                <th>Subtotal</th>
+                <th>Precio unitario<?= $mostrarIva ? ' (sin IVA)' : '' ?></th>
+                <th>Subtotal<?= $mostrarIva ? ' (sin IVA)' : '' ?></th>
               </tr>
             </thead>
             <tbody>

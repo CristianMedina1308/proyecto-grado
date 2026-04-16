@@ -1,6 +1,7 @@
 <?php
 include 'includes/conexion.php';
 include 'includes/pedidos_utils.php';
+include 'includes/business_rules.php';
 include 'includes/factura_layout.php';
 require 'includes/fpdf/fpdf.php';
 require 'includes/PHPMailer/PHPMailer.php';
@@ -94,6 +95,8 @@ $pedidoCreado = false;
 $pedidoId = null;
 $pedidoTotal = 0.0;
 $pedidoSubtotal = 0.0;
+$pedidoIvaRate = 0.19;
+$pedidoIvaMonto = 0.0;
 $pedidoEnvio = 0.0;
 $pedidoDiasEntrega = null;
 $facturaPublicaUrl = null;
@@ -276,35 +279,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
         ];
       }
 
-      $totalPedido = $subtotalProductos + $costoEnvio;
+      $ivaRate = 0.19;
+      $ivaMonto = tauroCalculateTax($subtotalProductos, $ivaRate);
+      $totalPedido = round($subtotalProductos + $ivaMonto + $costoEnvio, 2);
       $facturaToken = bin2hex(random_bytes(24));
 
-      $insertPedido = $conn->prepare("
-        INSERT INTO pedidos
-          (
-            usuario_id, total, subtotal_productos, costo_envio, estado, metodo_pago,
-            nombre_envio, telefono_envio, direccion_envio, barrio_envio, ciudad_envio, zona_envio,
-            dias_entrega_min, dias_entrega_max, estado_pendiente_at, stock_reintegrado, factura_token
-          )
-        VALUES
-          (?, ?, ?, ?, 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0, ?)
-      ");
-      $insertPedido->execute([
-        (int) $_SESSION['usuario']['id'],
-        $totalPedido,
-        $subtotalProductos,
-        $costoEnvio,
-        $metodoPago,
-        $nombreEnvio,
-        $telefonoEnvio,
-        $direccionEnvio,
-        $barrioEnvio,
-        $ciudadEnvio,
-        $zonaEnvio,
-        $diasEntregaMin,
-        $diasEntregaMax,
-        $facturaToken
-      ]);
+      try {
+        // Nueva versión (con IVA persistido en pedidos)
+        $insertPedido = $conn->prepare("
+          INSERT INTO pedidos
+            (
+              usuario_id,
+              total,
+              subtotal_productos,
+              iva_rate,
+              iva_monto,
+              costo_envio,
+              estado,
+              metodo_pago,
+              nombre_envio,
+              telefono_envio,
+              direccion_envio,
+              barrio_envio,
+              ciudad_envio,
+              zona_envio,
+              dias_entrega_min,
+              dias_entrega_max,
+              estado_pendiente_at,
+              stock_reintegrado,
+              factura_token
+            )
+          VALUES
+            (?, ?, ?, ?, ?, ?, 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0, ?)
+        ");
+
+        $insertPedido->execute([
+          (int) $_SESSION['usuario']['id'],
+          $totalPedido,
+          $subtotalProductos,
+          $ivaRate,
+          $ivaMonto,
+          $costoEnvio,
+          $metodoPago,
+          $nombreEnvio,
+          $telefonoEnvio,
+          $direccionEnvio,
+          $barrioEnvio,
+          $ciudadEnvio,
+          $zonaEnvio,
+          $diasEntregaMin,
+          $diasEntregaMax,
+          $facturaToken
+        ]);
+      } catch (PDOException $e) {
+        // Compatibilidad: si aún no se han agregado columnas iva_* en la BD, mantenemos el flujo.
+        if (stripos($e->getMessage(), 'Unknown column') === false) {
+          throw $e;
+        }
+
+        $insertPedido = $conn->prepare("
+          INSERT INTO pedidos
+            (
+              usuario_id, total, subtotal_productos, costo_envio, estado, metodo_pago,
+              nombre_envio, telefono_envio, direccion_envio, barrio_envio, ciudad_envio, zona_envio,
+              dias_entrega_min, dias_entrega_max, estado_pendiente_at, stock_reintegrado, factura_token
+            )
+          VALUES
+            (?, ?, ?, ?, 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0, ?)
+        ");
+
+        $insertPedido->execute([
+          (int) $_SESSION['usuario']['id'],
+          $totalPedido,
+          $subtotalProductos,
+          $costoEnvio,
+          $metodoPago,
+          $nombreEnvio,
+          $telefonoEnvio,
+          $direccionEnvio,
+          $barrioEnvio,
+          $ciudadEnvio,
+          $zonaEnvio,
+          $diasEntregaMin,
+          $diasEntregaMax,
+          $facturaToken
+        ]);
+      }
 
       $pedidoId = (int) $conn->lastInsertId();
 
@@ -338,6 +398,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
       $conn->commit();
       $pedidoCreado = true;
       $pedidoSubtotal = $subtotalProductos;
+      $pedidoIvaRate = $ivaRate;
+      $pedidoIvaMonto = $ivaMonto;
       $pedidoEnvio = $costoEnvio;
       $pedidoTotal = $totalPedido;
       $pedidoDiasEntrega = $diasEntregaMin !== null && $diasEntregaMax !== null
@@ -392,7 +454,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
       $pdf->Ln(5);
       $pdf->Cell(0, 8, 'Cliente: ' . $_SESSION['usuario']['nombre'], 0, 1);
       $pdf->Cell(0, 8, 'Pedido #: ' . $pedidoId, 0, 1);
-      $pdf->Cell(0, 8, 'Subtotal productos: $' . number_format($pedidoSubtotal, 0, ',', '.'), 0, 1);
+      $pdf->Cell(0, 8, 'Subtotal productos (sin IVA): $' . number_format($pedidoSubtotal, 0, ',', '.'), 0, 1);
+      $pdf->Cell(0, 8, 'IVA (' . (int) round($pedidoIvaRate * 100) . '%): $' . number_format($pedidoIvaMonto, 0, ',', '.'), 0, 1);
       $pdf->Cell(0, 8, 'Envio: $' . number_format($pedidoEnvio, 0, ',', '.'), 0, 1);
       $pdf->Cell(0, 8, 'Total: $' . number_format($pedidoTotal, 0, ',', '.'), 0, 1);
       if ($metodoPago === 'recoger_tienda') {
@@ -438,7 +501,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
         <h2 class="checkout-title mb-2">Pedido confirmado</h2>
         <p class="text-soft">Gracias por confiar en Tauro Store.</p>
         <p>Numero de pedido: <strong>#' . $pedidoId . '</strong></p>
-        <p>Subtotal productos: <strong class="status-price">$' . number_format($pedidoSubtotal, 0, ',', '.') . '</strong></p>
+        <p>Subtotal productos (sin IVA): <strong class="status-price">$' . number_format($pedidoSubtotal, 0, ',', '.') . '</strong></p>
+        <p>IVA (' . (int) round($pedidoIvaRate * 100) . '%): <strong class="status-price">$' . number_format($pedidoIvaMonto, 0, ',', '.') . '</strong></p>
         <p>Envio: <strong class="status-price">$' . number_format($pedidoEnvio, 0, ',', '.') . '</strong></p>
         <p>Total: <strong class="status-price">$' . number_format($pedidoTotal, 0, ',', '.') . '</strong></p>
         ' . ($metodoPago === 'recoger_tienda'
@@ -747,15 +811,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const ids = [...new Set(carrito.map((item) => Number(item.id)).filter(Boolean))];
     const metaProductos = await cargarMetaProductos(ids);
-    let total = 0;
+
+    const ivaRate = Number(window.TAURO_IVA_RATE ?? 0.19);
+    let subtotalBase = 0;
     let faltanTallas = false;
-    let html = "<div class='table-responsive'><table class='table table-sm text-center align-middle'><thead><tr><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead><tbody>";
+
+    let html = "<div class='table-responsive'><table class='table table-sm text-center align-middle'><thead><tr><th>Producto</th><th>Precio (IVA incl.)</th><th>Cant.</th><th>Subtotal (IVA incl.)</th><th></th></tr></thead><tbody>";
 
     carrito.forEach((item, index) => {
       const cantidad = Number(item.cantidad ?? 1);
-      const precio = Number(item.precio ?? 0);
-      const subtotal = precio * cantidad;
-      total += subtotal;
+      const precioBase = Number(item.precio ?? 0);
+      const precioConIva = precioBase * (1 + ivaRate);
+      const subtotalConIva = precioConIva * cantidad;
+
+      subtotalBase += (precioBase * cantidad);
 
       const nombre = String(item.nombre ?? "Producto");
       const meta = metaProductos[Number(item.id)] || null;
@@ -787,9 +856,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       html += `<tr>
         <td>${productoHtml}</td>
-        <td>$${precio.toLocaleString()}</td>
+        <td>$${precioConIva.toLocaleString()}</td>
         <td>${cantidad}</td>
-        <td>$${subtotal.toLocaleString()}</td>
+        <td>$${subtotalConIva.toLocaleString()}</td>
         <td>
           <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.eliminarDelCheckout(${index})">
             Quitar
@@ -812,10 +881,17 @@ document.addEventListener("DOMContentLoaded", function () {
       entrega = "<div class='small text-soft mt-2'>Recogida en tienda: sin costo de envio.</div>";
     }
 
-    const totalFinal = total + envio;
+    const ivaMonto = subtotalBase * ivaRate;
+    const subtotalConIva = subtotalBase + ivaMonto;
+    const totalFinal = subtotalConIva + envio;
+
     html += `<tr>
-      <td colspan="4"><strong>Subtotal productos</strong></td>
-      <td><strong>$${total.toLocaleString()}</strong></td>
+      <td colspan="4"><strong>Subtotal productos (sin IVA)</strong></td>
+      <td><strong>$${subtotalBase.toLocaleString()}</strong></td>
+    </tr>
+    <tr>
+      <td colspan="4"><strong>IVA (${Math.round(ivaRate * 100)}%)</strong></td>
+      <td><strong>$${ivaMonto.toLocaleString()}</strong></td>
     </tr>
     <tr>
       <td colspan="4"><strong>Envio</strong></td>

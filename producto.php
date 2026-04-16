@@ -150,7 +150,8 @@ include 'header.php';
     <div class="col-lg-6">
       <h2 class="product-main-title mb-2"><?= htmlspecialchars((string) $producto['nombre']) ?></h2>
       <p class="text-soft mb-4"><?= nl2br(htmlspecialchars((string) ($producto['descripcion'] ?? ''))) ?></p>
-      <h3 class="product-price mb-4">$<?= number_format((float) $producto['precio'], 0, ',', '.') ?></h3>
+      <?php $precioConIva = (float) $producto['precio'] * 1.19; ?>
+      <h3 class="product-price mb-4">$<?= number_format($precioConIva, 0, ',', '.') ?> <small class="text-soft">(IVA incl.)</small></h3>
 
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">

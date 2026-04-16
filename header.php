@@ -34,6 +34,11 @@ $logoExiste = file_exists($logoPath);
 </div>
 
 <script>
+// Tasa de IVA global (usada por carrito/checkout para mostrar totales consistentes)
+window.TAURO_IVA_RATE = 0.19;
+</script>
+
+<script>
 (() => {
   let hidden = false;
 

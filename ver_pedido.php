@@ -96,6 +96,15 @@ include 'header.php';
 
   <div class="card shadow-sm mb-4">
     <div class="card-body">
+      <?php
+        $subtotalProductos = (float) ($pedido['subtotal_productos'] ?? $pedido['total']);
+        $costoEnvio = (float) ($pedido['costo_envio'] ?? 0);
+        $totalPedido = (float) ($pedido['total'] ?? 0);
+        $ivaMonto = isset($pedido['iva_monto']) ? (float) $pedido['iva_monto'] : max($totalPedido - $subtotalProductos - $costoEnvio, 0);
+        $ivaRate = isset($pedido['iva_rate']) ? (float) $pedido['iva_rate'] : 0.19;
+        $mostrarIva = $ivaMonto > 0.005;
+      ?>
+
       <p><strong>Pedido #:</strong> <?= (int) $pedido['id'] ?></p>
       <p><strong>Fecha:</strong> <?= htmlspecialchars((string) $pedido['fecha']) ?></p>
       <p><strong>Modalidad:</strong> <?= htmlspecialchars(etiquetaMetodoPagoPedido((string) ($pedido['metodo_pago'] ?? ''))) ?></p>
@@ -104,9 +113,12 @@ include 'header.php';
           <?= htmlspecialchars($etiquetasEstado[normalizarTextoPedido((string) $pedido['estado'])] ?? ucfirst((string) $pedido['estado'])) ?>
         </span>
       </p>
-      <p><strong>Subtotal productos:</strong> $<?= number_format((float) ($pedido['subtotal_productos'] ?? $pedido['total']), 0, ',', '.') ?></p>
-      <p><strong>Costo envio:</strong> $<?= number_format((float) ($pedido['costo_envio'] ?? 0), 0, ',', '.') ?></p>
-      <p><strong>Total:</strong> $<?= number_format((float) $pedido['total'], 0, ',', '.') ?></p>
+      <p><strong>Subtotal productos<?= $mostrarIva ? ' (sin IVA)' : '' ?>:</strong> $<?= number_format($subtotalProductos, 0, ',', '.') ?></p>
+      <?php if ($mostrarIva): ?>
+        <p><strong>IVA (<?= (int) round($ivaRate * 100) ?>%):</strong> $<?= number_format($ivaMonto, 0, ',', '.') ?></p>
+      <?php endif; ?>
+      <p><strong>Costo envio:</strong> $<?= number_format($costoEnvio, 0, ',', '.') ?></p>
+      <p><strong>Total:</strong> $<?= number_format($totalPedido, 0, ',', '.') ?></p>
 
       <?php if (
         !$esAdmin &&
@@ -178,9 +190,9 @@ include 'header.php';
         <tr>
           <th>Producto</th>
           <th>Talla</th>
-          <th>Precio</th>
+          <th>Precio<?= $mostrarIva ? ' (sin IVA)' : '' ?></th>
           <th>Cantidad</th>
-          <th>Subtotal</th>
+          <th>Subtotal<?= $mostrarIva ? ' (sin IVA)' : '' ?></th>
         </tr>
       </thead>
       <tbody>

@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <img src="assets/img/productos/${p.imagen}" class="card-img-top" alt="${p.nombre}">
             <div class="card-body text-center d-flex flex-column">
               <h5 class="card-title">${p.nombre}</h5>
-              <p class="text-danger fw-bold mb-3">$${Number(p.precio).toLocaleString()}</p>
+              <p class="text-danger fw-bold mb-3">$${(Number(p.precio) * (1 + Number(window.TAURO_IVA_RATE ?? 0.19))).toLocaleString()} <small class='text-muted'>(IVA incl.)</small></p>
               <div class="mt-auto d-flex flex-column gap-2">
                 <button class="btn btn-outline-primary"
                         onclick="agregarCarrito('${p.nombre}', ${p.precio}, ${p.id})">

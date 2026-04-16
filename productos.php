@@ -92,7 +92,8 @@ $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categ
 
             <div class="producto-info">
               <h6 class="producto-nombre"><?= htmlspecialchars($p['nombre']) ?></h6>
-              <p class="producto-precio mb-0">$<?= number_format((float) $p['precio'], 0, ',', '.') ?></p>
+              <?php $precioConIva = (float) $p['precio'] * 1.19; ?>
+              <p class="producto-precio mb-0">$<?= number_format($precioConIva, 0, ',', '.') ?> <small class="text-soft">(IVA incl.)</small></p>
             </div>
           </article>
         </div>

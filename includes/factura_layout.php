@@ -231,6 +231,12 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $subtotalProductos = (float) ($pedido['subtotal_productos'] ?? 0);
   $costoEnvio = (float) ($pedido['costo_envio'] ?? 0);
   $totalPedido = (float) ($pedido['total'] ?? ($subtotalProductos + $costoEnvio));
+
+  // IVA: compatible con pedidos viejos (sin columnas iva_*)
+  $ivaMonto = isset($pedido['iva_monto']) ? (float) $pedido['iva_monto'] : max($totalPedido - $subtotalProductos - $costoEnvio, 0);
+  $ivaRate = isset($pedido['iva_rate']) ? (float) $pedido['iva_rate'] : ($subtotalProductos > 0 ? ($ivaMonto / $subtotalProductos) : 0.19);
+  $mostrarIva = $ivaMonto > 0.005;
+
   $codigoFactura = facturaGenerarCodigo((int) $pedido['id']);
 
   $pdf->SetAutoPageBreak(true, 18);
@@ -312,7 +318,7 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->SetTextColor($colorAccentStrong[0], $colorAccentStrong[1], $colorAccentStrong[2]);
   $pdf->SetXY(14, $y + 3);
   $pdf->Cell(40, 4, facturaPdfText('Metodo de pago'), 0, 0);
-  $pdf->Cell(48, 4, facturaPdfText('Subtotal productos'), 0, 0);
+  $pdf->Cell(48, 4, facturaPdfText($mostrarIva ? 'Subtotal (sin IVA)' : 'Subtotal productos'), 0, 0);
   $pdf->Cell(40, 4, facturaPdfText('Costo de envio'), 0, 0);
   $pdf->Cell(44, 4, facturaPdfText('Total pedido'), 0, 1);
   $pdf->SetFont('Helvetica', 'B', 11);
@@ -361,8 +367,8 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->Cell(28, 8, facturaPdfText('SKU'), 1, 0, 'C', true);
   $pdf->Cell(18, 8, facturaPdfText('Talla'), 1, 0, 'C', true);
   $pdf->Cell(20, 8, facturaPdfText('Cant.'), 1, 0, 'C', true);
-  $pdf->Cell(30, 8, facturaPdfText('Unitario'), 1, 0, 'C', true);
-  $pdf->Cell(36, 8, facturaPdfText('Subtotal'), 1, 1, 'C', true);
+  $pdf->Cell(30, 8, facturaPdfText($mostrarIva ? 'Unitario (sin IVA)' : 'Unitario'), 1, 0, 'C', true);
+  $pdf->Cell(36, 8, facturaPdfText($mostrarIva ? 'Subtotal (sin IVA)' : 'Subtotal'), 1, 1, 'C', true);
 
   $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
   $pdf->SetFont('Helvetica', '', 8.5);
@@ -397,8 +403,8 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
         $pdf->Cell(28, 8, facturaPdfText('SKU'), 1, 0, 'C', true);
         $pdf->Cell(18, 8, facturaPdfText('Talla'), 1, 0, 'C', true);
         $pdf->Cell(20, 8, facturaPdfText('Cant.'), 1, 0, 'C', true);
-        $pdf->Cell(30, 8, facturaPdfText('Unitario'), 1, 0, 'C', true);
-        $pdf->Cell(36, 8, facturaPdfText('Subtotal'), 1, 1, 'C', true);
+        $pdf->Cell(30, 8, facturaPdfText($mostrarIva ? 'Unitario (sin IVA)' : 'Unitario'), 1, 0, 'C', true);
+        $pdf->Cell(36, 8, facturaPdfText($mostrarIva ? 'Subtotal (sin IVA)' : 'Subtotal'), 1, 1, 'C', true);
         $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);
         $pdf->SetFont('Helvetica', '', 8.5);
       }
@@ -422,9 +428,17 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
 
   $pdf->SetDrawColor($colorBorder[0], $colorBorder[1], $colorBorder[2]);
   $pdf->SetFont('Helvetica', '', 9);
+
   $pdf->SetX($xResumen);
-  $pdf->Cell($wLabel, 8, facturaPdfText('Subtotal productos'), 1, 0, 'L', true);
+  $pdf->Cell($wLabel, 8, facturaPdfText($mostrarIva ? 'Subtotal (sin IVA)' : 'Subtotal productos'), 1, 0, 'L', true);
   $pdf->Cell($wValor, 8, facturaPdfMoney($totalLineas), 1, 1, 'R', true);
+
+  if ($mostrarIva) {
+    $pdf->SetX($xResumen);
+    $pdf->Cell($wLabel, 8, facturaPdfText('IVA (' . (int) round($ivaRate * 100) . '%)'), 1, 0, 'L', true);
+    $pdf->Cell($wValor, 8, facturaPdfMoney($ivaMonto), 1, 1, 'R', true);
+  }
+
   $pdf->SetX($xResumen);
   $pdf->Cell($wLabel, 8, facturaPdfText('Costo envio'), 1, 0, 'L', true);
   $pdf->Cell($wValor, 8, facturaPdfMoney($costoEnvio), 1, 1, 'R', true);

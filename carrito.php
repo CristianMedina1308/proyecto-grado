@@ -12,9 +12,9 @@
         <thead>
           <tr>
             <th>Producto</th>
-            <th>Precio</th>
+            <th>Precio (IVA incl.)</th>
             <th>Cantidad</th>
-            <th>Subtotal</th>
+            <th>Subtotal (IVA incl.)</th>
             <th>Eliminar</th>
           </tr>
         </thead>
@@ -25,7 +25,10 @@
     <hr class="my-4">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-      <h3 class="mb-0">Total: <span class="status-price">$<span id="total-carrito">0</span></span></h3>
+      <div>
+        <h3 class="mb-1">Total (IVA incl.): <span class="status-price">$<span id="total-carrito">0</span></span></h3>
+        <div class="text-soft small" id="carrito-desglose-iva"></div>
+      </div>
 
       <a href="checkout.php" class="btn btn-primary px-4">
         Finalizar compra
@@ -122,7 +125,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const carrito = leerCarrito();
     const ids = [...new Set(carrito.map((item) => Number(item.id)).filter(Boolean))];
     const metaProductos = await cargarMetaProductos(ids);
-    let total = 0;
+
+    const ivaRate = Number(window.TAURO_IVA_RATE ?? 0.19);
+    const desglose = document.getElementById("carrito-desglose-iva");
+
+    let subtotalBase = 0;
+    let totalConIva = 0;
 
     tabla.innerHTML = "";
 
@@ -135,15 +143,24 @@ document.addEventListener("DOMContentLoaded", function () {
         </tr>
       `;
       totalSpan.textContent = "0";
+      if (desglose) {
+        desglose.textContent = "";
+      }
       actualizarContadorCarrito();
       return;
     }
 
     carrito.forEach((item, index) => {
       const cantidad = Number(item.cantidad ?? 1);
-      const precio = Number(item.precio ?? 0);
-      const subtotal = precio * cantidad;
-      total += subtotal;
+      const precioBase = Number(item.precio ?? 0);
+
+      const subtotalBaseItem = precioBase * cantidad;
+      const precioConIva = precioBase * (1 + ivaRate);
+      const subtotalConIva = precioConIva * cantidad;
+
+      subtotalBase += subtotalBaseItem;
+      totalConIva += subtotalConIva;
+
       const meta = metaProductos[Number(item.id)] || null;
       const requiereTalla = !!(meta && meta.requires_size);
 
@@ -172,9 +189,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const fila = document.createElement("tr");
       fila.innerHTML = `
         <td></td>
-        <td class="status-price">$${precio.toLocaleString()}</td>
+        <td class="status-price">$${precioConIva.toLocaleString()}</td>
         <td>${cantidad}</td>
-        <td class="status-price">$${subtotal.toLocaleString()}</td>
+        <td class="status-price">$${subtotalConIva.toLocaleString()}</td>
         <td>
           <button class="btn btn-outline-primary btn-sm" onclick="eliminarDelCarrito(${index})">
             Quitar
@@ -185,7 +202,13 @@ document.addEventListener("DOMContentLoaded", function () {
       tabla.appendChild(fila);
     });
 
-    totalSpan.textContent = total.toLocaleString();
+    totalSpan.textContent = totalConIva.toLocaleString();
+
+    const ivaMonto = subtotalBase * ivaRate;
+    if (desglose) {
+      desglose.textContent = `Subtotal sin IVA: $${subtotalBase.toLocaleString()} | IVA (${Math.round(ivaRate * 100)}%): $${ivaMonto.toLocaleString()}`;
+    }
+
     actualizarContadorCarrito();
   }
 

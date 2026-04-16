@@ -130,9 +130,14 @@ function mostrarMiniCarrito() {
     return;
   }
 
+  const ivaRate = Number(window.TAURO_IVA_RATE ?? 0.19);
+
   carrito.forEach(item => {
 
-    const subtotal = item.precio * (item.cantidad ?? 1);
+    const cantidad = Number(item.cantidad ?? 1);
+    const precioBase = Number(item.precio ?? 0);
+    const precioConIva = precioBase * (1 + ivaRate);
+    const subtotal = precioConIva * cantidad;
 
     const li = document.createElement("li");
     li.classList.add("mb-2");
