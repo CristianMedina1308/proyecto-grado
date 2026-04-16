@@ -2,6 +2,8 @@
  * Módulo para manejo de Términos y Condiciones con SweetAlert
  */
 
+console.log("✅ terminos.js cargado correctamente");
+
 const TERMINOS_CONTENIDO = `
 <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 0 10px;">
   <h4>Términos y Condiciones de Tauro Store</h4>
@@ -35,18 +37,24 @@ const TERMINOS_CONTENIDO = `
 
 // Función global para mostrar términos en modal SweetAlert
 window.mostrarTerminosModal = function(checkboxId) {
+  console.log("✅ mostrarTerminosModal llamado con checkboxId:", checkboxId);
+
   const checkbox = document.getElementById(checkboxId);
+  console.log("✅ Checkbox encontrado:", checkbox);
 
   if (!checkbox) {
-    console.error("Checkbox no encontrado:", checkboxId);
+    console.error("❌ Checkbox no encontrado:", checkboxId);
     alert("Error al cargar términos y condiciones");
     return false;
   }
 
   if (!window.Swal) {
+    console.error("❌ SweetAlert no está disponible");
     alert("Ver términos y condiciones en: terminos.php");
     return false;
   }
+
+  console.log("✅ Abriendo SweetAlert...");
 
   Swal.fire({
     title: "Términos y Condiciones",
@@ -61,12 +69,18 @@ window.mostrarTerminosModal = function(checkboxId) {
     allowOutsideClick: false,
     allowEscapeKey: true
   }).then((result) => {
+    console.log("✅ SweetAlert resultado:", result);
+
     if (result.isConfirmed) {
+      console.log("✅ Usuario aceptó términos");
+
       // Marcar el checkbox
       checkbox.checked = true;
+      console.log("✅ Checkbox marcado:", checkbox.checked);
 
       // Dispara evento change para actualizar UI
       checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+      console.log("✅ Evento change disparado");
 
       // Mostrar confirmación
       Swal.fire({

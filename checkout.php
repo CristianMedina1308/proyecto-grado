@@ -880,65 +880,72 @@ document.addEventListener("DOMContentLoaded", function () {
     renderizarResumen(leerCarrito());
   });
 
-   form.addEventListener("submit", function (event) {
-     event.preventDefault();
-     
-     // Validar términos PRIMERO
-     const aceptaTerminosCheckbox = document.getElementById("acepta_terminos_checkout");
-     if (!aceptaTerminosCheckbox || !aceptaTerminosCheckbox.checked) {
-       if (window.Swal) {
-         window.Swal.fire({
-           icon: "warning",
-           title: "Términos no aceptados",
-           text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
-           confirmButtonText: "Entendido",
-           confirmButtonColor: "#b89247"
-         });
-       } else {
-         alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
-       }
-       return false;
-     }
-     
-     // Luego validar carrito y tallas
-     const carritoActual = leerCarrito();
+    form.addEventListener("submit", function (event) {
+      console.log("✅ Submit evento en checkout");
+      event.preventDefault();
+      
+      // Validar términos PRIMERO
+      const aceptaTerminosCheckbox = document.getElementById("acepta_terminos_checkout");
+      console.log("✅ Checkbox términos encontrado:", aceptaTerminosCheckbox);
+      console.log("✅ Checkbox marcado:", aceptaTerminosCheckbox?.checked);
+      
+      if (!aceptaTerminosCheckbox || !aceptaTerminosCheckbox.checked) {
+        console.log("❌ Términos NO aceptados, mostrando error");
+        if (window.Swal) {
+          window.Swal.fire({
+            icon: "warning",
+            title: "Términos no aceptados",
+            text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#b89247"
+          });
+        } else {
+          alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
+        }
+        return false;
+      }
+      
+      console.log("✅ Términos aceptados, continuando con validaciones");
+      
+      // Luego validar carrito y tallas
+      const carritoActual = leerCarrito();
 
-     if (!carritoActual.length) {
-       alert("Tu carrito está vacío.");
-       return;
-     }
+      if (!carritoActual.length) {
+        alert("Tu carrito está vacío.");
+        return;
+      }
 
-     hiddenCarrito.value = JSON.stringify(carritoActual);
+      hiddenCarrito.value = JSON.stringify(carritoActual);
 
-     const ids = [...new Set(carritoActual.map((item) => Number(item.id)).filter(Boolean))];
-     cargarMetaProductos(ids).then((metaProductos) => {
-       const faltanTallas = carritoActual.some((item) => {
-         const meta = metaProductos[Number(item.id)] || null;
-         return meta && meta.requires_size && !String(item.talla || "").trim();
-       });
+      const ids = [...new Set(carritoActual.map((item) => Number(item.id)).filter(Boolean))];
+      cargarMetaProductos(ids).then((metaProductos) => {
+        const faltanTallas = carritoActual.some((item) => {
+          const meta = metaProductos[Number(item.id)] || null;
+          return meta && meta.requires_size && !String(item.talla || "").trim();
+        });
 
-       if (faltanTallas) {
-         if (window.Swal) {
-           window.Swal.fire({
-             icon: "warning",
-             title: "Faltan tallas por seleccionar",
-             text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
-             confirmButtonText: "Entendido",
-             customClass: {
-               confirmButton: "btn btn-primary"
-             },
-             buttonsStyling: false
-           });
-         } else {
-           alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
-         }
-         return;
-       }
+        if (faltanTallas) {
+          if (window.Swal) {
+            window.Swal.fire({
+              icon: "warning",
+              title: "Faltan tallas por seleccionar",
+              text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
+              confirmButtonText: "Entendido",
+              customClass: {
+                confirmButton: "btn btn-primary"
+              },
+              buttonsStyling: false
+            });
+          } else {
+            alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
+          }
+          return;
+        }
 
-       // Si pasó todas las validaciones, enviar
-       form.submit();
-     });
-   });
+        console.log("✅ Todas las validaciones pasaron, enviando formulario");
+        form.submit();
+      });
+    });
  });
  </script>
 
