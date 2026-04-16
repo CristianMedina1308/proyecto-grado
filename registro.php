@@ -101,19 +101,31 @@ include 'header.php';
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("form");
   const checkboxTerminos = document.getElementById("acepta_terminos_registro");
   const btnRegistro = document.querySelector("button[name='registro']");
 
-  if (checkboxTerminos && btnRegistro) {
-    // Permitir que el checkbox sea clickeable
-    checkboxTerminos.addEventListener("change", function() {
-      // No hacer nada especial, solo permitir el cambio
-      console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
-    });
-
-    // Asegurar que el botón no esté deshabilitado
-    btnRegistro.disabled = false;
+  if (!form || !checkboxTerminos || !btnRegistro) {
+    return;
   }
+
+  // Prevenir envío si no está aceptado el checkbox
+  form.addEventListener("submit", function(event) {
+    if (!checkboxTerminos.checked) {
+      event.preventDefault();
+      alert("Debes aceptar los términos y condiciones para registrarte.");
+      checkboxTerminos.focus();
+      return false;
+    }
+  });
+
+  // Permitir que el checkbox sea clickeable
+  checkboxTerminos.addEventListener("change", function() {
+    console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
+  });
+
+  // Asegurar que el botón no esté deshabilitado
+  btnRegistro.disabled = false;
 });
 </script>
 

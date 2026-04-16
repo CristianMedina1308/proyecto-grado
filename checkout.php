@@ -880,63 +880,64 @@ document.addEventListener("DOMContentLoaded", function () {
     renderizarResumen(leerCarrito());
   });
 
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const carritoActual = leerCarrito();
-    const aceptaTerminos = document.getElementById("acepta_terminos_checkout");
+   form.addEventListener("submit", function (event) {
+     event.preventDefault();
+     const carritoActual = leerCarrito();
+     const aceptaTerminos = document.getElementById("acepta_terminos_checkout");
 
-    if (!carritoActual.length) {
-      alert("Tu carrito est&aacute; vac&iacute;o.");
-      return;
-    }
+     if (!carritoActual.length) {
+       alert("Tu carrito está vacío.");
+       return;
+     }
 
-    if (aceptaTerminos && !aceptaTerminos.checked) {
-      if (window.Swal) {
-        window.Swal.fire({
-          icon: "warning",
-          title: "Acepta los terminos",
-          text: "Debes aceptar los terminos y condiciones antes de finalizar la compra.",
-          confirmButtonText: "Entendido",
-          customClass: {
-            confirmButton: "btn btn-primary"
-          },
-          buttonsStyling: false
-        });
-      } else {
-        alert("Debes aceptar los terminos y condiciones antes de finalizar la compra.");
-      }
-      return;
-    }
+     // Validar que el checkbox esté marcado
+     if (!aceptaTerminos || !aceptaTerminos.checked) {
+       if (window.Swal) {
+         window.Swal.fire({
+           icon: "warning",
+           title: "Acepta los términos",
+           text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
+           confirmButtonText: "Entendido",
+           customClass: {
+             confirmButton: "btn btn-primary"
+           },
+           buttonsStyling: false
+         });
+       } else {
+         alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
+       }
+       return;
+     }
 
-    hiddenCarrito.value = JSON.stringify(carritoActual);
+     hiddenCarrito.value = JSON.stringify(carritoActual);
 
-    const ids = [...new Set(carritoActual.map((item) => Number(item.id)).filter(Boolean))];
-    cargarMetaProductos(ids).then((metaProductos) => {
-      const faltanTallas = carritoActual.some((item) => {
-        const meta = metaProductos[Number(item.id)] || null;
-        return meta && meta.requires_size && !String(item.talla || "").trim();
-      });
+     const ids = [...new Set(carritoActual.map((item) => Number(item.id)).filter(Boolean))];
+     cargarMetaProductos(ids).then((metaProductos) => {
+       const faltanTallas = carritoActual.some((item) => {
+         const meta = metaProductos[Number(item.id)] || null;
+         return meta && meta.requires_size && !String(item.talla || "").trim();
+       });
 
-      if (faltanTallas) {
-        if (window.Swal) {
-          window.Swal.fire({
-            icon: "warning",
-            title: "Faltan tallas por seleccionar",
-            text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
-            confirmButtonText: "Entendido",
-            customClass: {
-              confirmButton: "btn btn-primary"
-            },
-            buttonsStyling: false
-          });
-        } else {
-          alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
-        }
-        return;
-      }
+       if (faltanTallas) {
+         if (window.Swal) {
+           window.Swal.fire({
+             icon: "warning",
+             title: "Faltan tallas por seleccionar",
+             text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
+             confirmButtonText: "Entendido",
+             customClass: {
+               confirmButton: "btn btn-primary"
+             },
+             buttonsStyling: false
+           });
+         } else {
+           alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
+         }
+         return;
+       }
 
-      form.submit();
-    });
+       form.submit();
+     });
    });
  });
  </script>
@@ -945,8 +946,20 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function() {
   const checkboxTerminos = document.getElementById("acepta_terminos_checkout");
   const btnFinalizar = document.querySelector("button[name='finalizar_pedido']");
+  const form = document.getElementById("checkout-form");
 
-  if (checkboxTerminos && btnFinalizar) {
+  if (checkboxTerminos && btnFinalizar && form) {
+    // Validar en el evento submit del formulario
+    form.addEventListener("submit", function(event) {
+      if (!checkboxTerminos.checked) {
+        event.preventDefault();
+        event.stopPropagation();
+        alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
+        checkboxTerminos.focus();
+        return false;
+      }
+    }, true); // Usar captura (true) para asegurar que se ejecute antes
+
     // Permitir que el checkbox sea clickeable sin restricciones
     checkboxTerminos.addEventListener("change", function() {
       console.log("Términos checkout:", this.checked ? "aceptados" : "no aceptados");
