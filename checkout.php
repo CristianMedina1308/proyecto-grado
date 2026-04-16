@@ -971,17 +971,19 @@ document.addEventListener("DOMContentLoaded", function () {
       // Validar términos PRIMERO
       const aceptaTerminosCheckbox = document.getElementById("acepta_terminos_checkout");
       if (!aceptaTerminosCheckbox || !aceptaTerminosCheckbox.checked) {
-        if (window.Swal) {
-          window.Swal.fire({
+        const fire = typeof window.appSwalFire === "function"
+          ? window.appSwalFire
+          : (window.Swal && typeof window.Swal.fire === "function" ? window.Swal.fire.bind(window.Swal) : null);
+
+        if (fire) {
+          fire({
             icon: "warning",
             title: "Términos no aceptados",
             text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
-            confirmButtonText: "Entendido",
-            confirmButtonColor: "#b89247"
+            confirmButtonText: "Entendido"
           });
-        } else {
-          alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
         }
+
         return false;
       }
 
@@ -989,7 +991,19 @@ document.addEventListener("DOMContentLoaded", function () {
       const carritoActual = leerCarrito();
 
       if (!carritoActual.length) {
-        alert("Tu carrito está vacío.");
+        const fire = typeof window.appSwalFire === "function"
+          ? window.appSwalFire
+          : (window.Swal && typeof window.Swal.fire === "function" ? window.Swal.fire.bind(window.Swal) : null);
+
+        if (fire) {
+          fire({
+            icon: "info",
+            title: "Carrito vacío",
+            text: "Tu carrito está vacío.",
+            confirmButtonText: "Entendido"
+          });
+        }
+
         return;
       }
 
@@ -1003,20 +1017,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (faltanTallas) {
-          if (window.Swal) {
-            window.Swal.fire({
+          const fire = typeof window.appSwalFire === "function"
+            ? window.appSwalFire
+            : (window.Swal && typeof window.Swal.fire === "function" ? window.Swal.fire.bind(window.Swal) : null);
+
+          if (fire) {
+            fire({
               icon: "warning",
               title: "Faltan tallas por seleccionar",
               text: "Completa las tallas faltantes o quita esos productos antes de finalizar la compra.",
-              confirmButtonText: "Entendido",
-              customClass: {
-                confirmButton: "btn btn-primary"
-              },
-              buttonsStyling: false
+              confirmButtonText: "Entendido"
             });
-          } else {
-            alert("Completa las tallas faltantes o quita esos productos antes de finalizar la compra.");
           }
+
           return;
         }
 

@@ -201,7 +201,7 @@ window.TAURO_IVA_RATE = 0.19;
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- SweetAlert2 se carga en includes/ui_footer.php para toda la aplicacion -->
 <script src="assets/js/terminos.js?v=<?= $assetVersion ?>"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {

@@ -303,7 +303,14 @@ botonesTalla.forEach(btn => {
 
 btnAgregar.addEventListener("click", function() {
   if (!tallaSeleccionada) {
-    alert("Debes seleccionar una talla.");
+    if (typeof window.appSwalFire === "function") {
+      window.appSwalFire({
+        icon: "warning",
+        title: "Selecciona una talla",
+        text: "Debes seleccionar una talla.",
+        confirmButtonText: "Entendido"
+      });
+    }
     return;
   }
 

@@ -87,7 +87,9 @@ function agregarCarrito(nombre, precio, id) {
     return;
   }
 
-  alert("✅ Producto agregado al carrito");
+  if (typeof window.appSwalToast === "function") {
+    window.appSwalToast({ icon: "success", title: "Producto agregado al carrito" });
+  }
 }
 
 function toggleFavorito(id) {
@@ -100,7 +102,9 @@ function toggleFavorito(id) {
       mostrarAlertaFavorito(false);
       return;
     }
-    alert("❌ Producto eliminado de favoritos");
+    if (typeof window.appSwalToast === "function") {
+      window.appSwalToast({ icon: "info", title: "Producto eliminado de favoritos" });
+    }
   }
 }
 </script>

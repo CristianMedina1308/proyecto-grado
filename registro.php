@@ -112,16 +112,13 @@ document.addEventListener("DOMContentLoaded", function() {
         event.stopPropagation();
         event.stopImmediatePropagation();
 
-        if (window.Swal) {
-          Swal.fire({
+        if (typeof window.appSwalFire === "function") {
+          window.appSwalFire({
             icon: "warning",
             title: "Términos no aceptados",
             text: "Debes aceptar los términos y condiciones para registrarte.",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#b89247"
+            confirmButtonText: "Entendido"
           });
-        } else {
-          alert("Debes aceptar los términos y condiciones para registrarte.");
         }
 
         checkboxTerminos.focus();

@@ -7,7 +7,16 @@ function mostrarAlertaCarrito(nombre, cantidad, talla = null) {
   const detalleTalla = talla ? ` Talla ${talla}.` : "";
   const mensaje = `${nombre} ahora está en tu carrito.${detalleTalla}`;
 
-  if (window.Swal) {
+  if (typeof window.appSwalToast === "function") {
+    window.appSwalToast({
+      icon: "success",
+      title: titulo,
+      text: mensaje
+    });
+    return;
+  }
+
+  if (window.Swal && typeof window.Swal.fire === "function") {
     window.Swal.fire({
       icon: "success",
       title: titulo,
@@ -20,10 +29,7 @@ function mostrarAlertaCarrito(nombre, cantidad, talla = null) {
         popup: "app-swal-popup"
       }
     });
-    return;
   }
-
-  alert("✅ " + mensaje);
 }
 
 function mostrarAlertaFavorito(agregado = true) {
@@ -39,7 +45,16 @@ function mostrarAlertaFavorito(agregado = true) {
         text: "El producto se quitó de tu lista de deseos."
       };
 
-  if (window.Swal) {
+  if (typeof window.appSwalToast === "function") {
+    window.appSwalToast({
+      icon: config.icon,
+      title: config.title,
+      text: config.text
+    });
+    return;
+  }
+
+  if (window.Swal && typeof window.Swal.fire === "function") {
     window.Swal.fire({
       icon: config.icon,
       title: config.title,
@@ -52,16 +67,20 @@ function mostrarAlertaFavorito(agregado = true) {
         popup: "app-swal-popup"
       }
     });
-    return;
   }
-
-  alert((agregado ? "💖 " : "❌ ") + config.text);
 }
 
 function agregarCarrito(nombre, precio, id, talla = null) {
 
   if (!id || isNaN(id)) {
-    alert("Error: El producto no tiene un ID válido.");
+    if (typeof window.appSwalFire === "function") {
+      window.appSwalFire({
+        icon: "error",
+        title: "No se pudo agregar",
+        text: "Error: El producto no tiene un ID válido.",
+        confirmButtonText: "Entendido"
+      });
+    }
     return;
   }
 

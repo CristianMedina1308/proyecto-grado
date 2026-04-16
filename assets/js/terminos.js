@@ -34,52 +34,69 @@ const TERMINOS_CONTENIDO = `
 </div>
 `;
 
-// Función global para mostrar términos en modal SweetAlert
-window.mostrarTerminosModal = function(checkboxId) {
+// Función global para mostrar términos en modal SweetAlert (sin usar alert() nativo)
+window.mostrarTerminosModal = function (checkboxId) {
   const checkbox = document.getElementById(checkboxId);
 
+  const fire = typeof window.appSwalFire === "function"
+    ? window.appSwalFire
+    : (window.Swal && typeof window.Swal.fire === "function" ? window.Swal.fire.bind(window.Swal) : null);
+
   if (!checkbox) {
-    alert("Error al cargar términos y condiciones");
-    return false;
-  }
-
-  if (!window.Swal) {
-    alert("Ver términos y condiciones en: terminos.php");
-    return false;
-  }
-
-
-  Swal.fire({
-    title: "Términos y Condiciones",
-    html: TERMINOS_CONTENIDO,
-    icon: "info",
-    width: "650px",
-    confirmButtonText: "Aceptar y Marcar",
-    cancelButtonText: "Cerrar",
-    showCancelButton: true,
-    confirmButtonColor: "#b89247",
-    cancelButtonColor: "#6b6054",
-    allowOutsideClick: false,
-    allowEscapeKey: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Marcar el checkbox
-      checkbox.checked = true;
-
-      // Dispara evento change para actualizar UI
-      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-
-      // Mostrar confirmación
-      Swal.fire({
-        title: "¡Excelente!",
-        text: "Has aceptado los términos y condiciones.",
-        icon: "success",
-        confirmButtonText: "Continuar",
-        confirmButtonColor: "#b89247",
-        timer: 1200,
-        timerProgressBar: true
+    if (fire) {
+      fire({
+        icon: "error",
+        title: "No disponible",
+        text: "No fue posible cargar los términos y condiciones en este momento.",
+        confirmButtonText: "Entendido"
       });
     }
+    return false;
+  }
+
+  // Si Swal aun no esta cargado (p.ej. click muy temprano), redirigimos a la pagina.
+  if (!fire) {
+    window.location.href = "terminos.php";
+    return false;
+  }
+
+  fire({
+    icon: "info",
+    title: "Términos y Condiciones",
+    html: TERMINOS_CONTENIDO,
+    width: 650,
+    confirmButtonText: "Aceptar y marcar",
+    cancelButtonText: "Cerrar",
+    showCancelButton: true,
+    allowOutsideClick: false,
+    allowEscapeKey: true,
+    reverseButtons: true
+  }).then((result) => {
+    if (!result || !result.isConfirmed) {
+      return;
+    }
+
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+
+    const toast = typeof window.appSwalToast === "function" ? window.appSwalToast : null;
+
+    if (toast) {
+      toast({
+        icon: "success",
+        title: "Términos aceptados"
+      });
+      return;
+    }
+
+    fire({
+      icon: "success",
+      title: "¡Excelente!",
+      text: "Has aceptado los términos y condiciones.",
+      confirmButtonText: "Continuar",
+      timer: 1200,
+      showConfirmButton: true
+    });
   });
 
   return false;

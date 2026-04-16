@@ -266,7 +266,28 @@ function repetirPedido() {
   });
 
   localStorage.setItem("carrito", JSON.stringify(carrito));
-  alert("Productos agregados al carrito.");
+
+  if (typeof window.appSwalToast === "function") {
+    window.appSwalToast({ icon: "success", title: "Productos agregados al carrito" });
+    window.setTimeout(() => { window.location.href = "carrito.php"; }, 500);
+    return;
+  }
+
+  if (window.Swal && typeof window.Swal.fire === "function") {
+    window.Swal.fire({
+      icon: "success",
+      title: "Productos agregados al carrito",
+      timer: 900,
+      showConfirmButton: false,
+      toast: true,
+      position: "top-end",
+      customClass: { popup: "app-swal-popup" }
+    }).finally(() => {
+      window.location.href = "carrito.php";
+    });
+    return;
+  }
+
   window.location.href = "carrito.php";
 }
 </script>
