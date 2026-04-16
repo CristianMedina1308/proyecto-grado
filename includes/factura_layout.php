@@ -292,7 +292,7 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->SetX(14);
   $pdf->Cell(84, 5, facturaPdfText('NIT: 900123456-7'), 0, 1);
   $pdf->SetX(14);
-  $pdf->Cell(84, 5, facturaPdfText('Correo: soporte@taurostore.com'), 0, 1);
+  $pdf->Cell(84, 5, facturaPdfText('Correo: taurostore_cali@gmail.com'), 0, 1);
   $pdf->SetX(14);
   $pdf->Cell(84, 5, facturaPdfText('WhatsApp: +57 317 537 8274'), 0, 1);
 
@@ -502,7 +502,7 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->Ln(10);
   $pdf->SetTextColor($colorTextSoft[0], $colorTextSoft[1], $colorTextSoft[2]);
   $pdf->SetFont('Helvetica', '', 8.2);
-  $pdf->MultiCell(190, 4.8, facturaPdfText('Observaciones: Esta factura respalda la compra realizada en Tauro Store. Si necesitas soporte, escribe a soporte@taurostore.com con el numero de pedido o consulta tu factura publica.'));
+  $pdf->MultiCell(190, 4.8, facturaPdfText('Observaciones: Esta factura respalda la compra realizada en Tauro Store. Si necesitas soporte, escribe a taurostore_cali@gmail.com con el numero de pedido o consulta tu factura publica.'));
   $pdf->Ln(2);
   $pdf->SetDrawColor($colorAccent[0], $colorAccent[1], $colorAccent[2]);
   $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
