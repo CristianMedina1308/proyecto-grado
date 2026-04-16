@@ -83,7 +83,7 @@ include 'header.php';
            <div class="form-check mb-4">
              <input class="form-check-input terminos-check" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
              <label class="form-check-label text-soft" for="acepta_terminos_registro">
-               He leido y acepto los <a href="#" onclick="mostrarTerminosModal('acepta_terminos_registro'); return false;">terminos y condiciones</a>.
+               He leido y acepto los <a href="#" onclick="event.preventDefault(); event.stopPropagation(); mostrarTerminosModal('acepta_terminos_registro'); return false;">terminos y condiciones</a>.
              </label>
            </div>
 
@@ -102,27 +102,17 @@ include 'header.php';
 <script>
 // Validar términos al enviar
 document.addEventListener("DOMContentLoaded", function() {
-  console.log("✅ DOMContentLoaded en registro.php");
-  
   const form = document.querySelector("form");
   const checkboxTerminos = document.getElementById("acepta_terminos_registro");
-  
-  console.log("✅ Form encontrado:", form);
-  console.log("✅ Checkbox encontrado:", checkboxTerminos);
-  
+
   if (form && checkboxTerminos) {
     form.addEventListener("submit", function(event) {
-      console.log("✅ Submit evento disparado");
-      console.log("✅ Checkbox marcado:", checkboxTerminos.checked);
-      
       if (!checkboxTerminos.checked) {
-        console.log("❌ Checkbox NO está marcado, previniendo envío");
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        
+
         if (window.Swal) {
-          console.log("✅ Mostrando SweetAlert");
           Swal.fire({
             icon: "warning",
             title: "Términos no aceptados",
@@ -131,14 +121,11 @@ document.addEventListener("DOMContentLoaded", function() {
             confirmButtonColor: "#b89247"
           });
         } else {
-          console.log("⚠ SweetAlert no disponible, usando alert");
           alert("Debes aceptar los términos y condiciones para registrarte.");
         }
-        
+
         checkboxTerminos.focus();
         return false;
-      } else {
-        console.log("✅ Checkbox marcado, permitiendo envío");
       }
     }, true); // capturing phase para ejecutar antes que otros listeners
   }
