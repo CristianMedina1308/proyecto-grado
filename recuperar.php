@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $mensaje = "
         <div class='alert alert-success'>
           ✅ Código de verificación generado: <strong>$codigo</strong>.<br><br>
-          Por favor envía este código por WhatsApp a <a href='https://wa.me/573023341713' target='_blank'>+57 302 3341713</a> para confirmar tu identidad.<br><br>
+          Por favor envía este código por WhatsApp a <a href='https://wa.me/573175378274' target='_blank' rel='noopener'>+57 317 537 8274</a> para confirmar tu identidad.<br><br>
           <small>(Simulación para pruebas locales)</small>
         </div>
         <div class='text-center mt-4'>

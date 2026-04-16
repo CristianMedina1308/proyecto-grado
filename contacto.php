@@ -43,9 +43,9 @@
       <div class="card shadow mb-4">
         <div class="card-body">
           <h5 class="card-title">Información de contacto</h5>
-          <p><strong>Email:</strong> contacto@mitienda.com</p>
-          <p><strong>WhatsApp:</strong> +57 302 334 1713</p>
-          <p><strong>Ubicación:</strong> Bogotá, Colombia</p>
+          <p><strong>Email:</strong> taurostore_cali@gmail.com</p>
+          <p><strong>WhatsApp:</strong> +57 317 537 8274</p>
+          <p><strong>Ubicación:</strong> Centro Comercial Shangai, Local 03-04, Cali, Colombia</p>
         </div>
       </div>
 
@@ -54,7 +54,7 @@
           <h5 class="card-title mb-3">Síguenos</h5>
           <div class="d-flex gap-3 fs-4">
             <a href="https://www.instagram.com/" target="_blank" class="text-danger"><i class="fab fa-instagram"></i></a>
-            <a href="https://wa.me/573023341713" target="_blank" class="text-success"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://wa.me/573175378274" target="_blank" rel="noopener" class="text-success"><i class="fab fa-whatsapp"></i></a>
             <a href="https://www.facebook.com/" target="_blank" class="text-primary"><i class="fab fa-facebook"></i></a>
           </div>
         </div>
@@ -62,7 +62,7 @@
 
       <div class="ratio ratio-16x9 rounded shadow">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.767305509528!2d-74.081754!3d4.609710000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3f99c6f4c4b82f%3A0x1c915ed2c84fd96!2sBogot%C3%A1%2C%20Colombia!5e0!3m2!1ses!2sco!4v1687909608000"
+          src="https://www.google.com/maps?q=Centro%20Comercial%20Shangai%20Local%2003-04%20Cali%20Colombia&output=embed"
           width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
       </div>
     </div>

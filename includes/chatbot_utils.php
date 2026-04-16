@@ -1,4 +1,4 @@
-<?php
+ qu<?php
 
 require_once __DIR__ . '/app.php';
 require_once __DIR__ . '/pedidos_utils.php';
@@ -204,7 +204,7 @@ function tauroChatbotKnowledgeBase(): array
         [
             'keywords' => ['contacto', 'asesor', 'ayuda humana', 'telefono', 'correo', 'whatsapp'],
             'answer' => [
-                'text' => 'Si prefieres apoyo humano, puedes escribir a WhatsApp al +57 302 334 1713. Mientras tanto, tambien puedo ayudarte con dudas de producto, estilo o proceso de compra.',
+                'text' => 'Si prefieres apoyo humano, puedes escribir a WhatsApp al +57 317 537 8274. Mientras tanto, tambien puedo ayudarte con dudas de producto, estilo o proceso de compra.',
                 'suggestions' => ['WhatsApp', 'Envios', 'Metodos de pago', 'Guia de tallas']
             ]
         ]
@@ -892,7 +892,7 @@ function tauroChatbotBuildPublicOrderLines(array $pedido, string $token): array
     }
 
     $lines[] = 'Factura publica: ' . $invoiceUrl;
-    $lines[] = 'Si necesitas ayuda humana con este pedido, tambien puedes escribir a WhatsApp al +57 302 334 1713.';
+    $lines[] = 'Si necesitas ayuda humana con este pedido, tambien puedes escribir a WhatsApp al +57 317 537 8274.';
 
     return $lines;
 }
@@ -994,7 +994,7 @@ function tauroChatbotBuildInstructions(string $catalogContext = ''): string
         'Tu trabajo es ayudar con dudas sobre la tienda y tambien con preguntas mas abiertas del cliente, incluyendo estilo masculino, combinaciones, regalos, outfit para ocasiones, cuidado de prendas, materiales y preguntas generales.',
         'Si la pregunta no es sobre la tienda, igual puedes responder con normalidad y de forma util.',
         'No afirmes que puedes ver pedidos, pagos, direcciones, stock exacto, cuentas ni datos personales desde este chat publico.',
-        'Si piden datos privados o seguimiento de un pedido puntual, explica con claridad que deben usar su token publico de factura, iniciar sesion o escribir a WhatsApp al +57 302 334 1713.',
+        'Si piden datos privados o seguimiento de un pedido puntual, explica con claridad que deben usar su token publico de factura, iniciar sesion o escribir a WhatsApp al +57 317 537 8274.',
         'No inventes precios exactos, tiempos exactos, promociones activas ni disponibilidad exacta cuando no la conozcas.',
         'Si recibes contexto real de catalogo, usalo como fuente para recomendar productos y no inventes articulos adicionales.',
         'Si no tienes un dato exacto, dilo con honestidad y redirige a la pagina del producto, checkout o canal humano segun corresponda.',

@@ -22,13 +22,10 @@
 
       <div class="col-md-4 mb-4 text-center text-md-end">
         <h6 class="footer-title">Siguenos</h6>
-        <a href="https://facebook.com" target="_blank" class="me-2 social-icon" aria-label="Facebook">
-          <i class="bi bi-facebook"></i>
-        </a>
-        <a href="https://instagram.com" target="_blank" class="me-2 social-icon" aria-label="Instagram">
+        <a href="https://www.instagram.com/taurostorecali_04?igsh=MWRpbDl6MHBqc2Zhcw==" target="_blank" rel="noopener" class="me-2 social-icon" aria-label="Instagram">
           <i class="bi bi-instagram"></i>
         </a>
-        <a href="https://tiktok.com" target="_blank" class="social-icon" aria-label="TikTok">
+        <a href="https://www.tiktok.com/%40taurostore_cali?_t=ZS-8vrWkLUEeo8&_r=1&fbclid=PAb21jcARN8cVleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA81NjcwNjczNDMzNTI0MjcAAacQh_IUwLXJpPW9dAaX-Q_ifsL88dagKLdHjfnYRwINEMbPciVwW69o7pfsOg_aem_nbSOVkXhMRYJCuptXdXsqg" target="_blank" rel="noopener" class="social-icon" aria-label="TikTok">
           <i class="bi bi-tiktok"></i>
         </a>
       </div>
@@ -72,8 +69,9 @@ $appAssetPrefix = '';
 include __DIR__ . '/includes/ui_footer.php';
 ?>
 
-<script src="assets/js/script.js"></script>
-<script src="assets/js/chatbot.js"></script>
+<?php $assetVersion = isset($assetVersion) ? (string) $assetVersion : (string) time(); ?>
+<script src="assets/js/script.js?v=<?= $assetVersion ?>"></script>
+<script src="assets/js/chatbot.js?v=<?= $assetVersion ?>"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const elements = Array.from(document.querySelectorAll(".fade-in"));

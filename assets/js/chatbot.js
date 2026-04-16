@@ -193,7 +193,7 @@
     const config = {
       apiUrl: panel.dataset.apiUrl || "chatbot_api.php",
       csrfToken: panel.dataset.csrfToken || "",
-      whatsapp: panel.dataset.whatsapp || "+57 302 334 1713"
+      whatsapp: panel.dataset.whatsapp || "+57 317 537 8274"
     };
 
     const loadedState = loadMessages(config);

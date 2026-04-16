@@ -294,7 +294,7 @@ function facturaRenderizar(FPDF $pdf, array $pedido, array $productos, string $u
   $pdf->SetX(14);
   $pdf->Cell(84, 5, facturaPdfText('Correo: soporte@taurostore.com'), 0, 1);
   $pdf->SetX(14);
-  $pdf->Cell(84, 5, facturaPdfText('WhatsApp: +57 302 334 1713'), 0, 1);
+  $pdf->Cell(84, 5, facturaPdfText('WhatsApp: +57 317 537 8274'), 0, 1);
 
   $pdf->SetFont('Helvetica', 'B', 11);
   $pdf->SetTextColor($colorText[0], $colorText[1], $colorText[2]);

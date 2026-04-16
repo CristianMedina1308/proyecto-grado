@@ -150,7 +150,7 @@ window.TAURO_IVA_RATE = 0.19;
   <a href="checkout.php" class="btn btn-primary w-100">Finalizar compra</a>
 </div>
 
-<a href="https://wa.me/573023341713" class="whatsapp-float" target="_blank" title="Necesitas ayuda?">
+<a href="https://wa.me/573175378274" class="whatsapp-float" target="_blank" rel="noopener" title="Necesitas ayuda?">
   <i class="bi bi-whatsapp"></i>
 </a>
 
@@ -165,7 +165,7 @@ window.TAURO_IVA_RATE = 0.19;
          aria-label="Asistente Tauro"
          data-api-url="chatbot_api.php"
          data-csrf-token="<?= htmlspecialchars(appCsrfToken('chatbot_publico'), ENT_QUOTES, 'UTF-8') ?>"
-         data-whatsapp="+57 302 334 1713">
+         data-whatsapp="+57 317 537 8274">
   <div class="chatbot-header">
     <div>
       <div class="chatbot-eyebrow">Tauro Concierge</div>
