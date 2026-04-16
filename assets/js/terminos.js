@@ -33,18 +33,18 @@ const TERMINOS_CONTENIDO = `
 </div>
 `;
 
-// Función para mostrar términos
+// Función global para mostrar términos
 window.mostrarTerminosModal = function(checkboxId) {
   const checkbox = document.getElementById(checkboxId);
 
   if (!checkbox) {
     console.error("Checkbox no encontrado:", checkboxId);
-    return;
+    return false;
   }
 
   if (!window.Swal) {
     alert("Ver términos en: terminos.php");
-    return;
+    return false;
   }
 
   Swal.fire({
@@ -61,11 +61,9 @@ window.mostrarTerminosModal = function(checkboxId) {
     allowEscapeKey: true
   }).then((result) => {
     if (result.isConfirmed) {
-      // Marcar el checkbox
       checkbox.checked = true;
       checkbox.dispatchEvent(new Event("change", { bubbles: true }));
 
-      // Mostrar confirmación
       Swal.fire({
         title: "¡Excelente!",
         text: "Has aceptado los términos y condiciones.",
@@ -77,85 +75,79 @@ window.mostrarTerminosModal = function(checkboxId) {
       });
     }
   });
+
+  return false;
 };
 
-// Listener para los links de términos (mantener como fallback)
-document.addEventListener("DOMContentLoaded", function() {
-  // ...existing code...
+// Validación para Registro
+function validarRegistro() {
+  const formRegistro = document.querySelector("form");
+  if (!formRegistro) return;
 
-// Para Registro
+  const checkboxRegistro = document.getElementById("acepta_terminos_registro");
+  if (!checkboxRegistro) return;
+
+  formRegistro.addEventListener("submit", function(event) {
+    if (!checkboxRegistro.checked) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      if (window.Swal) {
+        Swal.fire({
+          icon: "warning",
+          title: "Términos no aceptados",
+          text: "Debes aceptar los términos y condiciones para registrarte.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#b89247"
+        });
+      } else {
+        alert("Debes aceptar los términos y condiciones para registrarte.");
+      }
+
+      checkboxRegistro.focus();
+      return false;
+    }
+  }, true);
+}
+
+// Validación para Checkout
+function validarCheckout() {
+  const formCheckout = document.getElementById("checkout-form");
+  if (!formCheckout) return;
+
+  const checkboxCheckout = document.getElementById("acepta_terminos_checkout");
+  if (!checkboxCheckout) return;
+
+  formCheckout.addEventListener("submit", function(event) {
+    if (!checkboxCheckout.checked) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      if (window.Swal) {
+        Swal.fire({
+          icon: "warning",
+          title: "Términos no aceptados",
+          text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#b89247"
+        });
+      } else {
+        alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
+      }
+
+      checkboxCheckout.focus();
+      return false;
+    }
+  }, true);
+}
+
+// Inicializar cuando carga el DOM
 document.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
-    const formRegistro = document.querySelector("form");
-    if (!formRegistro) return;
-
-    const checkboxRegistro = document.getElementById("acepta_terminos_registro");
-
-    if (checkboxRegistro) {
-      // Agregar listener en capturing phase (true)
-      formRegistro.addEventListener("submit", function(event) {
-        const checkbox = document.getElementById("acepta_terminos_registro");
-
-        if (checkbox && !checkbox.checked) {
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-
-          if (window.Swal) {
-            Swal.fire({
-              icon: "warning",
-              title: "Términos no aceptados",
-              text: "Debes aceptar los términos y condiciones para registrarte.",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#b89247"
-            });
-          } else {
-            alert("Debes aceptar los términos y condiciones para registrarte.");
-          }
-
-          checkbox.focus();
-          return false;
-        }
-      }, true); // capturing phase
-    }
-  }, 100);
-});
-
-// Para Checkout
-document.addEventListener("DOMContentLoaded", function() {
-  setTimeout(function() {
-    const formCheckout = document.getElementById("checkout-form");
-    if (!formCheckout) return;
-
-    const checkboxCheckout = document.getElementById("acepta_terminos_checkout");
-
-    if (checkboxCheckout) {
-      // Agregar listener en capturing phase (true)
-      formCheckout.addEventListener("submit", function(event) {
-        const checkbox = document.getElementById("acepta_terminos_checkout");
-
-        if (checkbox && !checkbox.checked) {
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-
-          if (window.Swal) {
-            Swal.fire({
-              icon: "warning",
-              title: "Términos no aceptados",
-              text: "Debes aceptar los términos y condiciones antes de finalizar la compra.",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#b89247"
-            });
-          } else {
-            alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
-          }
-
-          checkbox.focus();
-          return false;
-        }
-      }, true); // capturing phase
-    }
+    validarRegistro();
+    validarCheckout();
   }, 100);
 });
 
