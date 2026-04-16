@@ -83,7 +83,7 @@ include 'header.php';
            <div class="form-check mb-4">
              <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
              <label class="form-check-label text-soft" for="acepta_terminos_registro">
-               He leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a>.
+               He leido y acepto los <a href="#" class="terminos-link" data-checkbox="acepta_terminos_registro">terminos y condiciones</a>.
              </label>
            </div>
 
@@ -100,32 +100,19 @@ include 'header.php';
  </div>
 
 <script>
+// La validación se maneja en assets/js/terminos.js
 document.addEventListener("DOMContentLoaded", function() {
-  const form = document.querySelector("form");
   const checkboxTerminos = document.getElementById("acepta_terminos_registro");
   const btnRegistro = document.querySelector("button[name='registro']");
 
-  if (!form || !checkboxTerminos || !btnRegistro) {
-    return;
+  if (checkboxTerminos && btnRegistro) {
+    // Actualizar estado visual del botón según checkbox
+    checkboxTerminos.addEventListener("change", function() {
+      console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
+    });
+
+    btnRegistro.disabled = false;
   }
-
-  // Prevenir envío si no está aceptado el checkbox
-  form.addEventListener("submit", function(event) {
-    if (!checkboxTerminos.checked) {
-      event.preventDefault();
-      alert("Debes aceptar los términos y condiciones para registrarte.");
-      checkboxTerminos.focus();
-      return false;
-    }
-  });
-
-  // Permitir que el checkbox sea clickeable
-  checkboxTerminos.addEventListener("change", function() {
-    console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
-  });
-
-  // Asegurar que el botón no esté deshabilitado
-  btnRegistro.disabled = false;
 });
 </script>
 

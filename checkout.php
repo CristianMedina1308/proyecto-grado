@@ -571,7 +571,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
            <div class="form-check mt-4">
              <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
              <label class="form-check-label text-soft" for="acepta_terminos_checkout">
-               Declaro que he leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
+               Declaro que he leido y acepto los <a href="#" class="terminos-link" data-checkbox="acepta_terminos_checkout">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
              </label>
            </div>
 
@@ -943,29 +943,17 @@ document.addEventListener("DOMContentLoaded", function () {
  </script>
 
 <script>
+// La validación se maneja en assets/js/terminos.js
 document.addEventListener("DOMContentLoaded", function() {
   const checkboxTerminos = document.getElementById("acepta_terminos_checkout");
   const btnFinalizar = document.querySelector("button[name='finalizar_pedido']");
-  const form = document.getElementById("checkout-form");
 
-  if (checkboxTerminos && btnFinalizar && form) {
-    // Validar en el evento submit del formulario
-    form.addEventListener("submit", function(event) {
-      if (!checkboxTerminos.checked) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert("Debes aceptar los términos y condiciones antes de finalizar la compra.");
-        checkboxTerminos.focus();
-        return false;
-      }
-    }, true); // Usar captura (true) para asegurar que se ejecute antes
-
-    // Permitir que el checkbox sea clickeable sin restricciones
+  if (checkboxTerminos && btnFinalizar) {
+    // Actualizar estado visual según checkbox
     checkboxTerminos.addEventListener("change", function() {
       console.log("Términos checkout:", this.checked ? "aceptados" : "no aceptados");
     });
 
-    // Asegurar que el botón no esté deshabilitado
     btnFinalizar.disabled = false;
   }
 });
