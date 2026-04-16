@@ -1373,3 +1373,72 @@ body.page-loaded {
     border-radius: 18px;
   }
 }
+
+/* ========================================= */
+/* TÉRMINOS Y CONDICIONES - ACCESSIBILITY */
+/* ========================================= */
+
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.form-check-input {
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: 0.3em;
+  margin-right: 0.75em;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  border: 2px solid var(--border-soft);
+  border-radius: 0.25em;
+  transition: all 0.2s ease;
+}
+
+.form-check-input:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 8l4 4 8-8'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
+.form-check-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.form-check-input:disabled {
+  background-color: var(--bg-soft);
+  border-color: var(--border-soft);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.form-check-label {
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Asegurar que el botón de envío siempre sea clickeable */
+button[type="submit"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

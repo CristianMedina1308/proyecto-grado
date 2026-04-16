@@ -568,12 +568,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
             </div>
           </div>
 
-          <div class="form-check mt-4">
-            <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?> required>
-            <label class="form-check-label text-soft" for="acepta_terminos_checkout">
-              Declaro que he leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
-            </label>
-          </div>
+           <div class="form-check mt-4">
+             <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
+             <label class="form-check-label text-soft" for="acepta_terminos_checkout">
+               Declaro que he leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
+             </label>
+           </div>
 
           <button type="submit" name="finalizar_pedido" class="btn w-100 mt-3">Confirmar pedido</button>
         </form>
@@ -937,8 +937,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
       form.submit();
     });
-  });
+   });
+ });
+ </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const checkboxTerminos = document.getElementById("acepta_terminos_checkout");
+  const btnFinalizar = document.querySelector("button[name='finalizar_pedido']");
+
+  if (checkboxTerminos && btnFinalizar) {
+    // Permitir que el checkbox sea clickeable sin restricciones
+    checkboxTerminos.addEventListener("change", function() {
+      console.log("Términos checkout:", this.checked ? "aceptados" : "no aceptados");
+    });
+
+    // Asegurar que el botón no esté deshabilitado
+    btnFinalizar.disabled = false;
+  }
 });
 </script>
 
-<?php include 'footer.php'; ?>
+ <?php include 'footer.php'; ?>

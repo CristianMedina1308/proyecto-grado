@@ -80,12 +80,12 @@ include 'header.php';
             <input type="password" name="password" class="form-control" required>
           </div>
 
-          <div class="form-check mb-4">
-            <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?> required>
-            <label class="form-check-label text-soft" for="acepta_terminos_registro">
-              He leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a>.
-            </label>
-          </div>
+           <div class="form-check mb-4">
+             <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
+             <label class="form-check-label text-soft" for="acepta_terminos_registro">
+               He leido y acepto los <a href="terminos.php" target="_blank" rel="noopener noreferrer">terminos y condiciones</a>.
+             </label>
+           </div>
 
           <button type="submit" name="registro" class="btn btn-primary w-100">Registrarse</button>
 
@@ -93,10 +93,28 @@ include 'header.php';
             Ya tienes cuenta?
             <a href="login.php">Inicia sesion</a>
           </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+         </form>
+       </div>
+     </div>
+   </div>
+ </div>
 
-<?php include 'footer.php'; ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const checkboxTerminos = document.getElementById("acepta_terminos_registro");
+  const btnRegistro = document.querySelector("button[name='registro']");
+
+  if (checkboxTerminos && btnRegistro) {
+    // Permitir que el checkbox sea clickeable
+    checkboxTerminos.addEventListener("change", function() {
+      // No hacer nada especial, solo permitir el cambio
+      console.log("Términos:", this.checked ? "aceptados" : "no aceptados");
+    });
+
+    // Asegurar que el botón no esté deshabilitado
+    btnRegistro.disabled = false;
+  }
+});
+</script>
+
+ <?php include 'footer.php'; ?>
