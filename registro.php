@@ -81,7 +81,7 @@ include 'header.php';
           </div>
 
            <div class="form-check mb-4">
-             <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
+             <input class="form-check-input terminos-check" type="checkbox" value="1" id="acepta_terminos_registro" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
              <label class="form-check-label text-soft" for="acepta_terminos_registro">
                He leido y acepto los <a href="#" onclick="mostrarTerminosModal('acepta_terminos_registro'); return false;">terminos y condiciones</a>.
              </label>

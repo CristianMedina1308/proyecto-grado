@@ -18,8 +18,11 @@ $logoExiste = file_exists($logoPath);
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <?php include __DIR__ . '/includes/ui_head.php'; ?>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/responsive.css">
+  <?php
+    $assetVersion = (string) (file_exists(__DIR__ . '/assets/css/style.css') ? filemtime(__DIR__ . '/assets/css/style.css') : time());
+  ?>
+  <link rel="stylesheet" href="assets/css/style.css?v=<?= $assetVersion ?>">
+  <link rel="stylesheet" href="assets/css/responsive.css?v=<?= $assetVersion ?>">
 </head>
 
 <body class="page-shell">
@@ -194,7 +197,7 @@ $logoExiste = file_exists($logoPath);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="assets/js/terminos.js"></script>
+<script src="assets/js/terminos.js?v=<?= $assetVersion ?>"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btnCarrito = document.getElementById("btnMiniCarrito");

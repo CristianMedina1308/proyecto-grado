@@ -569,7 +569,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finalizar_pedido'])) 
           </div>
 
            <div class="form-check mt-4">
-             <input class="form-check-input" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
+             <input class="form-check-input terminos-check" type="checkbox" value="1" id="acepta_terminos_checkout" name="acepta_terminos" <?= $aceptaTerminos ? 'checked' : '' ?>>
              <label class="form-check-label text-soft" for="acepta_terminos_checkout">
                Declaro que he leido y acepto los <a href="#" onclick="mostrarTerminosModal('acepta_terminos_checkout'); return false;">terminos y condiciones</a> y el tratamiento de los datos necesarios para gestionar este pedido.
              </label>
@@ -881,16 +881,20 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
     form.addEventListener("submit", function (event) {
-      console.log("✅ Submit evento en checkout");
+      // Si venimos de requestSubmit, permitir el envío real (sin revalidar ni bloquear)
+      if (form.dataset.termsBypass === "true") {
+        form.dataset.termsBypass = "false";
+        return;
+      }
+
       event.preventDefault();
-      
+
+      // Guardar el botón que disparó el submit (importante para PHP: finalizar_pedido)
+      const submitter = event.submitter || null;
+
       // Validar términos PRIMERO
       const aceptaTerminosCheckbox = document.getElementById("acepta_terminos_checkout");
-      console.log("✅ Checkbox términos encontrado:", aceptaTerminosCheckbox);
-      console.log("✅ Checkbox marcado:", aceptaTerminosCheckbox?.checked);
-      
       if (!aceptaTerminosCheckbox || !aceptaTerminosCheckbox.checked) {
-        console.log("❌ Términos NO aceptados, mostrando error");
         if (window.Swal) {
           window.Swal.fire({
             icon: "warning",
@@ -904,9 +908,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return false;
       }
-      
-      console.log("✅ Términos aceptados, continuando con validaciones");
-      
+
       // Luego validar carrito y tallas
       const carritoActual = leerCarrito();
 
@@ -942,8 +944,25 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        console.log("✅ Todas las validaciones pasaron, enviando formulario");
-        form.submit();
+        // MUY IMPORTANTE:
+        // - form.submit() NO envía el nombre del botón submit (finalizar_pedido)
+        // - checkout.php depende de isset($_POST['finalizar_pedido'])
+        // Por eso usamos requestSubmit(submitter) y evitamos el modal de confirmación.
+        form.dataset.confirmed = "true";
+        form.dataset.termsBypass = "true";
+
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit(submitter || undefined);
+        } else {
+          if (submitter && submitter.name) {
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = submitter.name;
+            hidden.value = submitter.value || "1";
+            form.appendChild(hidden);
+          }
+          form.submit();
+        }
       });
     });
  });
