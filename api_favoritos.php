@@ -3,6 +3,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    require_once __DIR__ . '/includes/app.php';
     require_once __DIR__ . '/includes/conexion.php';
 
     // Obtener y validar los IDs
@@ -29,6 +30,7 @@ try {
     // Convertir resultados en array asociativo indexado por ID
     $result = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $row['imagen'] = appResolveProductImage($row, __DIR__ . '/assets/img/productos');
         $result[$row['id']] = $row;
     }
 

@@ -188,6 +188,101 @@ function appDeleteProductImageFile(string $destinationDir, ?string $filename): v
     }
 }
 
+/**
+ * Resuelve el nombre de archivo de imagen a mostrar para un producto.
+ *
+ * - Usa el nombre almacenado en BD si existe en disco.
+ * - Si no existe, intenta con la misma base pero otras extensiones comunes.
+ * - Si aun no existe, asigna una imagen de tu carpeta (camisa/saco/mochila)
+ *   segun el nombre/categoria del producto.
+ *
+ * Retorna solo el nombre del archivo (basename) dentro de $imagesDir.
+ */
+function appResolveProductImage(array $product, string $imagesDir): string
+{
+    $imagesDir = rtrim($imagesDir, DIRECTORY_SEPARATOR);
+    $fallback = 'look-default.svg';
+
+    $raw = (string) ($product['imagen'] ?? '');
+    $filename = basename(trim($raw));
+
+    if ($filename !== '' && is_file($imagesDir . DIRECTORY_SEPARATOR . $filename)) {
+        return $filename;
+    }
+
+    if ($filename !== '') {
+        $base = (string) pathinfo($filename, PATHINFO_FILENAME);
+        $exts = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'];
+
+        foreach ($exts as $ext) {
+            $candidate = $base . '.' . $ext;
+            if (is_file($imagesDir . DIRECTORY_SEPARATOR . $candidate)) {
+                return $candidate;
+            }
+        }
+    }
+
+    $nombre = strtolower(trim((string) ($product['nombre'] ?? '')));
+    $categoria = strtolower(trim((string) ($product['categoria'] ?? '')));
+
+    $group = 'saco';
+    if (str_contains($nombre, 'mochila') || str_contains($categoria, 'mochila')) {
+        $group = 'mochila';
+    } elseif (
+        str_contains($categoria, 'camis') ||
+        str_contains($nombre, 'camis') ||
+        str_contains($nombre, 'polo')
+    ) {
+        $group = 'camisa';
+    } elseif (
+        str_contains($categoria, 'chaquet') ||
+        str_contains($categoria, 'buzo') ||
+        str_contains($nombre, 'chaqueta') ||
+        str_contains($nombre, 'hoodie') ||
+        str_contains($nombre, 'saco')
+    ) {
+        $group = 'saco';
+    }
+
+    static $cache = [];
+    $cacheKey = $imagesDir . '|' . $group;
+
+    if (!array_key_exists($cacheKey, $cache)) {
+        $files = [];
+        foreach (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'] as $ext) {
+            $pattern = $imagesDir . DIRECTORY_SEPARATOR . $group . '*.' . $ext;
+            $matches = glob($pattern) ?: [];
+            foreach ($matches as $match) {
+                $files[] = $match;
+            }
+        }
+
+        $files = array_values(array_unique($files));
+        usort($files, static function (string $a, string $b): int {
+            return strnatcasecmp(basename($a), basename($b));
+        });
+
+        $cache[$cacheKey] = $files;
+    }
+
+    $files = $cache[$cacheKey];
+    if (is_array($files) && count($files) > 0) {
+        $seed = (int) ($product['id'] ?? 0);
+        if ($seed <= 0) {
+            $seed = (int) (abs(crc32($nombre . '|' . $categoria)) ?: 1);
+        }
+
+        $index = $seed % count($files);
+        return basename($files[$index]);
+    }
+
+    if (is_file($imagesDir . DIRECTORY_SEPARATOR . $fallback)) {
+        return $fallback;
+    }
+
+    return $filename !== '' ? $filename : $fallback;
+}
+
 function appRedirect(string $url): void
 {
     header('Location: ' . $url);

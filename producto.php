@@ -3,6 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
+require_once __DIR__ . '/includes/app.php';
+
 include 'includes/conexion.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -88,10 +90,12 @@ $imagenes = $conn->prepare("SELECT archivo FROM producto_imagenes WHERE producto
 $imagenes->execute([$id]);
 $galeria = $imagenes->fetchAll(PDO::FETCH_ASSOC);
 
-$imagenPrincipal = trim((string) ($producto['imagen'] ?? $galeria[0]['archivo'] ?? ''));
-if ($imagenPrincipal === '' || !file_exists(__DIR__ . '/assets/img/productos/' . $imagenPrincipal)) {
-  $imagenPrincipal = 'look-default.svg';
+$imagenPrincipal = trim((string) ($producto['imagen'] ?? ''));
+if ($imagenPrincipal === '' && !empty($galeria[0]['archivo'])) {
+  $imagenPrincipal = (string) $galeria[0]['archivo'];
 }
+$producto['imagen'] = $imagenPrincipal;
+$imagenPrincipal = appResolveProductImage($producto, __DIR__ . '/assets/img/productos');
 
 $resumenResenasStmt = $conn->prepare("
   SELECT COUNT(*) AS total, AVG(puntuacion) AS promedio
@@ -123,7 +127,8 @@ include 'header.php';
              src="assets/img/productos/<?= htmlspecialchars($imagenPrincipal) ?>"
              class="img-fluid rounded"
              style="max-height:520px; width:100%; object-fit:cover; transition:transform .25s ease;"
-             alt="<?= htmlspecialchars((string) $producto['nombre']) ?>">
+             alt="<?= htmlspecialchars((string) $producto['nombre']) ?>"
+             onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
       </div>
 
       <?php if (count($galeria) > 1): ?>
@@ -131,16 +136,25 @@ include 'header.php';
           <?php foreach ($galeria as $img): ?>
             <?php
               $archivo = trim((string) ($img['archivo'] ?? ''));
-              if ($archivo === '' || !file_exists(__DIR__ . '/assets/img/productos/' . $archivo)) {
+              if ($archivo === '') {
                 continue;
               }
+
+              $tmpProduct = [
+                'id' => $producto['id'] ?? 0,
+                'nombre' => $producto['nombre'] ?? '',
+                'categoria' => $producto['categoria'] ?? '',
+                'imagen' => $archivo
+              ];
+              $archivo = appResolveProductImage($tmpProduct, __DIR__ . '/assets/img/productos');
             ?>
             <button type="button"
                     class="border-0 bg-transparent p-0"
                     onclick="cambiarImagen('assets/img/productos/<?= htmlspecialchars($archivo) ?>')">
               <img src="assets/img/productos/<?= htmlspecialchars($archivo) ?>"
                    style="width:68px; height:68px; object-fit:cover; border-radius:10px; border:1px solid #ccd9e3;"
-                   alt="Miniatura producto">
+                    alt="Miniatura producto"
+                    onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
             </button>
           <?php endforeach; ?>
         </div>

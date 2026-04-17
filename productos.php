@@ -68,10 +68,7 @@ $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categ
     <?php if ($productos): ?>
       <?php foreach ($productos as $p): ?>
         <?php
-          $imagenProducto = trim((string) ($p['imagen'] ?? ''));
-          if ($imagenProducto === '' || !file_exists(__DIR__ . '/assets/img/productos/' . $imagenProducto)) {
-            $imagenProducto = 'look-default.svg';
-          }
+          $imagenProducto = appResolveProductImage($p, __DIR__ . '/assets/img/productos');
         ?>
         <div class="col">
           <article class="producto-card">
@@ -84,7 +81,9 @@ $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categ
             </button>
 
             <div class="producto-imagen-wrapper">
-              <img src="assets/img/productos/<?= htmlspecialchars($imagenProducto) ?>" alt="<?= htmlspecialchars($p['nombre']) ?>">
+              <img src="assets/img/productos/<?= htmlspecialchars($imagenProducto) ?>"
+                   alt="<?= htmlspecialchars($p['nombre']) ?>"
+                   onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
               <div class="producto-overlay">
                 <a href="producto.php?id=<?= (int) $p['id'] ?>" class="btn-overlay">Comprar ahora</a>
               </div>

@@ -186,9 +186,8 @@ $tallasAsignadasIds = array_map(static fn(array $item): int => (int) $item['tall
 $tallasDisponibles = array_values(array_filter($todasTallas, static fn(array $talla): bool => !in_array((int) $talla['id'], $tallasAsignadasIds, true)));
 
 $imagenVista = trim((string) ($producto['imagen'] ?? ''));
-if ($imagenVista === '' || !file_exists(__DIR__ . '/../assets/img/productos/' . $imagenVista)) {
-    $imagenVista = 'look-default.svg';
-}
+$producto['imagen'] = $imagenVista;
+$imagenVista = appResolveProductImage($producto, __DIR__ . '/../assets/img/productos');
 
 $totalStock = 0;
 $tallasAgotadas = 0;
@@ -274,7 +273,10 @@ function tallaInventarioEstado(int $stock): array
           <span class="admin-pill"><i class="bi bi-upc-scan"></i> <?= htmlspecialchars((string) ($productForm['sku'] !== '' ? $productForm['sku'] : 'Sin SKU')) ?></span>
         </div>
         <div class="admin-product-preview mb-4">
-          <img src="../assets/img/productos/<?= htmlspecialchars($imagenVista) ?>" alt="<?= htmlspecialchars((string) ($producto['nombre'] ?? 'Producto')) ?>" class="admin-preview-image">
+          <img src="../assets/img/productos/<?= htmlspecialchars($imagenVista) ?>"
+               alt="<?= htmlspecialchars((string) ($producto['nombre'] ?? 'Producto')) ?>"
+               class="admin-preview-image"
+               onerror="this.onerror=null;this.src='../assets/img/productos/look-default.svg';">
         </div>
         <div class="admin-list">
           <div class="admin-list-item">

@@ -105,16 +105,15 @@ $heroBrandImage = file_exists(__DIR__ . '/assets/img/hero-tauro-campaign.svg')
       <?php if ($destacados): ?>
         <?php foreach ($destacados as $p): ?>
           <?php
-            $imagenProducto = trim((string) ($p['imagen'] ?? ''));
-            if ($imagenProducto === '' || !file_exists(__DIR__ . '/assets/img/productos/' . $imagenProducto)) {
-              $imagenProducto = 'look-default.svg';
-            }
+            $imagenProducto = appResolveProductImage($p, __DIR__ . '/assets/img/productos');
           ?>
           <div class="col">
             <a href="producto.php?id=<?= (int) $p['id'] ?>" class="text-decoration-none">
               <article class="producto-card">
                 <div class="producto-imagen-wrapper">
-                  <img src="assets/img/productos/<?= htmlspecialchars($imagenProducto) ?>" alt="<?= htmlspecialchars($p['nombre']) ?>">
+                  <img src="assets/img/productos/<?= htmlspecialchars($imagenProducto) ?>"
+                       alt="<?= htmlspecialchars($p['nombre']) ?>"
+                       onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
                 </div>
                 <div class="producto-info">
                   <h6 class="producto-nombre mb-1"><?= htmlspecialchars($p['nombre']) ?></h6>

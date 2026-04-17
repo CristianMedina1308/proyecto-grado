@@ -1,11 +1,37 @@
 <?php
 
-// Detecta si estás en Railway (variables reales)
-$host = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-$db   = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'tiendaropa';
-$user = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
-$pass = getenv('MYSQLPASSWORD') ?: getenv('DB_PASS') ?: '';
-$port = getenv('MYSQLPORT') ?: 3306;
+// Conexion compatible con XAMPP/Railway.
+// Importante: no hardcodear credenciales en codigo. En Railway configura variables de entorno.
+
+$host = '127.0.0.1';
+$db = 'tiendaropa';
+$user = 'root';
+$pass = '';
+$port = 3306;
+
+// 1) Si existe una URL estilo mysql://user:pass@host:port/db, la usamos.
+$url = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: '';
+if (is_string($url) && trim($url) !== '') {
+    $parts = parse_url($url);
+    if (is_array($parts) && !empty($parts['host'])) {
+        $host = (string) ($parts['host'] ?? $host);
+        $port = (int) ($parts['port'] ?? $port);
+        $user = (string) ($parts['user'] ?? $user);
+        $pass = (string) ($parts['pass'] ?? $pass);
+        $path = (string) ($parts['path'] ?? '');
+        $path = ltrim($path, '/');
+        if ($path !== '') {
+            $db = $path;
+        }
+    }
+}
+
+// 2) Variables tipicas de Railway/servicios (con o sin guiones bajos)
+$host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: $host;
+$db   = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: $db;
+$user = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: $user;
+$pass = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: $pass;
+$port = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: $port);
 
 try {
     $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";

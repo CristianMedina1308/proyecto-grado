@@ -479,10 +479,7 @@ function inventarioEstadoMeta(int $stockTotal): array
           <?php if ($productos): ?>
             <?php foreach ($productos as $productoItem): ?>
               <?php
-                $img = trim((string) ($productoItem['imagen'] ?? ''));
-                if ($img === '' || !file_exists(__DIR__ . '/../assets/img/productos/' . $img)) {
-                    $img = 'look-default.svg';
-                }
+                $img = appResolveProductImage($productoItem, __DIR__ . '/../assets/img/productos');
 
                 $stockTotal = (int) ($productoItem['stock_total'] ?? 0);
                 $tallasActivas = (int) ($productoItem['tallas_activas'] ?? 0);
@@ -493,7 +490,10 @@ function inventarioEstadoMeta(int $stockTotal): array
               <tr>
                 <td><?= (int) $productoItem['id'] ?></td>
                 <td>
-                  <img src="../assets/img/productos/<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars((string) $productoItem['nombre']) ?>" class="admin-thumb">
+                  <img src="../assets/img/productos/<?= htmlspecialchars($img) ?>"
+                       alt="<?= htmlspecialchars((string) $productoItem['nombre']) ?>"
+                       class="admin-thumb"
+                       onerror="this.onerror=null;this.src='../assets/img/productos/look-default.svg';">
                 </td>
                 <td>
                   <div class="fw-bold"><?= htmlspecialchars((string) $productoItem['nombre']) ?></div>

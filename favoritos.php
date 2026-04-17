@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         col.className = "col-12 col-sm-6 col-md-4 col-lg-3";
         col.innerHTML = `
           <div class="card h-100 shadow-sm">
-            <img src="assets/img/productos/${p.imagen}" class="card-img-top" alt="${p.nombre}">
+            <img src="assets/img/productos/${p.imagen}" class="card-img-top" alt="${p.nombre}" onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
             <div class="card-body text-center d-flex flex-column">
               <h5 class="card-title">${p.nombre}</h5>
               <p class="text-danger fw-bold mb-3">$${(Number(p.precio) * (1 + Number(window.TAURO_IVA_RATE ?? 0.19))).toLocaleString()} <small class='text-muted'>(IVA incl.)</small></p>
