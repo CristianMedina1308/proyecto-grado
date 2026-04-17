@@ -7,6 +7,7 @@ appEnsureRecoveryPinSchema($conn);
 
 $token = trim((string) ($_GET['token'] ?? ($_POST['token'] ?? '')));
 $mensaje = '';
+$mensajeTipo = 'info';
 $mostrarFormulario = false;
 $requirePin = false;
 
@@ -37,13 +38,16 @@ $fetchUserByToken = static function (PDO $conn, string $token, bool $pinDisponib
 };
 
 if ($token === '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
-  $mensaje = "❗ Este enlace no es válido. Solicita uno nuevo desde <a href='recuperar.php'>recuperar contraseña</a>.";
+  $mensajeTipo = 'warning';
+  $mensaje = "Este enlace no es válido. Solicita uno nuevo desde <a href='recuperar.php'>recuperar contraseña</a>.";
 } elseif ($token !== '' && preg_match('/^[a-f0-9]{64}$/i', $token) !== 1) {
-  $mensaje = "❌ Token inválido.";
+  $mensajeTipo = 'danger';
+  $mensaje = 'Token inválido.';
 } else {
   $usuario = $fetchUserByToken($conn, $token, $pinDisponible, $hasAttemptsCol, $hasLockedCol);
   if ($token !== '' && !$usuario) {
-    $mensaje = "❌ Token inválido o expirado.";
+    $mensajeTipo = 'danger';
+    $mensaje = 'Token inválido o expirado.';
   } else {
     $requirePin = $pinDisponible && trim((string) ($usuario['recovery_pin_hash'] ?? '')) !== '';
     $mostrarFormulario = $token !== '';
@@ -52,6 +56,7 @@ if ($token === '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!appValidarCsrf('restablecer_form', $_POST['csrf_token'] ?? null)) {
+    $mensajeTipo = 'warning';
     $mensaje = 'La sesion del formulario expiro. Intenta nuevamente.';
   } else {
     $nueva = (string) ($_POST['nueva'] ?? '');
@@ -59,10 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pinIngresado = trim((string) ($_POST['pin'] ?? ''));
 
     if ($nueva !== $confirmar || strlen($nueva) < 6) {
+      $mensajeTipo = 'warning';
       $mensaje = '❗ Las contraseñas no coinciden o son demasiado cortas.';
     } else {
       $usuario = $fetchUserByToken($conn, $token, $pinDisponible, $hasAttemptsCol, $hasLockedCol);
       if (!$usuario) {
+        $mensajeTipo = 'danger';
         $mensaje = '❌ Token inválido o expirado.';
       } else {
         $requirePin = $pinDisponible && trim((string) ($usuario['recovery_pin_hash'] ?? '')) !== '';
@@ -70,8 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($requirePin) {
           $lockedUntil = trim((string) ($usuario['pin_locked_until'] ?? ''));
           if ($lockedUntil !== '' && strtotime($lockedUntil) !== false && strtotime($lockedUntil) > time()) {
+            $mensajeTipo = 'warning';
             $mensaje = '⚠️ Demasiados intentos. Espera un momento e intentalo de nuevo.';
           } elseif (!appValidateRecoveryPin($pinIngresado)) {
+            $mensajeTipo = 'warning';
             $mensaje = '⚠️ Ingresa tu PIN de 4 digitos.';
           } elseif (!appVerifyRecoveryPin($pinIngresado, (string) $usuario['recovery_pin_hash'])) {
             if ($hasAttemptsCol || $hasLockedCol) {
@@ -102,7 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               }
             }
 
-            $mensaje = '❌ PIN incorrecto.';
+            $mensajeTipo = 'danger';
+            $mensaje = 'PIN incorrecto.';
           }
         }
 
@@ -116,7 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               ->execute([$hash, (int) $usuario['id']]);
           }
 
-          $mensaje = "✅ Contraseña actualizada. <a href='login.php'>Inicia sesión</a>";
+          $mensajeTipo = 'success';
+          $mensaje = "Contraseña actualizada. <a href='login.php'>Inicia sesión</a>.";
           $mostrarFormulario = false;
         }
       }
@@ -128,33 +139,55 @@ include 'header.php';
 ?>
 
 <div class="container py-5">
-  <h1 class="text-center mb-4">🔒 Restablecer Contraseña</h1>
-  <?php if ($mensaje): ?>
-    <div class="alert alert-info"><?= $mensaje ?></div>
-  <?php endif; ?>
-  <?php if ($mostrarFormulario && $token): ?>
-    <form method="post" class="mx-auto" style="max-width: 400px;">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(appCsrfToken('restablecer_form')) ?>">
-      <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card p-5">
+        <h2 class="text-center mb-4 checkout-title">Restablecer contraseña</h2>
 
-      <?php if ($requirePin): ?>
-        <div class="mb-3">
-          <label class="form-label">PIN de recuperacion</label>
-          <input type="password" name="pin" class="form-control" required inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4 digitos">
-        </div>
-      <?php endif; ?>
+        <?php if ($mensaje): ?>
+          <div class="alert alert-<?= htmlspecialchars($mensajeTipo) ?>"><?= $mensaje ?></div>
+        <?php endif; ?>
 
-      <div class="mb-3">
-        <label class="form-label">Nueva contraseña</label>
-        <input type="password" name="nueva" class="form-control" required>
+        <?php if ($mostrarFormulario && $token): ?>
+          <form method="post" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(appCsrfToken('restablecer_form')) ?>">
+            <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+
+            <?php if ($requirePin): ?>
+              <div class="mb-4">
+                <label class="form-label">PIN de recuperación</label>
+                <input type="password"
+                       name="pin"
+                       class="form-control"
+                       required
+                       inputmode="numeric"
+                       pattern="\d{4}"
+                       maxlength="4"
+                       placeholder="4 dígitos">
+              </div>
+            <?php endif; ?>
+
+            <div class="mb-4">
+              <label class="form-label">Nueva contraseña</label>
+              <input type="password" name="nueva" class="form-control" required>
+              <div class="form-text text-soft">Mínimo 6 caracteres.</div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Confirmar contraseña</label>
+              <input type="password" name="confirmar" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Cambiar contraseña</button>
+
+            <div class="text-center mt-4 text-soft">
+              <a href="login.php">Volver a iniciar sesión</a>
+            </div>
+          </form>
+        <?php endif; ?>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Confirmar contraseña</label>
-        <input type="password" name="confirmar" class="form-control" required>
-      </div>
-      <button type="submit" class="btn btn-success w-100">Cambiar contraseña</button>
-    </form>
-  <?php endif; ?>
+    </div>
+  </div>
 </div>
 
 <?php include 'footer.php'; ?>
