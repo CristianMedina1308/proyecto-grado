@@ -83,7 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if (isset($_POST['actualizar_pin'])) {
     if (!$pinDisponible) {
-      $error = 'El PIN de recuperacion aun no esta habilitado en la base de datos.';
+      $dbActual = appDbCurrentDatabase($conn);
+      $error = 'El PIN de recuperacion aun no esta habilitado en la base de datos.'
+        . ($dbActual !== '' ? (' (BD actual: ' . $dbActual . ')') : '')
+        . ' Aplica la migracion y vuelve a intentar.';
     } elseif (!appValidarCsrf('perfil_pin_form', $_POST['csrf_token'] ?? null)) {
       $error = 'La sesion del formulario expiro. Intenta nuevamente.';
     } else {

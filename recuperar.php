@@ -11,7 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!appValidarCsrf('recuperar_form', $_POST['csrf_token'] ?? null)) {
     $mensaje = "<div class='alert alert-warning'>⚠️ La sesion del formulario expiro. Intenta nuevamente.</div>";
   } elseif (!$pinDisponible) {
-    $mensaje = "<div class='alert alert-warning'>⚠️ El PIN de recuperacion aun no esta habilitado en la base de datos.</div>";
+    $dbActual = appDbCurrentDatabase($conn);
+    $mensaje = "<div class='alert alert-warning'>⚠️ El PIN de recuperacion aun no esta habilitado en la base de datos" . ($dbActual !== '' ? " (BD actual: " . htmlspecialchars($dbActual) . ")" : "") . ". Aplica la migracion en esa misma base.</div>";
   } else {
     $identificador = trim((string) ($_POST['identificador'] ?? ''));
     $pin = trim((string) ($_POST['pin'] ?? ''));

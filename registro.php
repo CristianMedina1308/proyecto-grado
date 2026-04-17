@@ -25,7 +25,10 @@ if (isset($_POST['registro'])) {
     } elseif (!preg_match('/^[0-9+ ]{7,20}$/', $telefono)) {
       $mensajeError = 'Ingresa un telefono valido.';
     } elseif (!appDbHasColumn($conn, 'usuarios', 'recovery_pin_hash')) {
-      $mensajeError = 'El PIN de recuperacion aun no esta habilitado en la base de datos. Aplica la migracion correspondiente y vuelve a intentar.';
+      $dbActual = appDbCurrentDatabase($conn);
+      $mensajeError = 'El PIN de recuperacion aun no esta habilitado en la base de datos.'
+        . ($dbActual !== '' ? (' (BD actual: ' . $dbActual . ')') : '')
+        . ' Aplica la migracion en ESA misma base y vuelve a intentar.';
     } elseif (!appValidateRecoveryPin($pinRecuperacion)) {
       $mensajeError = 'El PIN de recuperacion debe tener exactamente 4 digitos.';
     } elseif ($pinRecuperacion !== $pinRecuperacionConfirm) {

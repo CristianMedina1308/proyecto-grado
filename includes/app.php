@@ -693,12 +693,37 @@ function appDbHasColumn(PDO $conn, string $table, string $column): bool
         $safeTable = str_replace('`', '', $table);
         $stmt = $conn->prepare('SHOW COLUMNS FROM `' . $safeTable . '` LIKE ?');
         $stmt->execute([$column]);
-        $cache[$key] = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+        $exists = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+
+        // En algunos hosts/usuarios, SHOW COLUMNS puede estar restringido.
+        // Si no encontramos nada, intentamos con INFORMATION_SCHEMA.
+        if (!$exists) {
+            $db = appDbCurrentDatabase($conn);
+            if ($db !== '') {
+                $chk = $conn->prepare(
+                    'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1'
+                );
+                $chk->execute([$db, $safeTable, $column]);
+                $exists = $chk->fetchColumn() !== false;
+            }
+        }
+
+        $cache[$key] = $exists;
     } catch (Throwable $e) {
         $cache[$key] = false;
     }
 
     return (bool) $cache[$key];
+}
+
+function appDbCurrentDatabase(PDO $conn): string
+{
+    try {
+        $db = $conn->query('SELECT DATABASE()')->fetchColumn();
+        return is_string($db) ? $db : '';
+    } catch (Throwable $e) {
+        return '';
+    }
 }
 
 function appValidateRecoveryPin(string $pin): bool
