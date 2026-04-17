@@ -7,6 +7,24 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['usuario']['rol'] ?? '') !== 'adm
 
 require_once '../includes/conexion.php';
 
+// Sembrar catalogo desde imagenes (camisa/saco/mochila) para que aparezcan todas.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seed_catalogo_imagenes'])) {
+    if (!appValidarCsrf('admin_productos_seed_images', $_POST['csrf_token'] ?? null)) {
+        appFlash('danger', 'La sesion del formulario expiro. Intenta nuevamente.', 'No se pudo generar');
+        appRedirect('productos.php');
+    }
+
+    try {
+        $resumen = appSeedCatalogFromImages($conn, __DIR__ . '/../assets/img/productos');
+        $msg = 'Listo: ' . (int) ($resumen['updated'] ?? 0) . ' productos actualizados y ' . (int) ($resumen['inserted'] ?? 0) . ' productos creados (imagenes detectadas: ' . (int) ($resumen['totalImages'] ?? 0) . ').';
+        appFlash('success', $msg, 'Catalogo generado');
+    } catch (Throwable $e) {
+        appFlash('danger', 'No se pudo generar el catalogo desde imagenes.', 'Error');
+    }
+
+    appRedirect('productos.php');
+}
+
 $error = '';
 $formData = [
     'nombre' => trim((string) ($_POST['nombre'] ?? '')),
@@ -299,11 +317,23 @@ function inventarioEstadoMeta(int $stockTotal): array
             <h2 class="admin-card-title">Alertas inmediatas</h2>
             <p class="admin-meta mb-0">Productos que requieren accion rapida para no afectar conversion.</p>
           </div>
-          <span class="admin-pill"><i class="bi bi-exclamation-triangle"></i> Riesgo</span>
+          <div class="d-flex flex-column align-items-end gap-2">
+            <form method="post" class="d-inline">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(appCsrfToken('admin_productos_seed_images')) ?>">
+              <button type="submit" name="seed_catalogo_imagenes" value="1" class="btn btn-admin-soft">
+                <i class="bi bi-images me-2"></i>Generar productos desde imagenes
+              </button>
+            </form>
+            <div class="inventory-stack">
+              <span class="admin-stat-badge is-danger">Sin stock: <?= $sinStock ?></span>
+              <span class="admin-stat-badge is-warning">Criticos: <?= $stockCritico ?></span>
+              <span class="admin-stat-badge is-ok">Saludables: <?= $saludables ?></span>
+            </div>
+          </div>
         </div>
 
         <?php if ($productosCriticos): ?>
-          <div class="admin-list">
+          <div class="admin-list mt-3">
             <?php foreach ($productosCriticos as $critico): ?>
               <div class="admin-list-item">
                 <div>
@@ -322,7 +352,7 @@ function inventarioEstadoMeta(int $stockTotal): array
             <?php endforeach; ?>
           </div>
         <?php else: ?>
-          <div class="admin-empty">No hay productos en alerta por ahora. El inventario se ve estable.</div>
+          <div class="admin-empty mt-3">No hay productos en alerta por ahora. El inventario se ve estable.</div>
         <?php endif; ?>
       </div>
     </div>

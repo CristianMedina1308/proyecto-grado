@@ -283,6 +283,168 @@ function appResolveProductImage(array $product, string $imagesDir): string
     return $filename !== '' ? $filename : $fallback;
 }
 
+/**
+ * Crea/actualiza productos a partir de imagenes locales (camisa*.png, saco*.png, mochila*.png).
+ *
+ * Objetivo: que el catalogo tenga un producto por imagen y que todos apunten a archivos existentes.
+ * - Si un producto existente tiene una imagen que no existe, se le asigna una disponible.
+ * - Luego, por cada imagen restante sin producto, se crea un producto nuevo con precio y datos base.
+ *
+ * Retorna un resumen con los contadores de actualizados/creados.
+ */
+function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
+{
+    $imagesDir = rtrim($imagesDir, DIRECTORY_SEPARATOR);
+    if (!is_dir($imagesDir)) {
+        return ['updated' => 0, 'inserted' => 0, 'totalImages' => 0];
+    }
+
+    $allowedExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+    $regex = '/^(camisa|saco|mochila)(\d+)\.(' . implode('|', $allowedExt) . ')$/i';
+    $files = [];
+
+    foreach ($allowedExt as $ext) {
+        $matches = glob($imagesDir . DIRECTORY_SEPARATOR . '*.' . $ext) ?: [];
+        foreach ($matches as $path) {
+            $name = basename($path);
+            if (preg_match($regex, $name)) {
+                $files[] = $name;
+            }
+        }
+    }
+
+    $files = array_values(array_unique($files));
+    usort($files, 'strnatcasecmp');
+
+    if (!$files) {
+        return ['updated' => 0, 'inserted' => 0, 'totalImages' => 0];
+    }
+
+    $byGroup = ['camisa' => [], 'saco' => [], 'mochila' => []];
+    foreach ($files as $file) {
+        if (preg_match($regex, $file, $m)) {
+            $group = strtolower($m[1]);
+            $byGroup[$group][] = $file;
+        }
+    }
+
+    $productos = $conn->query('SELECT id, nombre, categoria, imagen FROM productos ORDER BY id ASC')->fetchAll(PDO::FETCH_ASSOC);
+
+    // Marca como usadas las imagenes ya asignadas y existentes.
+    $used = [];
+    foreach ($productos as $p) {
+        $img = basename(trim((string) ($p['imagen'] ?? '')));
+        if ($img !== '' && in_array($img, $files, true) && is_file($imagesDir . DIRECTORY_SEPARATOR . $img)) {
+            $used[$img] = true;
+        }
+    }
+
+    $pool = ['camisa' => [], 'saco' => [], 'mochila' => []];
+    foreach ($byGroup as $group => $list) {
+        foreach ($list as $img) {
+            if (!isset($used[$img])) {
+                $pool[$group][] = $img;
+            }
+        }
+    }
+
+    $pickFromAnyPool = static function (array &$pool): ?string {
+        foreach (['camisa', 'saco', 'mochila'] as $g) {
+            if (!empty($pool[$g])) {
+                return array_shift($pool[$g]);
+            }
+        }
+        return null;
+    };
+
+    $updated = 0;
+    $inserted = 0;
+
+    $updStmt = $conn->prepare('UPDATE productos SET imagen = ? WHERE id = ?');
+    $galCountStmt = $conn->prepare('SELECT COUNT(*) FROM producto_imagenes WHERE producto_id = ?');
+    $galInsStmt = $conn->prepare('INSERT INTO producto_imagenes (producto_id, archivo) VALUES (?, ?)');
+
+    // 1) Actualiza productos existentes con imagen rota.
+    foreach ($productos as $p) {
+        $img = basename(trim((string) ($p['imagen'] ?? '')));
+        if ($img !== '' && is_file($imagesDir . DIRECTORY_SEPARATOR . $img)) {
+            continue;
+        }
+
+        $group = 'saco';
+        $nombre = strtolower(trim((string) ($p['nombre'] ?? '')));
+        $categoria = strtolower(trim((string) ($p['categoria'] ?? '')));
+        if (str_contains($nombre, 'mochila') || str_contains($categoria, 'mochila')) {
+            $group = 'mochila';
+        } elseif (str_contains($categoria, 'camis') || str_contains($nombre, 'camis') || str_contains($nombre, 'polo')) {
+            $group = 'camisa';
+        } elseif (str_contains($categoria, 'chaquet') || str_contains($categoria, 'buzo') || str_contains($nombre, 'chaqueta') || str_contains($nombre, 'hoodie') || str_contains($nombre, 'saco')) {
+            $group = 'saco';
+        }
+
+        $picked = null;
+        if (!empty($pool[$group])) {
+            $picked = array_shift($pool[$group]);
+        } else {
+            $picked = $pickFromAnyPool($pool);
+        }
+
+        if ($picked === null) {
+            break;
+        }
+
+        $updStmt->execute([$picked, (int) $p['id']]);
+        $updated += $updStmt->rowCount() > 0 ? 1 : 0;
+
+        // Asegura al menos 1 imagen en galeria.
+        $galCountStmt->execute([(int) $p['id']]);
+        if ((int) $galCountStmt->fetchColumn() === 0) {
+            $galInsStmt->execute([(int) $p['id'], $picked]);
+        }
+    }
+
+    // 2) Inserta productos nuevos para las imagenes restantes.
+    $insStmt = $conn->prepare('INSERT INTO productos (nombre, sku, descripcion, precio, categoria, marca, color, material, fit, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $defaultPrice = 100000.00;
+    $defaultMarca = 'Tauro';
+    $defaultFit = 'Regular';
+
+    foreach (['camisa', 'saco', 'mochila'] as $group) {
+        while (!empty($pool[$group])) {
+            $img = array_shift($pool[$group]);
+            if (!$img) {
+                continue;
+            }
+
+            preg_match($regex, $img, $m);
+            $num = isset($m[2]) ? (int) $m[2] : 0;
+            $nombre = ucfirst($group) . ($num > 0 ? ' ' . $num : '');
+            $categoria = $group === 'camisa' ? 'Camisas' : ($group === 'mochila' ? 'Mochilas' : 'Sacos');
+
+            $insStmt->execute([
+                $nombre,
+                null,
+                null,
+                $defaultPrice,
+                $categoria,
+                $defaultMarca,
+                null,
+                null,
+                $defaultFit,
+                $img
+            ]);
+
+            $newId = (int) $conn->lastInsertId();
+            if ($newId > 0) {
+                $galInsStmt->execute([$newId, $img]);
+                $inserted++;
+            }
+        }
+    }
+
+    return ['updated' => $updated, 'inserted' => $inserted, 'totalImages' => count($files)];
+}
+
 function appRedirect(string $url): void
 {
     header('Location: ' . $url);
