@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Tauro Store</title>
+  <desc id="desc">Logo monograma TS para Tauro Store.</desc>
+  <defs>
+    <linearGradient id="tauroGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d28d"/>
+      <stop offset="1" stop-color="#8a6521"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="48" cy="48" r="40" fill="none" stroke="url(#tauroGradient)" stroke-width="6"/>
+  <circle cx="48" cy="48" r="33" fill="rgba(255,248,236,0.06)"/>
+
+  <text x="48" y="57"
+        text-anchor="middle"
+        font-family="Manrope, Arial, sans-serif"
+        font-size="30"
+        font-weight="800"
+        letter-spacing="1"
+        fill="#f7e0aa">TS</text>
+</svg>
+

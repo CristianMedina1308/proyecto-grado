@@ -31,11 +31,20 @@ if (count($destacados) < 4) {
 $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> ''")->fetchAll(PDO::FETCH_COLUMN);
 $totalProductos = (int) ($conn->query("SELECT COUNT(*) FROM productos")->fetchColumn() ?: 0);
 
-$heroBrandImage = file_exists(__DIR__ . '/assets/img/hero-tauro-campaign.svg')
-  ? 'assets/img/hero-tauro-campaign.svg'
-  : (file_exists(__DIR__ . '/assets/img/Tauro Store.webp')
-    ? 'assets/img/Tauro%20Store.webp'
-    : '');
+$heroBrandImage = '';
+$heroBrandFile = '';
+
+if (file_exists(__DIR__ . '/assets/img/hero-tauro-campaign.svg')) {
+  $heroBrandImage = 'assets/img/hero-tauro-campaign.svg';
+  $heroBrandFile = __DIR__ . '/assets/img/hero-tauro-campaign.svg';
+} elseif (file_exists(__DIR__ . '/assets/img/Tauro Store.webp')) {
+  $heroBrandImage = 'assets/img/Tauro%20Store.webp';
+  $heroBrandFile = __DIR__ . '/assets/img/Tauro Store.webp';
+}
+
+if ($heroBrandImage !== '' && $heroBrandFile !== '') {
+  $heroBrandImage .= '?v=' . (string) @filemtime($heroBrandFile);
+}
 ?>
 
 <main class="home-shell">

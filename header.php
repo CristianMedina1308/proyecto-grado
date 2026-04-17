@@ -1,7 +1,14 @@
 <?php
 require_once __DIR__ . '/includes/app.php';
-$logoPath = __DIR__ . '/assets/img/logo.png';
-$logoExiste = file_exists($logoPath);
+
+// Logo: preferimos SVG (se ve nitido y con buen contraste). Fallback a WebP existente.
+$logoUrl = 'assets/img/logo.svg';
+$logoPath = __DIR__ . '/assets/img/logo.svg';
+if (!is_file($logoPath)) {
+  $logoUrl = 'assets/img/Tauro%20Store.webp';
+  $logoPath = __DIR__ . '/assets/img/Tauro Store.webp';
+}
+$logoExiste = is_file($logoPath);
 ?>
 
 <!DOCTYPE html>
@@ -85,7 +92,7 @@ window.TAURO_IVA_RATE = 0.19;
   <div class="container-fluid px-3 px-md-4">
     <a class="navbar-brand d-flex align-items-center" href="index.php">
       <?php if ($logoExiste): ?>
-        <img src="assets/img/logo.png" alt="Tauro Store" height="42" class="me-2">
+        <img src="<?= htmlspecialchars($logoUrl) ?>" alt="Tauro Store" height="42" class="me-2 brand-logo">
       <?php else: ?>
         <span class="me-2 fw-bold px-2 py-1 rounded bg-light border">TS</span>
       <?php endif; ?>

@@ -87,6 +87,17 @@ main {
   letter-spacing: 0.6px;
 }
 
+.site-navbar .navbar-brand .brand-logo {
+  width: auto;
+  max-height: 42px;
+  display: block;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 248, 236, 0.06);
+  border: 1px solid rgba(215, 181, 109, 0.18);
+  box-shadow: 0 10px 18px rgba(10, 8, 6, 0.22);
+}
+
 .site-navbar .navbar-brand .brand-highlight {
   color: var(--highlight);
 }
