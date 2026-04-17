@@ -319,6 +319,134 @@ function appListCatalogImageFiles(string $imagesDir): array
     return $files;
 }
 
+/**
+ * Genera nombre y descripcion "bonitos" para el catalogo segun el archivo de imagen.
+ *
+ * No cambia precios ni otras columnas; se usa para completar copy (nombre/descripcion)
+ * de productos creados desde imagenes.
+ */
+function appCatalogCopyFromImageFilename(string $filename, array $product = []): array
+{
+    $allowedExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+    $regex = '/^(camisa|saco|mochila)(\d+)\.(' . implode('|', $allowedExt) . ')$/i';
+
+    $base = basename(trim($filename));
+    $group = 'saco';
+    $num = 1;
+    if (preg_match($regex, $base, $m)) {
+        $group = strtolower($m[1]);
+        $num = max(1, (int) $m[2]);
+    }
+
+    $colors = [
+        'Negro', 'Blanco', 'Azul', 'Gris', 'Beige', 'Verde oliva', 'Vinotinto', 'Cafe', 'Arena',
+        'Azul marino', 'Mostaza', 'Grafito', 'Camel', 'Hueso', 'Acero', 'Carbon', 'Chocolate',
+        'Tostado', 'Pizarra', 'Taupe'
+    ];
+
+    $fit = trim((string) ($product['fit'] ?? ''));
+    if ($fit === '') {
+        $fit = 'Regular';
+    }
+
+    $material = trim((string) ($product['material'] ?? ''));
+    if ($material === '') {
+        $material = $group === 'camisa' ? 'Algodon' : ($group === 'mochila' ? 'Poliester' : 'Mezcla textil');
+    }
+
+    $color = trim((string) ($product['color'] ?? ''));
+    if ($color === '') {
+        $color = $colors[($num - 1) % count($colors)];
+    }
+
+    $marca = trim((string) ($product['marca'] ?? ''));
+    if ($marca === '') {
+        $marca = 'Tauro';
+    }
+
+    if ($group === 'camisa') {
+        $styles = [
+            'Oxford', 'Slim Fit', 'Lino', 'Manga Larga', 'Formal', 'Casual', 'Premium', 'Minimal',
+            'Texturizada', 'Denim', 'Essential', 'Urban', 'Cuello Mao', 'Clasica', 'Sastrera'
+        ];
+        $style = $styles[($num - 1) % count($styles)];
+        $name = 'Camisa ' . $style . ' ' . $color;
+        $desc = 'Camisa ' . strtolower($style) . ' para hombre en tono ' . strtolower($color) . ', fit ' . strtolower($fit) . '. '
+            . 'Tela ' . strtolower($material) . ' comoda para oficina o salidas; se ve excelente con jean o pantalon de vestir.';
+        return ['nombre' => $name, 'descripcion' => $desc];
+    }
+
+    if ($group === 'mochila') {
+        $styles = [
+            'Urbana', 'Compacta', 'Ejecutiva', 'Travel', 'Minimal', 'Waterproof', 'Daily', 'Campus', 'Street'
+        ];
+        $style = $styles[($num - 1) % count($styles)];
+        $name = 'Mochila ' . $style . ' ' . $color;
+        $desc = 'Mochila ' . strtolower($style) . ' para hombre en color ' . strtolower($color) . '. '
+            . 'Compartimentos organizados y material ' . strtolower($material) . ' para uso diario en trabajo, estudio o viaje.';
+        return ['nombre' => $name, 'descripcion' => $desc];
+    }
+
+    // saco
+    $styles = [
+        'Bomber', 'Denim', 'Biker', 'Tejido', 'Hoodie', 'Varsity', 'Puffer', 'Pano', 'Cargo', 'Aviador',
+        'Rompevientos', 'Cuello Alto', 'Overshirt', 'Basico', 'Street', 'Tactical', 'Minimal', 'Utility',
+        'Premium', 'Classic'
+    ];
+    $style = $styles[($num - 1) % count($styles)];
+    $name = 'Chaqueta ' . $style . ' ' . $color;
+    $desc = 'Chaqueta estilo ' . strtolower($style) . ' en tono ' . strtolower($color) . ', pensada para capas y clima variable. '
+        . 'Acabado ' . strtolower($marca) . ' y material ' . strtolower($material) . ' para un look masculino sobrio y moderno.';
+
+    return ['nombre' => $name, 'descripcion' => $desc];
+}
+
+function appGenericProductDescription(array $product): string
+{
+    $nombre = trim((string) ($product['nombre'] ?? ''));
+    $categoria = strtolower(trim((string) ($product['categoria'] ?? '')));
+    $marca = trim((string) ($product['marca'] ?? ''));
+    $color = trim((string) ($product['color'] ?? ''));
+    $material = trim((string) ($product['material'] ?? ''));
+    $fit = trim((string) ($product['fit'] ?? ''));
+
+    if ($marca === '') {
+        $marca = 'Tauro';
+    }
+    if ($fit === '') {
+        $fit = 'Regular';
+    }
+
+    $tipo = 'Producto';
+    if (str_contains($categoria, 'camis')) {
+        $tipo = 'Camisa';
+    } elseif (str_contains($categoria, 'saco') || str_contains($categoria, 'chaquet') || str_contains($categoria, 'buzo')) {
+        $tipo = 'Chaqueta';
+    } elseif (str_contains($categoria, 'mochil')) {
+        $tipo = 'Mochila';
+    } elseif (str_contains($categoria, 'jean') || str_contains($categoria, 'pantal')) {
+        $tipo = 'Pantalon';
+    } elseif (str_contains($categoria, 'tenis') || str_contains($categoria, 'zap')) {
+        $tipo = 'Calzado';
+    }
+
+    $detalles = [];
+    if ($color !== '') {
+        $detalles[] = 'color ' . strtolower($color);
+    }
+    if ($material !== '') {
+        $detalles[] = 'material ' . strtolower($material);
+    }
+    if ($fit !== '') {
+        $detalles[] = 'fit ' . strtolower($fit);
+    }
+
+    $detalleTxt = $detalles ? (' (' . implode(', ', $detalles) . ')') : '';
+    $baseName = $nombre !== '' ? $nombre : ($tipo . ' ' . $marca);
+
+    return $baseName . '. ' . $tipo . ' para hombre ' . $marca . $detalleTxt . ', ideal para un look sobrio y versatil en el dia a dia.';
+}
+
 function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
 {
     $imagesDir = rtrim($imagesDir, DIRECTORY_SEPARATOR);
@@ -343,7 +471,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
         }
     }
 
-    $productos = $conn->query('SELECT id, nombre, categoria, imagen FROM productos ORDER BY id ASC')->fetchAll(PDO::FETCH_ASSOC);
+    $productos = $conn->query('SELECT id, nombre, descripcion, categoria, marca, color, material, fit, imagen FROM productos ORDER BY id ASC')->fetchAll(PDO::FETCH_ASSOC);
 
     // Marca como usadas las imagenes ya asignadas y existentes.
     $used = [];
@@ -378,6 +506,9 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
     $updStmt = $conn->prepare('UPDATE productos SET imagen = ? WHERE id = ?');
     $galCountStmt = $conn->prepare('SELECT COUNT(*) FROM producto_imagenes WHERE producto_id = ?');
     $galInsStmt = $conn->prepare('INSERT INTO producto_imagenes (producto_id, archivo) VALUES (?, ?)');
+
+    // Completar nombre/descripcion (solo si estan vacios o genericos).
+    $copyUpdStmt = $conn->prepare('UPDATE productos SET nombre = ?, descripcion = ? WHERE id = ?');
 
     // 1) Actualiza productos existentes con imagen rota.
     foreach ($productos as $p) {
@@ -418,6 +549,58 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
         }
     }
 
+    // 1.5) Completa copy (nombre/descripcion) para productos del catalogo.
+    foreach ($productos as $p) {
+        $img = basename(trim((string) ($p['imagen'] ?? '')));
+        if ($img === '') {
+            continue;
+        }
+
+        // Solo actuar sobre archivos del catalogo (camisa/saco/mochila).
+        if (!preg_match($regex, $img)) {
+            continue;
+        }
+
+        $nombreActual = trim((string) ($p['nombre'] ?? ''));
+        $descActual = trim((string) ($p['descripcion'] ?? ''));
+        $nombreEsGenerico = $nombreActual === '' || preg_match('/^(camisa|saco|mochila)\s*\d*$/i', $nombreActual);
+
+        $descEsGenerica = $descActual !== '' && str_contains(strtolower($descActual), 'ideal para un look sobrio y versatil');
+
+        if (!$nombreEsGenerico && $descActual !== '' && !$descEsGenerica) {
+            continue;
+        }
+
+        $copy = appCatalogCopyFromImageFilename($img, $p);
+        $nuevoNombre = $nombreEsGenerico ? (string) ($copy['nombre'] ?? $nombreActual) : $nombreActual;
+        $nuevaDesc = ($descActual !== '' && !$descEsGenerica)
+            ? $descActual
+            : (string) ($copy['descripcion'] ?? $descActual);
+
+        if ($nuevoNombre !== $nombreActual || $nuevaDesc !== $descActual) {
+            $copyUpdStmt->execute([$nuevoNombre, $nuevaDesc !== '' ? $nuevaDesc : null, (int) $p['id']]);
+        }
+    }
+
+    // 1.6) Completa descripciones faltantes en cualquier producto (sin tocar nombres no genericos).
+    foreach ($productos as $p) {
+        $descActual = trim((string) ($p['descripcion'] ?? ''));
+        if ($descActual !== '') {
+            continue;
+        }
+
+        $genericDesc = appGenericProductDescription($p);
+        if (trim($genericDesc) === '') {
+            continue;
+        }
+
+        $copyUpdStmt->execute([
+            trim((string) ($p['nombre'] ?? '')),
+            $genericDesc,
+            (int) $p['id']
+        ]);
+    }
+
     // 2) Inserta productos nuevos para las imagenes restantes.
     $insStmt = $conn->prepare('INSERT INTO productos (nombre, sku, descripcion, precio, categoria, marca, color, material, fit, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $skuCheckStmt = $conn->prepare('SELECT COUNT(*) FROM productos WHERE sku = ?');
@@ -434,7 +617,11 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
 
             preg_match($regex, $img, $m);
             $num = isset($m[2]) ? (int) $m[2] : 0;
-            $nombre = ucfirst($group) . ($num > 0 ? ' ' . $num : '');
+            $copy = appCatalogCopyFromImageFilename($img, [
+                'marca' => $defaultMarca,
+                'fit' => $defaultFit
+            ]);
+            $nombre = (string) ($copy['nombre'] ?? (ucfirst($group) . ($num > 0 ? ' ' . $num : '')));
             $categoria = $group === 'camisa' ? 'Camisas' : ($group === 'mochila' ? 'Mochilas' : 'Sacos');
 
             // SKU estable por imagen (evita depender del autoincrement y ayuda a filtrar por catalogo).
@@ -448,7 +635,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
             $insStmt->execute([
                 $nombre,
                 $sku,
-                null,
+                (string) ($copy['descripcion'] ?? ''),
                 $defaultPrice,
                 $categoria,
                 $defaultMarca,
