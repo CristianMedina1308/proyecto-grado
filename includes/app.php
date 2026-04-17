@@ -785,6 +785,45 @@ function appVerifyRecoveryPin(string $pin, string $hash): bool
     return password_verify($pepper . $pin, $hash);
 }
 
+/**
+ * Asegura (best effort) que el esquema necesario para el PIN exista.
+ *
+ * Motivo: en algunos despliegues, aplicar migraciones manuales es difícil.
+ * Si el usuario de BD tiene permisos, intentamos crear las columnas faltantes.
+ *
+ * Importante:
+ * - Si el host bloquea ALTER TABLE o ya existen las columnas, no rompe: solo ignora el error.
+ * - Esto no reemplaza una migración formal, pero evita quedar bloqueado en producción.
+ */
+function appEnsureRecoveryPinSchema(PDO $conn): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+
+    $table = 'usuarios';
+    $ddls = [
+        'recovery_pin_hash' => "ALTER TABLE `usuarios` ADD COLUMN `recovery_pin_hash` VARCHAR(255) NULL AFTER `password`",
+        'recovery_pin_set_at' => "ALTER TABLE `usuarios` ADD COLUMN `recovery_pin_set_at` DATETIME NULL AFTER `recovery_pin_hash`",
+        'pin_failed_attempts' => "ALTER TABLE `usuarios` ADD COLUMN `pin_failed_attempts` INT NOT NULL DEFAULT 0 AFTER `recovery_pin_set_at`",
+        'pin_locked_until' => "ALTER TABLE `usuarios` ADD COLUMN `pin_locked_until` DATETIME NULL AFTER `pin_failed_attempts`"
+    ];
+
+    foreach ($ddls as $column => $ddl) {
+        if (appDbHasColumn($conn, $table, $column)) {
+            continue;
+        }
+
+        try {
+            $conn->exec($ddl);
+        } catch (Throwable $e) {
+            // Si no hay permisos o la columna ya existe (condición de carrera), seguimos.
+        }
+    }
+}
+
 function appPublicBaseUrl(): string
 {
     $explicit = appEnv('APP_URL', '') ?: appEnv('PUBLIC_URL', '');

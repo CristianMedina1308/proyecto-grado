@@ -2,6 +2,10 @@
 include 'includes/conexion.php';
 require_once 'includes/app.php';
 
+// En producción (Railway) podemos no tener la migración aplicada todavía.
+// Esto intenta crear las columnas necesarias si el usuario de BD tiene permisos.
+appEnsureRecoveryPinSchema($conn);
+
 $mensajeError = '';
 $aceptaTerminos = isset($_POST['acepta_terminos']);
 

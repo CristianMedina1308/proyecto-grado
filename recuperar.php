@@ -2,6 +2,9 @@
 require_once __DIR__ . '/includes/app.php';
 require_once __DIR__ . '/includes/conexion.php';
 
+// Best effort: si faltan columnas del PIN, intentamos crearlas (si hay permisos).
+appEnsureRecoveryPinSchema($conn);
+
 $mensaje = '';
 $pinDisponible = appDbHasColumn($conn, 'usuarios', 'recovery_pin_hash');
 $hasAttemptsCol = appDbHasColumn($conn, 'usuarios', 'pin_failed_attempts');

@@ -8,6 +8,9 @@ if (!isset($_SESSION['usuario'])) {
 include 'includes/conexion.php';
 include 'includes/pedidos_utils.php';
 
+// Best effort: si faltan columnas del PIN, intentamos crearlas (si hay permisos).
+appEnsureRecoveryPinSchema($conn);
+
 $usuarioId = (int) $_SESSION['usuario']['id'];
 $usuario = $_SESSION['usuario'];
 $error = '';
