@@ -1,4 +1,4 @@
- qu<?php
+<?php
 
 require_once __DIR__ . '/app.php';
 require_once __DIR__ . '/pedidos_utils.php';

@@ -1,12 +1,12 @@
 <?php
-// api_favoritos.php
+// Endpoint: devuelve información básica de productos a partir de una lista de IDs.
 header('Content-Type: application/json; charset=utf-8');
 
 try {
     require_once __DIR__ . '/includes/app.php';
     require_once __DIR__ . '/includes/conexion.php';
 
-    // Obtener y validar los IDs
+    // Leer y validar los IDs recibidos por querystring.
     $idsParam = $_GET['ids'] ?? '';
     if (empty($idsParam)) {
         echo json_encode([]);
@@ -19,22 +19,22 @@ try {
         exit;
     }
 
-    // Crear placeholders
+    // Placeholders para el IN (...)
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-    // Query optimizada
+    // Consulta simple (solo lo necesario para pintar tarjetas de favoritos)
     $sql = "SELECT id, nombre, precio, imagen FROM productos WHERE id IN ($placeholders)";
     $stmt = $conn->prepare($sql);
     $stmt->execute($ids);
 
-    // Convertir resultados en array asociativo indexado por ID
+    // Indexar por id para luego respetar el orden original.
     $result = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $row['imagen'] = appResolveProductImage($row, __DIR__ . '/assets/img/productos');
         $result[$row['id']] = $row;
     }
 
-    // Reordenar los resultados según el orden original de $ids
+    // Respetar el orden original de $ids.
     $ordenado = [];
     foreach ($ids as $id) {
         if (isset($result[$id])) {

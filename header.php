@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/app.php';
 
-// Logo: preferimos SVG (se ve nitido y con buen contraste). Fallback a WebP existente.
+// Logo: preferimos SVG por nitidez. Si no existe, usamos el WebP.
 $logoUrl = 'assets/img/logo.svg';
 $logoPath = __DIR__ . '/assets/img/logo.svg';
 if (!is_file($logoPath)) {
@@ -84,9 +84,8 @@ window.TAURO_IVA_RATE = 0.19;
   window.addEventListener("load", hideLoader, { once: true });
   window.setTimeout(hideLoader, 900);
 
-  // Hardening: En algunos navegadores/hosts, el evento load puede no dispararse como se espera
-  // (o la pagina puede volver desde bfcache). Si el loader quedara encima, bloquearia toda la UI.
-  // Estos failsafes aseguran que nunca quede atrapado.
+  // En algunos navegadores/hosts, el evento load puede fallar o la pagina puede volver desde bfcache.
+  // Si el loader quedara encima, bloquearia la UI. Estos respaldos evitan ese escenario.
   window.addEventListener("pageshow", hideLoader);
   window.setTimeout(hideLoader, 3000);
 })();

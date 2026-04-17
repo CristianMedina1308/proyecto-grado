@@ -5,20 +5,21 @@ include 'includes/conexion.php';
 $busqueda = trim($_GET['buscar'] ?? '');
 $categoria = trim($_GET['categoria'] ?? '');
 
-// Por defecto mostramos SOLO el catalogo de 44 imagenes (camisa/saco/mochila).
-// Si necesitas ver todo el inventario, usa ?todo=1
+// Colección:
+// - Por defecto mostramos el catálogo basado en las 44 imágenes (camisa/saco/mochila).
+// - Si necesitas ver todo el inventario, usa ?todo=1
 $verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
 
 $imagesDir = __DIR__ . '/assets/img/productos';
 $catalogImages = appListCatalogImageFiles($imagesDir);
 
-// Garantiza que existan productos para las imagenes del catalogo.
-// (Si ya existen, el seed es idempotente: no duplica imagenes ya asignadas)
+// Asegura que existan productos para las imágenes del catálogo.
+// (Si ya existen, el seed es idempotente y no duplica.)
 if (!$verTodo && $catalogImages) {
   try {
     appSeedCatalogFromImages($conn, $imagesDir);
   } catch (Throwable $e) {
-    // noop: si falla el seed, igual intentamos listar lo que haya.
+    // Si algo falla aquí, igual intentamos listar lo que haya en BD.
   }
 }
 

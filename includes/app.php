@@ -189,12 +189,13 @@ function appDeleteProductImageFile(string $destinationDir, ?string $filename): v
 }
 
 /**
- * Resuelve el nombre de archivo de imagen a mostrar para un producto.
+ * Devuelve el archivo de imagen que se debe mostrar para un producto.
  *
- * - Usa el nombre almacenado en BD si existe en disco.
- * - Si no existe, intenta con la misma base pero otras extensiones comunes.
- * - Si aun no existe, asigna una imagen de tu carpeta (camisa/saco/mochila)
- *   segun el nombre/categoria del producto.
+ * Orden de resolucion:
+ * 1) Se respeta el nombre guardado en BD si el archivo existe.
+ * 2) Si no existe, se prueba la misma base con otras extensiones comunes.
+ * 3) Si aun no existe, se asigna una imagen disponible (camisa/saco/mochila)
+ *    en base a nombre/categoria.
  *
  * Retorna solo el nombre del archivo (basename) dentro de $imagesDir.
  */
@@ -284,13 +285,7 @@ function appResolveProductImage(array $product, string $imagesDir): string
 }
 
 /**
- * Crea/actualiza productos a partir de imagenes locales (camisa*.png, saco*.png, mochila*.png).
- *
- * Objetivo: que el catalogo tenga un producto por imagen y que todos apunten a archivos existentes.
- * - Si un producto existente tiene una imagen que no existe, se le asigna una disponible.
- * - Luego, por cada imagen restante sin producto, se crea un producto nuevo con precio y datos base.
- *
- * Retorna un resumen con los contadores de actualizados/creados.
+ * Lista las imagenes del catalogo (camisa/saco/mochila) disponibles en disco.
  */
 function appListCatalogImageFiles(string $imagesDir): array
 {
@@ -320,10 +315,10 @@ function appListCatalogImageFiles(string $imagesDir): array
 }
 
 /**
- * Genera nombre y descripcion "bonitos" para el catalogo segun el archivo de imagen.
+ * Genera un nombre y una descripcion coherentes a partir del archivo de imagen.
  *
- * No cambia precios ni otras columnas; se usa para completar copy (nombre/descripcion)
- * de productos creados desde imagenes.
+ * Nota: esto se usa para completar el copy del catalogo (nombre/descripcion)
+ * sin tocar precios ni otras columnas.
  */
 function appCatalogCopyFromImageFilename(string $filename, array $product = []): array
 {
@@ -473,7 +468,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
 
     $productos = $conn->query('SELECT id, nombre, descripcion, categoria, marca, color, material, fit, imagen FROM productos ORDER BY id ASC')->fetchAll(PDO::FETCH_ASSOC);
 
-    // Marca como usadas las imagenes ya asignadas y existentes.
+    // Marcar como usadas las imagenes ya asignadas y existentes.
     $used = [];
     foreach ($productos as $p) {
         $img = basename(trim((string) ($p['imagen'] ?? '')));
@@ -510,7 +505,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
     // Completar nombre/descripcion (solo si estan vacios o genericos).
     $copyUpdStmt = $conn->prepare('UPDATE productos SET nombre = ?, descripcion = ? WHERE id = ?');
 
-    // 1) Actualiza productos existentes con imagen rota.
+    // 1) Reparar productos existentes con imagen rota.
     foreach ($productos as $p) {
         $img = basename(trim((string) ($p['imagen'] ?? '')));
         if ($img !== '' && is_file($imagesDir . DIRECTORY_SEPARATOR . $img)) {
@@ -549,7 +544,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
         }
     }
 
-    // 1.5) Completa copy (nombre/descripcion) para productos del catalogo.
+    // 1.5) Completar nombre/descripcion para productos del catalogo.
     foreach ($productos as $p) {
         $img = basename(trim((string) ($p['imagen'] ?? '')));
         if ($img === '') {
@@ -582,7 +577,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
         }
     }
 
-    // 1.6) Completa descripciones faltantes en cualquier producto (sin tocar nombres no genericos).
+    // 1.6) Completar descripciones faltantes en cualquier producto (sin tocar nombres no genericos).
     foreach ($productos as $p) {
         $descActual = trim((string) ($p['descripcion'] ?? ''));
         if ($descActual !== '') {
@@ -601,7 +596,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
         ]);
     }
 
-    // 2) Inserta productos nuevos para las imagenes restantes.
+    // 2) Crear productos para las imagenes restantes.
     $insStmt = $conn->prepare('INSERT INTO productos (nombre, sku, descripcion, precio, categoria, marca, color, material, fit, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $skuCheckStmt = $conn->prepare('SELECT COUNT(*) FROM productos WHERE sku = ?');
     $defaultPrice = 100000.00;
@@ -624,7 +619,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
             $nombre = (string) ($copy['nombre'] ?? (ucfirst($group) . ($num > 0 ? ' ' . $num : '')));
             $categoria = $group === 'camisa' ? 'Camisas' : ($group === 'mochila' ? 'Mochilas' : 'Sacos');
 
-            // SKU estable por imagen (evita depender del autoincrement y ayuda a filtrar por catalogo).
+            // SKU estable por imagen (ayuda a mantener el catalogo identificable).
             $skuBase = 'TS-' . strtoupper($group) . '-' . str_pad((string) max(1, $num), 2, '0', STR_PAD_LEFT);
             $sku = $skuBase;
             $skuCheckStmt->execute([$sku]);

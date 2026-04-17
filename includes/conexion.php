@@ -1,7 +1,7 @@
 <?php
 
-// Conexion compatible con XAMPP/Railway.
-// Importante: no hardcodear credenciales en codigo. En Railway configura variables de entorno.
+// Conexión para local (XAMPP) y despliegue (Railway).
+// Importante: las credenciales no van en el código; en Railway se manejan con variables de entorno.
 
 $host = '127.0.0.1';
 $db = 'tiendaropa';
@@ -10,7 +10,7 @@ $pass = '';
 $port = 3306;
 
 // 1) Si existe una URL estilo mysql://user:pass@host:port/db, la usamos.
-// En Railway normalmente esta URL es la fuente mas confiable (evita desalineaciones con bases distintas).
+// En Railway suele ser la fuente más confiable (evita desalineaciones con bases distintas).
 $url = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: '';
 $hasUrl = is_string($url) && trim($url) !== '';
 if ($hasUrl) {
@@ -28,8 +28,8 @@ if ($hasUrl) {
     }
 }
 
-// 2) Variables tipicas de Railway/servicios (con o sin guiones bajos)
-// Solo se aplican cuando NO hay URL, para evitar conectarse a una base equivocada por defaults.
+// 2) Variables típicas de Railway/servicios (con o sin guiones bajos).
+// Solo se aplican cuando NO hay URL, para evitar conectarse a una base equivocada por valores por defecto.
 if (!$hasUrl) {
     $host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: $host;
     $db   = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: $db;
@@ -43,11 +43,11 @@ try {
 
     $conn = new PDO($dsn, $user, $pass);
 
-    // Configuración recomendada
+    // Ajustes básicos de PDO
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    // Opcional (para debug)
+    // (Debug)
     // echo "✅ Conectado a Railway";
 
 } catch (PDOException $e) {

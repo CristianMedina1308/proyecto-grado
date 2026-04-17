@@ -7,23 +7,24 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['usuario']['rol'] ?? '') !== 'adm
 
 require_once '../includes/conexion.php';
 
-// Por defecto el panel lista SOLO el catalogo de 44 imagenes (camisa/saco/mochila).
-// Para ver todo el inventario (incluyendo otros productos), usa ?todo=1
+// Inventario (admin):
+// - Por defecto listamos el catálogo basado en las 44 imágenes (camisa/saco/mochila).
+// - Para ver todo el inventario (incluyendo otros productos), usa ?todo=1
 $verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
 
 $imagesDir = __DIR__ . '/../assets/img/productos';
 $catalogImages = appListCatalogImageFiles($imagesDir);
 
-// Garantiza que existan productos para las imagenes del catalogo.
+// Asegura que existan productos para las imágenes del catálogo.
 if (!$verTodo && $catalogImages) {
     try {
         appSeedCatalogFromImages($conn, $imagesDir);
     } catch (Throwable $e) {
-        // noop
+        // Si falla el seed, el panel igual intenta mostrar lo que exista.
     }
 }
 
-// Sembrar catalogo desde imagenes (camisa/saco/mochila) para que aparezcan todas.
+// Accion manual: generar/actualizar el catálogo desde imágenes (camisa/saco/mochila).
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seed_catalogo_imagenes'])) {
     if (!appValidarCsrf('admin_productos_seed_images', $_POST['csrf_token'] ?? null)) {
         appFlash('danger', 'La sesion del formulario expiro. Intenta nuevamente.', 'No se pudo generar');

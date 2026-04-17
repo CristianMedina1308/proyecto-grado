@@ -121,7 +121,7 @@
 
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(safeMessages));
     } catch (error) {
-      // noop
+      // Si el storage no esta disponible (modo privado, cuota, etc.), no bloqueamos el chat.
     }
   }
 
@@ -137,7 +137,7 @@
         };
       }
     } catch (error) {
-      // noop
+      // Si no hay nada almacenado o el JSON esta corrupto, iniciamos conversacion limpia.
     }
 
     return {
@@ -241,7 +241,7 @@
       try {
         sessionStorage.setItem(PANEL_STATE_KEY, "open");
       } catch (error) {
-        // noop
+        // Guardar el estado del panel es opcional; si falla, seguimos normal.
       }
 
       window.setTimeout(() => input.focus(), 120);
@@ -254,7 +254,7 @@
       try {
         sessionStorage.setItem(PANEL_STATE_KEY, "closed");
       } catch (error) {
-        // noop
+        // Guardar el estado del panel es opcional; si falla, seguimos normal.
       }
     }
 
@@ -427,7 +427,7 @@
         openPanel();
       }
     } catch (error) {
-      // noop
+      // Si sessionStorage falla, no forzamos estado del panel.
     }
   });
 })();

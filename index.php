@@ -2,6 +2,7 @@
 include 'header.php';
 include 'includes/conexion.php';
 
+// Productos que intentamos mostrar primero en la home (si existen en BD).
 $destacadosPreferidos = [
   'Chaqueta Bomber Negra',
   'Jean Slim Fit Azul Oscuro',
@@ -25,13 +26,16 @@ $destacadosStmt = $conn->prepare("
 $destacadosStmt->execute(array_merge($destacadosPreferidos, $destacadosPreferidos));
 $destacados = $destacadosStmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Si no estan esos nombres exactos, mostramos los ultimos 4 registrados.
 if (count($destacados) < 4) {
   $destacados = $conn->query("SELECT * FROM productos ORDER BY id DESC LIMIT 4")->fetchAll(PDO::FETCH_ASSOC);
 }
+
+// Datos rapidos para el bloque principal.
 $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> ''")->fetchAll(PDO::FETCH_COLUMN);
 $totalProductos = (int) ($conn->query("SELECT COUNT(*) FROM productos")->fetchColumn() ?: 0);
 
-// Hero: escaparate con productos reales (evita el banner SVG con tarjetas en blanco)
+// Hero: pequeño escaparate con los productos destacados.
 $heroProductos = array_slice($destacados ?: [], 0, 4);
 ?>
 
