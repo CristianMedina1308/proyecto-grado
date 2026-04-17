@@ -89,13 +89,14 @@ main {
 
 .site-navbar .navbar-brand .brand-logo {
   width: auto;
-  max-height: 42px;
+  max-height: 48px;
   display: block;
   padding: 4px;
   border-radius: 999px;
-  background: rgba(255, 248, 236, 0.06);
-  border: 1px solid rgba(215, 181, 109, 0.18);
-  box-shadow: 0 10px 18px rgba(10, 8, 6, 0.22);
+  background: rgba(255, 248, 236, 0.12);
+  border: 1px solid rgba(215, 181, 109, 0.28);
+  box-shadow: 0 12px 22px rgba(10, 8, 6, 0.26);
+  filter: drop-shadow(0 8px 16px rgba(8, 6, 4, 0.35));
 }
 
 .site-navbar .navbar-brand .brand-highlight {
@@ -883,6 +884,128 @@ textarea:focus {
   color: var(--accent-strong);
 }
 
+/* Escaparate del hero (coleccion masculina) */
+.hero-showcase {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-showcase-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero-showcase-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(18, 14, 10, 0.06);
+  border: 1px solid rgba(184, 146, 71, 0.22);
+  color: var(--accent-strong);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-showcase-label {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(23, 18, 12, 0.72);
+}
+
+.hero-showcase-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hero-showcase-item {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(215, 181, 109, 0.22);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(215, 181, 109, 0.14) 0%, rgba(215, 181, 109, 0) 50%),
+    linear-gradient(180deg, #f6efe4 0%, #ece0cf 100%);
+  box-shadow: 0 18px 38px rgba(12, 9, 6, 0.18);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-showcase-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(184, 146, 71, 0.48);
+  box-shadow: 0 22px 46px rgba(12, 9, 6, 0.22);
+}
+
+.hero-showcase-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transform: scale(1.01);
+  transition: transform 0.6s ease;
+}
+
+.hero-showcase-item:hover img {
+  transform: scale(1.06);
+}
+
+.hero-showcase-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 14px 14px 12px;
+  display: grid;
+  gap: 2px;
+  background: linear-gradient(180deg, rgba(20, 16, 12, 0) 0%, rgba(17, 13, 10, 0.78) 65%, rgba(17, 13, 10, 0.9) 100%);
+}
+
+.hero-showcase-name {
+  color: rgba(255, 248, 236, 0.96);
+  font-weight: 800;
+  font-size: 0.92rem;
+  line-height: 1.25;
+  text-shadow: 0 12px 24px rgba(8, 6, 4, 0.3);
+}
+
+.hero-showcase-price {
+  color: rgba(247, 224, 170, 0.92);
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+}
+
+.hero-showcase-item--1 {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+}
+
+.hero-showcase-item--2 {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.hero-showcase-item--3 {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.hero-showcase-item--4 {
+  grid-column: 2;
+  grid-row: 3;
+}
+
 .hero-note {
   position: absolute;
   max-width: 220px;
@@ -1266,6 +1389,19 @@ body.page-loaded {
 
   .hero-stage-card {
     min-height: 320px;
+  }
+
+  .hero-showcase-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-showcase-item--1,
+  .hero-showcase-item--2,
+  .hero-showcase-item--3,
+  .hero-showcase-item--4 {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .hero-note {

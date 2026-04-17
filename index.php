@@ -31,20 +31,8 @@ if (count($destacados) < 4) {
 $categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> ''")->fetchAll(PDO::FETCH_COLUMN);
 $totalProductos = (int) ($conn->query("SELECT COUNT(*) FROM productos")->fetchColumn() ?: 0);
 
-$heroBrandImage = '';
-$heroBrandFile = '';
-
-if (file_exists(__DIR__ . '/assets/img/hero-tauro-campaign.svg')) {
-  $heroBrandImage = 'assets/img/hero-tauro-campaign.svg';
-  $heroBrandFile = __DIR__ . '/assets/img/hero-tauro-campaign.svg';
-} elseif (file_exists(__DIR__ . '/assets/img/Tauro Store.webp')) {
-  $heroBrandImage = 'assets/img/Tauro%20Store.webp';
-  $heroBrandFile = __DIR__ . '/assets/img/Tauro Store.webp';
-}
-
-if ($heroBrandImage !== '' && $heroBrandFile !== '') {
-  $heroBrandImage .= '?v=' . (string) @filemtime($heroBrandFile);
-}
+// Hero: escaparate con productos reales (evita el banner SVG con tarjetas en blanco)
+$heroProductos = array_slice($destacados ?: [], 0, 4);
 ?>
 
 <main class="home-shell">
@@ -81,10 +69,35 @@ if ($heroBrandImage !== '' && $heroBrandFile !== '') {
 
       <div class="hero-stage">
         <div class="hero-stage-card">
-          <?php if ($heroBrandImage !== ''): ?>
-            <img src="<?= htmlspecialchars($heroBrandImage) ?>"
-                 alt="Banner editorial Tauro"
-                 class="hero-brand-image">
+          <?php if ($heroProductos): ?>
+            <div class="hero-showcase" aria-label="Coleccion masculina destacada">
+              <div class="hero-showcase-top">
+                <span class="hero-showcase-badge">Coleccion masculina</span>
+                <span class="hero-showcase-label">Tauro Store</span>
+              </div>
+
+              <div class="hero-showcase-grid">
+                <?php foreach ($heroProductos as $i => $p): ?>
+                  <?php
+                    $imagenHero = appResolveProductImage($p, __DIR__ . '/assets/img/productos');
+                    $precioHero = isset($p['precio']) ? (float) $p['precio'] * 1.19 : 0.0;
+                  ?>
+                  <a href="producto.php?id=<?= (int) $p['id'] ?>"
+                     class="hero-showcase-item hero-showcase-item--<?= (int) ($i + 1) ?>">
+                    <img src="assets/img/productos/<?= htmlspecialchars($imagenHero) ?>"
+                         alt="<?= htmlspecialchars($p['nombre']) ?>"
+                         loading="eager"
+                         onerror="this.onerror=null;this.src='assets/img/productos/look-default.svg';">
+                    <span class="hero-showcase-caption">
+                      <span class="hero-showcase-name"><?= htmlspecialchars($p['nombre']) ?></span>
+                      <?php if ($precioHero > 0): ?>
+                        <span class="hero-showcase-price">$<?= number_format($precioHero, 0, ',', '.') ?></span>
+                      <?php endif; ?>
+                    </span>
+                  </a>
+                <?php endforeach; ?>
+              </div>
+            </div>
           <?php else: ?>
             <div class="hero-brand-wordmark">TAURO</div>
           <?php endif; ?>

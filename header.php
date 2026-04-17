@@ -9,6 +9,10 @@ if (!is_file($logoPath)) {
   $logoPath = __DIR__ . '/assets/img/Tauro Store.webp';
 }
 $logoExiste = is_file($logoPath);
+
+if ($logoExiste) {
+  $logoUrl .= '?v=' . (string) @filemtime($logoPath);
+}
 ?>
 
 <!DOCTYPE html>
@@ -92,7 +96,7 @@ window.TAURO_IVA_RATE = 0.19;
   <div class="container-fluid px-3 px-md-4">
     <a class="navbar-brand d-flex align-items-center" href="index.php">
       <?php if ($logoExiste): ?>
-        <img src="<?= htmlspecialchars($logoUrl) ?>" alt="Tauro Store" height="42" class="me-2 brand-logo">
+        <img src="<?= htmlspecialchars($logoUrl) ?>" alt="Tauro Store" height="48" class="me-2 brand-logo" decoding="async">
       <?php else: ?>
         <span class="me-2 fw-bold px-2 py-1 rounded bg-light border">TS</span>
       <?php endif; ?>
