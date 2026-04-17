@@ -7,9 +7,21 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['usuario']['rol'] ?? '') !== 'adm
 
 require_once '../includes/conexion.php';
 
-// Por defecto el panel lista SOLO el catalogo de 44 productos (camisas/sacos/mochilas).
+// Por defecto el panel lista SOLO el catalogo de 44 imagenes (camisa/saco/mochila).
 // Para ver todo el inventario (incluyendo otros productos), usa ?todo=1
 $verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
+
+$imagesDir = __DIR__ . '/../assets/img/productos';
+$catalogImages = appListCatalogImageFiles($imagesDir);
+
+// Garantiza que existan productos para las imagenes del catalogo.
+if (!$verTodo && $catalogImages) {
+    try {
+        appSeedCatalogFromImages($conn, $imagesDir);
+    } catch (Throwable $e) {
+        // noop
+    }
+}
 
 // Sembrar catalogo desde imagenes (camisa/saco/mochila) para que aparezcan todas.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seed_catalogo_imagenes'])) {
@@ -134,13 +146,20 @@ $productosSql = '
   ) inv ON inv.producto_id = p.id
   ';
 
-if (!$verTodo) {
-    $productosSql .= " WHERE (p.sku LIKE 'TS-CAMISA-%' OR p.sku LIKE 'TS-SACO-%' OR p.sku LIKE 'TS-MOCHILA-%')";
+if (!$verTodo && $catalogImages) {
+    $placeholders = implode(',', array_fill(0, count($catalogImages), '?'));
+    $productosSql .= " WHERE p.imagen IN ($placeholders)";
 }
 
 $productosSql .= ' ORDER BY p.id DESC';
 
-$productos = $conn->query($productosSql)->fetchAll(PDO::FETCH_ASSOC);
+if (!$verTodo && $catalogImages) {
+    $stmt = $conn->prepare($productosSql);
+    $stmt->execute($catalogImages);
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $productos = $conn->query($productosSql)->fetchAll(PDO::FETCH_ASSOC);
+}
 
 $categoriasStats = $conn->query('
   SELECT

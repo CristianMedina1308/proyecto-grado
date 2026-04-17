@@ -292,11 +292,11 @@ function appResolveProductImage(array $product, string $imagesDir): string
  *
  * Retorna un resumen con los contadores de actualizados/creados.
  */
-function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
+function appListCatalogImageFiles(string $imagesDir): array
 {
     $imagesDir = rtrim($imagesDir, DIRECTORY_SEPARATOR);
     if (!is_dir($imagesDir)) {
-        return ['updated' => 0, 'inserted' => 0, 'totalImages' => 0];
+        return [];
     }
 
     $allowedExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
@@ -315,6 +315,21 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
 
     $files = array_values(array_unique($files));
     usort($files, 'strnatcasecmp');
+
+    return $files;
+}
+
+function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
+{
+    $imagesDir = rtrim($imagesDir, DIRECTORY_SEPARATOR);
+    if (!is_dir($imagesDir)) {
+        return ['updated' => 0, 'inserted' => 0, 'totalImages' => 0];
+    }
+
+    $allowedExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+    $regex = '/^(camisa|saco|mochila)(\d+)\.(' . implode('|', $allowedExt) . ')$/i';
+
+    $files = appListCatalogImageFiles($imagesDir);
 
     if (!$files) {
         return ['updated' => 0, 'inserted' => 0, 'totalImages' => 0];
@@ -405,6 +420,7 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
 
     // 2) Inserta productos nuevos para las imagenes restantes.
     $insStmt = $conn->prepare('INSERT INTO productos (nombre, sku, descripcion, precio, categoria, marca, color, material, fit, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $skuCheckStmt = $conn->prepare('SELECT COUNT(*) FROM productos WHERE sku = ?');
     $defaultPrice = 100000.00;
     $defaultMarca = 'Tauro';
     $defaultFit = 'Regular';
@@ -421,9 +437,17 @@ function appSeedCatalogFromImages(PDO $conn, string $imagesDir): array
             $nombre = ucfirst($group) . ($num > 0 ? ' ' . $num : '');
             $categoria = $group === 'camisa' ? 'Camisas' : ($group === 'mochila' ? 'Mochilas' : 'Sacos');
 
+            // SKU estable por imagen (evita depender del autoincrement y ayuda a filtrar por catalogo).
+            $skuBase = 'TS-' . strtoupper($group) . '-' . str_pad((string) max(1, $num), 2, '0', STR_PAD_LEFT);
+            $sku = $skuBase;
+            $skuCheckStmt->execute([$sku]);
+            if ((int) $skuCheckStmt->fetchColumn() > 0) {
+                $sku = $skuBase . '-' . substr(md5($img), 0, 4);
+            }
+
             $insStmt->execute([
                 $nombre,
-                null,
+                $sku,
                 null,
                 $defaultPrice,
                 $categoria,

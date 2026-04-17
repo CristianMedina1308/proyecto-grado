@@ -5,15 +5,30 @@ include 'includes/conexion.php';
 $busqueda = trim($_GET['buscar'] ?? '');
 $categoria = trim($_GET['categoria'] ?? '');
 
-// Por defecto mostramos SOLO el catalogo de 44 productos (camisas/sacos/mochilas).
+// Por defecto mostramos SOLO el catalogo de 44 imagenes (camisa/saco/mochila).
 // Si necesitas ver todo el inventario, usa ?todo=1
 $verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
+
+$imagesDir = __DIR__ . '/assets/img/productos';
+$catalogImages = appListCatalogImageFiles($imagesDir);
+
+// Garantiza que existan productos para las imagenes del catalogo.
+// (Si ya existen, el seed es idempotente: no duplica imagenes ya asignadas)
+if (!$verTodo && $catalogImages) {
+  try {
+    appSeedCatalogFromImages($conn, $imagesDir);
+  } catch (Throwable $e) {
+    // noop: si falla el seed, igual intentamos listar lo que haya.
+  }
+}
 
 $sql = "SELECT * FROM productos WHERE 1";
 $params = [];
 
-if (!$verTodo) {
-  $sql .= " AND (sku LIKE 'TS-CAMISA-%' OR sku LIKE 'TS-SACO-%' OR sku LIKE 'TS-MOCHILA-%')";
+if (!$verTodo && $catalogImages) {
+  $placeholders = implode(',', array_fill(0, count($catalogImages), '?'));
+  $sql .= " AND imagen IN ($placeholders)";
+  $params = array_merge($params, $catalogImages);
 }
 
 if ($busqueda !== '') {
@@ -32,11 +47,19 @@ $stmt->execute($params);
 $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $categoriasSql = "SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> ''";
-if (!$verTodo) {
-  $categoriasSql .= " AND (sku LIKE 'TS-CAMISA-%' OR sku LIKE 'TS-SACO-%' OR sku LIKE 'TS-MOCHILA-%')";
+if (!$verTodo && $catalogImages) {
+  $placeholders = implode(',', array_fill(0, count($catalogImages), '?'));
+  $categoriasSql .= " AND imagen IN ($placeholders)";
 }
 $categoriasSql .= " ORDER BY categoria ASC";
-$categorias = $conn->query($categoriasSql)->fetchAll(PDO::FETCH_COLUMN);
+
+if (!$verTodo && $catalogImages) {
+  $catStmt = $conn->prepare($categoriasSql);
+  $catStmt->execute($catalogImages);
+  $categorias = $catStmt->fetchAll(PDO::FETCH_COLUMN);
+} else {
+  $categorias = $conn->query($categoriasSql)->fetchAll(PDO::FETCH_COLUMN);
+}
 ?>
 
 <main class="container py-5">
