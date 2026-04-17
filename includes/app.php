@@ -657,6 +657,186 @@ function appRedirect(string $url): void
     exit;
 }
 
+function appEnv(string $key, string $default = ''): string
+{
+    $value = getenv($key);
+    if (is_string($value) && trim($value) !== '') {
+        return trim($value);
+    }
+
+    if (isset($_ENV[$key]) && is_string($_ENV[$key]) && trim($_ENV[$key]) !== '') {
+        return trim($_ENV[$key]);
+    }
+
+    if (isset($_SERVER[$key]) && is_string($_SERVER[$key]) && trim($_SERVER[$key]) !== '') {
+        return trim($_SERVER[$key]);
+    }
+
+    return $default;
+}
+
+/**
+ * Comprueba si una columna existe en una tabla.
+ *
+ * Esto permite que el proyecto siga funcionando aunque la migración no se haya aplicado aún.
+ */
+function appDbHasColumn(PDO $conn, string $table, string $column): bool
+{
+    static $cache = [];
+    $key = strtolower($table . '.' . $column);
+
+    if (array_key_exists($key, $cache)) {
+        return (bool) $cache[$key];
+    }
+
+    try {
+        $safeTable = str_replace('`', '', $table);
+        $stmt = $conn->prepare('SHOW COLUMNS FROM `' . $safeTable . '` LIKE ?');
+        $stmt->execute([$column]);
+        $cache[$key] = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+    } catch (Throwable $e) {
+        $cache[$key] = false;
+    }
+
+    return (bool) $cache[$key];
+}
+
+function appValidateRecoveryPin(string $pin): bool
+{
+    return preg_match('/^\d{4}$/', $pin) === 1;
+}
+
+function appIsWeakRecoveryPin(string $pin): bool
+{
+    // Evita los PIN más obvios. No es infalible, pero reduce errores comunes.
+    static $weak = [
+        '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999',
+        '1234', '4321', '1122', '1212', '2468', '1357'
+    ];
+
+    return in_array($pin, $weak, true);
+}
+
+function appHashRecoveryPin(string $pin): string
+{
+    $pepper = appEnv('APP_PIN_PEPPER', '');
+    return password_hash($pepper . $pin, PASSWORD_DEFAULT);
+}
+
+function appVerifyRecoveryPin(string $pin, string $hash): bool
+{
+    if (trim($hash) === '') {
+        return false;
+    }
+
+    $pepper = appEnv('APP_PIN_PEPPER', '');
+    return password_verify($pepper . $pin, $hash);
+}
+
+function appPublicBaseUrl(): string
+{
+    $explicit = appEnv('APP_URL', '') ?: appEnv('PUBLIC_URL', '');
+    if ($explicit !== '') {
+        return rtrim($explicit, '/');
+    }
+
+    $forwardedProto = trim((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    if (strpos($forwardedProto, ',') !== false) {
+        $forwardedProto = trim((string) explode(',', $forwardedProto)[0]);
+    }
+
+    $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $scheme = $https ? 'https' : 'http';
+    if ($forwardedProto !== '') {
+        $scheme = strtolower($forwardedProto) === 'https' ? 'https' : 'http';
+    } elseif (appEnv('RAILWAY_PUBLIC_DOMAIN', '') !== '') {
+        $scheme = 'https';
+    }
+
+    $host = trim((string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? appEnv('RAILWAY_PUBLIC_DOMAIN', 'localhost')));
+    if (strpos($host, ',') !== false) {
+        $host = trim((string) explode(',', $host)[0]);
+    }
+
+    $dir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+    $dir = rtrim($dir, '/');
+
+    return $scheme . '://' . $host . ($dir !== '' ? $dir : '');
+}
+
+function appAbsoluteUrl(string $path): string
+{
+    return rtrim(appPublicBaseUrl(), '/') . '/' . ltrim($path, '/');
+}
+
+function appSendEmail(string $toEmail, string $toName, string $subject, string $htmlBody): bool
+{
+    $host = appEnv('SMTP_HOST', '');
+    $user = appEnv('SMTP_USER', '');
+    $pass = appEnv('SMTP_PASS', '');
+    if ($host === '' || $user === '' || $pass === '') {
+        // Fallback: intentar con mail() si el servidor lo soporta.
+        // Nota: en Windows/XAMPP depende de la configuración de php.ini (SMTP / sendmail_from).
+        $fromEmail = appEnv('SMTP_FROM_EMAIL', '');
+        if ($fromEmail === '') {
+            $serverHost = trim((string) ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+            $serverHost = preg_replace('/:\d+$/', '', $serverHost);
+            $fromEmail = 'no-reply@' . ($serverHost !== '' ? $serverHost : 'localhost');
+        }
+
+        $fromName = appEnv('SMTP_FROM_NAME', 'Tauro Store - Moda Masculina');
+        $headers = [];
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=UTF-8';
+        $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+
+        $to = $toName !== '' ? ($toName . ' <' . $toEmail . '>') : $toEmail;
+        try {
+            return function_exists('mail') ? mail($to, $subject, $htmlBody, implode("\r\n", $headers)) : false;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    $port = (int) (appEnv('SMTP_PORT', '') !== '' ? appEnv('SMTP_PORT') : 587);
+    $secure = strtolower(appEnv('SMTP_SECURE', $port === 465 ? 'ssl' : 'tls'));
+    $fromEmail = appEnv('SMTP_FROM_EMAIL', $user);
+    $fromName = appEnv('SMTP_FROM_NAME', 'Tauro Store - Moda Masculina');
+
+    if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+        $base = __DIR__ . '/PHPMailer/';
+        require_once $base . 'Exception.php';
+        require_once $base . 'PHPMailer.php';
+        require_once $base . 'SMTP.php';
+    }
+
+    try {
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->isSMTP();
+        $mail->Host = $host;
+        $mail->SMTPAuth = true;
+        $mail->Username = $user;
+        $mail->Password = $pass;
+        $mail->Port = $port;
+
+        if ($secure !== '') {
+            $mail->SMTPSecure = $secure;
+        }
+
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($toEmail, $toName);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $htmlBody;
+
+        $mail->send();
+        return true;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
 if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     $_SESSION['usuario'] = appSesionUsuario($_SESSION['usuario']);
 }

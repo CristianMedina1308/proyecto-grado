@@ -13,6 +13,18 @@ $usuario = $_SESSION['usuario'];
 $error = '';
 $etiquetasEstado = etiquetasEstadoPedido();
 
+$pinDisponible = appDbHasColumn($conn, 'usuarios', 'recovery_pin_hash');
+$pinConfigurado = false;
+if ($pinDisponible) {
+  try {
+    $pinStmt = $conn->prepare('SELECT recovery_pin_hash FROM usuarios WHERE id = ?');
+    $pinStmt->execute([$usuarioId]);
+    $pinConfigurado = trim((string) $pinStmt->fetchColumn()) !== '';
+  } catch (Throwable $e) {
+    $pinConfigurado = false;
+  }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['actualizar_datos'])) {
     if (!appValidarCsrf('perfil_form', $_POST['csrf_token'] ?? null)) {
@@ -65,6 +77,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
       } else {
         $error = 'Completa todos los campos para cambiar la contrasena.';
+      }
+    }
+  }
+
+  if (isset($_POST['actualizar_pin'])) {
+    if (!$pinDisponible) {
+      $error = 'El PIN de recuperacion aun no esta habilitado en la base de datos.';
+    } elseif (!appValidarCsrf('perfil_pin_form', $_POST['csrf_token'] ?? null)) {
+      $error = 'La sesion del formulario expiro. Intenta nuevamente.';
+    } else {
+      $contrasenaActual = (string) ($_POST['contrasena_actual_pin'] ?? '');
+      $pinNuevo = trim((string) ($_POST['pin_recuperacion'] ?? ''));
+      $pinConfirmar = trim((string) ($_POST['pin_recuperacion_confirmar'] ?? ''));
+
+      if ($contrasenaActual === '' || $pinNuevo === '' || $pinConfirmar === '') {
+        $error = 'Completa todos los campos para actualizar el PIN.';
+      } elseif (!appValidateRecoveryPin($pinNuevo)) {
+        $error = 'El PIN debe tener exactamente 4 digitos.';
+      } elseif ($pinNuevo !== $pinConfirmar) {
+        $error = 'Los PIN no coinciden.';
+      } elseif (appIsWeakRecoveryPin($pinNuevo)) {
+        $error = 'Elige un PIN menos obvio (por ejemplo, evita 1234 o 0000).';
+      } else {
+        $stmt = $conn->prepare('SELECT password FROM usuarios WHERE id = ?');
+        $stmt->execute([$usuarioId]);
+        $hash = (string) $stmt->fetchColumn();
+
+        if (!password_verify($contrasenaActual, $hash)) {
+          $error = 'Contrasena actual incorrecta.';
+        } else {
+          $pinHash = appHashRecoveryPin($pinNuevo);
+          $upd = $conn->prepare('UPDATE usuarios SET recovery_pin_hash = ?, recovery_pin_set_at = NOW(), pin_failed_attempts = 0, pin_locked_until = NULL WHERE id = ?');
+          $upd->execute([$pinHash, $usuarioId]);
+          appFlash('success', 'Tu PIN de recuperacion fue actualizado. Guardalo en un lugar seguro.', 'PIN actualizado');
+          appRedirect('perfil.php');
+        }
       }
     }
   }
@@ -131,6 +179,43 @@ include 'header.php';
         </div>
         <button type="submit" name="cambiar_contrasena" class="btn btn-warning">Actualizar contrasena</button>
       </form>
+    </div>
+  </div>
+
+  <div class="card mb-5 shadow-sm">
+    <div class="card-body">
+      <h3 class="card-title mb-2">PIN de recuperacion</h3>
+      <p class="text-soft mb-4">
+        Estado: <strong><?= $pinDisponible ? ($pinConfigurado ? 'Configurado' : 'No configurado') : 'No disponible' ?></strong>
+      </p>
+
+      <?php if (!$pinDisponible): ?>
+        <div class="alert alert-warning mb-0">
+          El PIN de recuperacion no esta habilitado en tu base de datos. Aplica la migracion para activarlo.
+        </div>
+      <?php else: ?>
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(appCsrfToken('perfil_pin_form')) ?>">
+
+          <div class="mb-3">
+            <label class="form-label">Contrasena actual</label>
+            <input type="password" name="contrasena_actual_pin" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nuevo PIN (4 digitos)</label>
+            <input type="password" name="pin_recuperacion" class="form-control" required inputmode="numeric" pattern="\d{4}" maxlength="4">
+            <div class="form-text text-soft">Este PIN se pedira cuando vayas a recuperar tu contrasena.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Confirmar PIN</label>
+            <input type="password" name="pin_recuperacion_confirmar" class="form-control" required inputmode="numeric" pattern="\d{4}" maxlength="4">
+          </div>
+
+          <button type="submit" name="actualizar_pin" class="btn btn-outline-primary">Guardar PIN</button>
+        </form>
+      <?php endif; ?>
     </div>
   </div>
 

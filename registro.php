@@ -13,8 +13,10 @@ if (isset($_POST['registro'])) {
     $telefono = trim($_POST['telefono'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $passwordPlano = (string) ($_POST['password'] ?? '');
+    $pinRecuperacion = trim((string) ($_POST['pin_recuperacion'] ?? ''));
+    $pinRecuperacionConfirm = trim((string) ($_POST['pin_recuperacion_confirmar'] ?? ''));
 
-    if ($nombre === '' || $telefono === '' || $email === '' || $passwordPlano === '') {
+    if ($nombre === '' || $telefono === '' || $email === '' || $passwordPlano === '' || $pinRecuperacion === '' || $pinRecuperacionConfirm === '') {
       $mensajeError = 'Todos los campos son obligatorios.';
     } elseif (!$aceptaTerminos) {
       $mensajeError = 'Debes aceptar los terminos y condiciones para registrarte.';
@@ -22,6 +24,14 @@ if (isset($_POST['registro'])) {
       $mensajeError = 'Ingresa un correo electronico valido.';
     } elseif (!preg_match('/^[0-9+ ]{7,20}$/', $telefono)) {
       $mensajeError = 'Ingresa un telefono valido.';
+    } elseif (!appDbHasColumn($conn, 'usuarios', 'recovery_pin_hash')) {
+      $mensajeError = 'El PIN de recuperacion aun no esta habilitado en la base de datos. Aplica la migracion correspondiente y vuelve a intentar.';
+    } elseif (!appValidateRecoveryPin($pinRecuperacion)) {
+      $mensajeError = 'El PIN de recuperacion debe tener exactamente 4 digitos.';
+    } elseif ($pinRecuperacion !== $pinRecuperacionConfirm) {
+      $mensajeError = 'Los PIN de recuperacion no coinciden.';
+    } elseif (appIsWeakRecoveryPin($pinRecuperacion)) {
+      $mensajeError = 'Elige un PIN menos obvio (por ejemplo, evita 1234 o 0000).';
     } else {
       $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
       $stmt->execute([$email]);
@@ -30,8 +40,9 @@ if (isset($_POST['registro'])) {
         $mensajeError = 'Ese correo ya esta registrado.';
       } else {
         $passwordHash = password_hash($passwordPlano, PASSWORD_BCRYPT);
-        $stmt = $conn->prepare("INSERT INTO usuarios (nombre, telefono, email, password, rol) VALUES (?, ?, ?, ?, 'cliente')");
-        $stmt->execute([$nombre, $telefono, $email, $passwordHash]);
+        $pinHash = appHashRecoveryPin($pinRecuperacion);
+        $stmt = $conn->prepare("INSERT INTO usuarios (nombre, telefono, email, password, rol, recovery_pin_hash, recovery_pin_set_at) VALUES (?, ?, ?, ?, 'cliente', ?, NOW())");
+        $stmt->execute([$nombre, $telefono, $email, $passwordHash, $pinHash]);
         appFlash('success', 'Tu cuenta fue creada correctamente. Ya puedes iniciar sesion.', 'Registro exitoso');
         appRedirect('login.php');
       }
@@ -78,6 +89,31 @@ include 'header.php';
           <div class="mb-4">
             <label class="form-label">Contrasena</label>
             <input type="password" name="password" class="form-control" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">PIN de recuperacion (4 digitos)</label>
+            <input type="password"
+                   name="pin_recuperacion"
+                   class="form-control"
+                   required
+                   inputmode="numeric"
+                   pattern="\d{4}"
+                   maxlength="4"
+                   placeholder="Ej: 4827">
+            <div class="form-text text-soft">Guarda este PIN. Lo usaras si algun dia necesitas recuperar tu contrasena.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Confirmar PIN de recuperacion</label>
+            <input type="password"
+                   name="pin_recuperacion_confirmar"
+                   class="form-control"
+                   required
+                   inputmode="numeric"
+                   pattern="\d{4}"
+                   maxlength="4"
+                   placeholder="Repite tu PIN">
           </div>
 
            <div class="form-check mb-4">
