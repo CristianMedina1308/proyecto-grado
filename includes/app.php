@@ -691,20 +691,47 @@ function appDbHasColumn(PDO $conn, string $table, string $column): bool
 
     try {
         $safeTable = str_replace('`', '', $table);
-        $stmt = $conn->prepare('SHOW COLUMNS FROM `' . $safeTable . '` LIKE ?');
-        $stmt->execute([$column]);
-        $exists = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+        $exists = false;
 
-        // En algunos hosts/usuarios, SHOW COLUMNS puede estar restringido.
-        // Si no encontramos nada, intentamos con INFORMATION_SCHEMA.
+        // 1) Vía SHOW COLUMNS (rápido cuando está permitido)
+        try {
+            $stmt = $conn->prepare('SHOW COLUMNS FROM `' . $safeTable . '` LIKE ?');
+            $stmt->execute([$column]);
+            $exists = $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+        } catch (Throwable $e) {
+            $exists = false;
+        }
+
+        // 2) Vía INFORMATION_SCHEMA (algunos hosts limitan SHOW COLUMNS)
         if (!$exists) {
-            $db = appDbCurrentDatabase($conn);
-            if ($db !== '') {
-                $chk = $conn->prepare(
-                    'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1'
-                );
-                $chk->execute([$db, $safeTable, $column]);
-                $exists = $chk->fetchColumn() !== false;
+            try {
+                $db = appDbCurrentDatabase($conn);
+                if ($db !== '') {
+                    $chk = $conn->prepare(
+                        'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1'
+                    );
+                    $chk->execute([$db, $safeTable, $column]);
+                    $exists = $chk->fetchColumn() !== false;
+                }
+            } catch (Throwable $e) {
+                $exists = false;
+            }
+        }
+
+        // 3) Último respaldo: intentar un SELECT a la columna.
+        // Esto funciona incluso cuando el proveedor bloquea metadatos, pero permite SELECT.
+        if (!$exists) {
+            $safeColumn = str_replace('`', '', $column);
+            $idOk = preg_match('/^[a-zA-Z0-9_]+$/', $safeTable) === 1
+                && preg_match('/^[a-zA-Z0-9_]+$/', $safeColumn) === 1;
+
+            if ($idOk) {
+                try {
+                    $conn->query('SELECT `' . $safeColumn . '` FROM `' . $safeTable . '` LIMIT 0');
+                    $exists = true;
+                } catch (Throwable $e) {
+                    $exists = false;
+                }
             }
         }
 
