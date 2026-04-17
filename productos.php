@@ -5,8 +5,16 @@ include 'includes/conexion.php';
 $busqueda = trim($_GET['buscar'] ?? '');
 $categoria = trim($_GET['categoria'] ?? '');
 
+// Por defecto mostramos SOLO el catalogo de 44 productos (camisas/sacos/mochilas).
+// Si necesitas ver todo el inventario, usa ?todo=1
+$verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
+
 $sql = "SELECT * FROM productos WHERE 1";
 $params = [];
+
+if (!$verTodo) {
+  $sql .= " AND (sku LIKE 'TS-CAMISA-%' OR sku LIKE 'TS-SACO-%' OR sku LIKE 'TS-MOCHILA-%')";
+}
 
 if ($busqueda !== '') {
   $sql .= " AND nombre LIKE ?";
@@ -23,7 +31,12 @@ $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$categorias = $conn->query("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> '' ORDER BY categoria ASC")->fetchAll(PDO::FETCH_COLUMN);
+$categoriasSql = "SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria <> ''";
+if (!$verTodo) {
+  $categoriasSql .= " AND (sku LIKE 'TS-CAMISA-%' OR sku LIKE 'TS-SACO-%' OR sku LIKE 'TS-MOCHILA-%')";
+}
+$categoriasSql .= " ORDER BY categoria ASC";
+$categorias = $conn->query($categoriasSql)->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
 <main class="container py-5">

@@ -7,6 +7,10 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['usuario']['rol'] ?? '') !== 'adm
 
 require_once '../includes/conexion.php';
 
+// Por defecto el panel lista SOLO el catalogo de 44 productos (camisas/sacos/mochilas).
+// Para ver todo el inventario (incluyendo otros productos), usa ?todo=1
+$verTodo = isset($_GET['todo']) && $_GET['todo'] === '1';
+
 // Sembrar catalogo desde imagenes (camisa/saco/mochila) para que aparezcan todas.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seed_catalogo_imagenes'])) {
     if (!appValidarCsrf('admin_productos_seed_images', $_POST['csrf_token'] ?? null)) {
@@ -112,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_producto'])) {
     }
 }
 
-$productos = $conn->query('
+$productosSql = '
   SELECT
     p.*,
     COALESCE(inv.stock_total, 0) AS stock_total,
@@ -128,8 +132,15 @@ $productos = $conn->query('
     FROM producto_tallas
     GROUP BY producto_id
   ) inv ON inv.producto_id = p.id
-  ORDER BY p.id DESC
-')->fetchAll(PDO::FETCH_ASSOC);
+  ';
+
+if (!$verTodo) {
+    $productosSql .= " WHERE (p.sku LIKE 'TS-CAMISA-%' OR p.sku LIKE 'TS-SACO-%' OR p.sku LIKE 'TS-MOCHILA-%')";
+}
+
+$productosSql .= ' ORDER BY p.id DESC';
+
+$productos = $conn->query($productosSql)->fetchAll(PDO::FETCH_ASSOC);
 
 $categoriasStats = $conn->query('
   SELECT

@@ -10,8 +10,10 @@ $pass = '';
 $port = 3306;
 
 // 1) Si existe una URL estilo mysql://user:pass@host:port/db, la usamos.
+// En Railway normalmente esta URL es la fuente mas confiable (evita desalineaciones con bases distintas).
 $url = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: '';
-if (is_string($url) && trim($url) !== '') {
+$hasUrl = is_string($url) && trim($url) !== '';
+if ($hasUrl) {
     $parts = parse_url($url);
     if (is_array($parts) && !empty($parts['host'])) {
         $host = (string) ($parts['host'] ?? $host);
@@ -27,11 +29,14 @@ if (is_string($url) && trim($url) !== '') {
 }
 
 // 2) Variables tipicas de Railway/servicios (con o sin guiones bajos)
-$host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: $host;
-$db   = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: $db;
-$user = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: $user;
-$pass = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: $pass;
-$port = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: $port);
+// Solo se aplican cuando NO hay URL, para evitar conectarse a una base equivocada por defaults.
+if (!$hasUrl) {
+    $host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: $host;
+    $db   = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: $db;
+    $user = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: $user;
+    $pass = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: $pass;
+    $port = (int) (getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: $port);
+}
 
 try {
     $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
