@@ -48,8 +48,8 @@ try {
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
     // (Debug)
-    // echo "✅ Conectado a Railway";
+    // echo "Conectado a Railroad";
 
 } catch (PDOException $e) {
-    die('❌ Error de conexión: ' . $e->getMessage());
+    die('Error de conexión: ' . $e->getMessage());
 }

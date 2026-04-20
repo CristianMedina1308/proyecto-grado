@@ -8,12 +8,12 @@
 
 **Tauro Store** es una aplicación e-commerce completa para venta de ropa y accesorios. Stack: PHP 8.2, MySQL, JavaScript vanilla.
 
-- ✅ Catálogo de productos
-- ✅ Carrito y checkout con validaciones
-- ✅ Sistema de facturación PDF
-- ✅ Panel administrativo
-- ✅ Chatbot de soporte
-- ✅ Pruebas unitarias incluidas
+- Catálogo de productos con búsqueda
+- Carrito y checkout con validaciones
+- Sistema de facturación PDF
+- Panel administrativo completo
+- Chatbot de soporte y consultas
+- Pruebas unitarias incluidas
 
 ---
 
@@ -51,17 +51,17 @@
 
 ```text
 integrador-main/
-├── admin/                        # Panel administrativo (usuarios, pedidos, productos)
-├── assets/                       # CSS, JS, imágenes
+├── admin/                        # Zona administrativa: usuarios, pedidos, productos
+├── assets/                       # Estilos, scripts, imágenes del sitio
 ├── includes/
-│   ├── app.php                   # Core (sesión, CSRF, flashes)
-│   ├── conexion.php              # Conexión BD
-│   ├── pedidos_utils.php         # Lógica de pedidos y envíos
-│   ├── chatbot_utils.php         # Chatbot
-│   └── business_rules.php        # Reglas de negocio puras
-├── tests/                        # Pruebas unitarias PHPUnit
-├── Dockerfile                    # Para despliegue en Railway
-├── composer.json                 # Dependencias (PHPMailer, PHPUnit)
+│   ├── app.php                   # Motor principal (sesión, CSRF, flashes, utilidades)
+│   ├── conexion.php              # Conexión a la base de datos
+│   ├── pedidos_utils.php         # Lógica para gestión de pedidos y envíos
+│   ├── chatbot_utils.php         # Chatbot conversacional
+│   └── business_rules.php        # Reglas de negocio sin dependencias de BD
+├── tests/                        # Pruebas unitarias con PHPUnit
+├── Dockerfile                    # Configuración para despliegue
+├── composer.json                 # Dependencias (PHPMailer, PHPUnit, etc.)
 └── README.md                     # Documentación principal
 ```
 
@@ -99,13 +99,13 @@ flowchart LR
 
 ## Seguridad aplicada en el proyecto
 
-- Tokens CSRF para formularios sensibles.
-- Validación de sesión de usuario.
-- Normalización de datos de usuario.
-- `basename()` para endurecer manejo de rutas de imágenes.
-- Uso de PDO.
-- Token público para consulta limitada de factura.
-- Validaciones de cantidad, tallas, estados y entrada del carrito.
+- Tokens CSRF para todas las acciones sensibles.
+- Validación de sesión antes de operaciones administrativas.
+- Preparación de consultas SQL con PDO.
+- Normalización de entrada de usuarios.
+- Uso de `basename()` para rutas de archivos.
+- Tokens públicos para consultas limitadas de facturas.
+- Validaciones de cantidad, tallas, estados y datos del carrito.
 
 ---
 

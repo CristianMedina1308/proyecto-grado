@@ -676,9 +676,10 @@ function appEnv(string $key, string $default = ''): string
 }
 
 /**
- * Comprueba si una columna existe en una tabla.
+ * Verifica si una columna existe en una tabla.
  *
  * Esto permite que el proyecto siga funcionando aunque la migración no se haya aplicado aún.
+ * Intenta varios métodos: SHOW COLUMNS, INFORMATION_SCHEMA, y como último recurso un SELECT.
  */
 function appDbHasColumn(PDO $conn, string $table, string $column): bool
 {
@@ -788,12 +789,9 @@ function appVerifyRecoveryPin(string $pin, string $hash): bool
 /**
  * Asegura (best effort) que el esquema necesario para el PIN exista.
  *
- * Motivo: en algunos despliegues, aplicar migraciones manuales es difícil.
- * Si el usuario de BD tiene permisos, intentamos crear las columnas faltantes.
- *
- * Importante:
- * - Si el host bloquea ALTER TABLE o ya existen las columnas, no rompe: solo ignora el error.
- * - Esto no reemplaza una migración formal, pero evita quedar bloqueado en producción.
+ * En algunos proveedores (como Railway), aplicar migraciones manuales es complicado.
+ * Si el usuario de BD tiene permisos, intentamos crear las columnas que falten.
+ * Si no tiene permisos o ya existen, simplemente continuamos sin error.
  */
 function appEnsureRecoveryPinSchema(PDO $conn): void
 {

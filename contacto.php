@@ -1,10 +1,10 @@
 <?php include 'header.php'; ?>
 
 <main class="container py-5">
-  <h1 class="text-center mb-5">📬 Contáctanos</h1>
+  <h1 class="text-center mb-5">Contáctanos</h1>
   <div class="row g-5">
 
-    <!-- FORMULARIO -->
+    <!-- Formulario de contacto -->
     <div class="col-md-6">
       <div class="card shadow">
         <div class="card-body">
@@ -30,7 +30,7 @@
 
           <?php if ($_SERVER["REQUEST_METHOD"] == "POST"): ?>
             <div class="alert alert-success mt-4">
-              ✅ Gracias por tu mensaje, <strong><?= htmlspecialchars($_POST['nombre']) ?></strong>.
+              Gracias por tu mensaje, <strong><?= htmlspecialchars($_POST['nombre']) ?></strong>.
               Te responderemos pronto a <strong><?= htmlspecialchars($_POST['email']) ?></strong>.
             </div>
           <?php endif; ?>

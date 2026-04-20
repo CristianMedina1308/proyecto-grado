@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/app.php';
 require_once __DIR__ . '/includes/conexion.php';
 
-// Best effort: si faltan columnas del PIN, intentamos crearlas (si hay permisos).
+// Intenta crear columnas de PIN si no existen (para casos donde la migración no se ha ejecutado).
 appEnsureRecoveryPinSchema($conn);
 
 $token = trim((string) ($_GET['token'] ?? ($_POST['token'] ?? '')));
@@ -65,12 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($nueva !== $confirmar || strlen($nueva) < 6) {
       $mensajeTipo = 'warning';
-      $mensaje = '❗ Las contraseñas no coinciden o son demasiado cortas.';
+      $mensaje = 'Las contraseñas no coinciden o son demasiado cortas.';
     } else {
       $usuario = $fetchUserByToken($conn, $token, $pinDisponible, $hasAttemptsCol, $hasLockedCol);
       if (!$usuario) {
         $mensajeTipo = 'danger';
-        $mensaje = '❌ Token inválido o expirado.';
+        $mensaje = 'Token inválido o expirado.';
       } else {
         $requirePin = $pinDisponible && trim((string) ($usuario['recovery_pin_hash'] ?? '')) !== '';
 
@@ -78,10 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $lockedUntil = trim((string) ($usuario['pin_locked_until'] ?? ''));
           if ($lockedUntil !== '' && strtotime($lockedUntil) !== false && strtotime($lockedUntil) > time()) {
             $mensajeTipo = 'warning';
-            $mensaje = '⚠️ Demasiados intentos. Espera un momento e intentalo de nuevo.';
+            $mensaje = 'Demasiados intentos. Espera un momento e intentalo de nuevo.';
           } elseif (!appValidateRecoveryPin($pinIngresado)) {
             $mensajeTipo = 'warning';
-            $mensaje = '⚠️ Ingresa tu PIN de 4 digitos.';
+            $mensaje = 'Ingresa tu PIN de 4 dígitos.';
           } elseif (!appVerifyRecoveryPin($pinIngresado, (string) $usuario['recovery_pin_hash'])) {
             if ($hasAttemptsCol || $hasLockedCol) {
               $intentos = (int) ($usuario['pin_failed_attempts'] ?? 0);

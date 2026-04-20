@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/app.php';
 require_once __DIR__ . '/includes/conexion.php';
 
-// Best effort: si faltan columnas del PIN, intentamos crearlas (si hay permisos).
+// Intenta crear las columnas de PIN si faltan (para Railway u otros hosts sin migración manual).
 appEnsureRecoveryPinSchema($conn);
 
 $mensaje = '';
@@ -12,10 +12,10 @@ $hasLockedCol = appDbHasColumn($conn, 'usuarios', 'pin_locked_until');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!appValidarCsrf('recuperar_form', $_POST['csrf_token'] ?? null)) {
-    $mensaje = "<div class='alert alert-warning'>⚠️ La sesion del formulario expiro. Intenta nuevamente.</div>";
+    $mensaje = "<div class='alert alert-warning'>La sesión del formulario expiró. Intenta nuevamente.</div>";
   } elseif (!$pinDisponible) {
     $dbActual = appDbCurrentDatabase($conn);
-    $mensaje = "<div class='alert alert-warning'>⚠️ El PIN de recuperacion aun no esta habilitado en la base de datos" . ($dbActual !== '' ? " (BD actual: " . htmlspecialchars($dbActual) . ")" : "") . ". Aplica la migracion en esa misma base.</div>";
+    $mensaje = "<div class='alert alert-warning'>El PIN de recuperación aún no está habilitado en la base de datos" . ($dbActual !== '' ? " (BD actual: " . htmlspecialchars($dbActual) . ")" : "") . ". Aplica la migración en esa misma base.</div>";
   } else {
     $identificador = trim((string) ($_POST['identificador'] ?? ''));
     $pin = trim((string) ($_POST['pin'] ?? ''));
@@ -24,9 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isPhone = preg_match('/^[0-9+ ]{7,20}$/', $identificador) === 1;
 
     if (!$isEmail && !$isPhone) {
-      $mensaje = "<div class='alert alert-warning'>⚠️ Ingresa un correo o telefono valido.</div>";
+      $mensaje = "<div class='alert alert-warning'>Ingresa un correo o teléfono válido.</div>";
     } elseif (!appValidateRecoveryPin($pin)) {
-      $mensaje = "<div class='alert alert-warning'>⚠️ El PIN debe tener 4 digitos.</div>";
+      $mensaje = "<div class='alert alert-warning'>El PIN debe tener 4 dígitos.</div>";
     } else {
       $cols = ['id', 'nombre', 'email', 'telefono', 'recovery_pin_hash'];
       if ($hasAttemptsCol) {
@@ -42,44 +42,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if (!$usuario) {
-        $mensaje = "<div class='alert alert-danger'>❌ No fue posible validar los datos. Verifica e intenta de nuevo.</div>";
-      } elseif (trim((string) ($usuario['recovery_pin_hash'] ?? '')) === '') {
-        $mensaje = "<div class='alert alert-warning'>⚠️ Esta cuenta no tiene PIN de recuperacion configurado. Si aun puedes entrar, configuralo en tu perfil.</div>";
-      } else {
-        $lockedUntil = trim((string) ($usuario['pin_locked_until'] ?? ''));
-        if ($lockedUntil !== '' && strtotime($lockedUntil) !== false && strtotime($lockedUntil) > time()) {
-          $mensaje = "<div class='alert alert-warning'>⚠️ Demasiados intentos. Espera un momento e intentalo de nuevo.</div>";
-        } elseif (!appVerifyRecoveryPin($pin, (string) $usuario['recovery_pin_hash'])) {
-          // Fallo de PIN: sumar intento y bloquear si es necesario.
-          if ($hasAttemptsCol || $hasLockedCol) {
-            $intentos = (int) ($usuario['pin_failed_attempts'] ?? 0);
-            $intentos++;
+         $mensaje = "<div class='alert alert-danger'>No fue posible validar los datos. Verifica e intenta de nuevo.</div>";
+       } elseif (trim((string) ($usuario['recovery_pin_hash'] ?? '')) === '') {
+         $mensaje = "<div class='alert alert-warning'>Esta cuenta no tiene PIN de recuperación configurado. Si aún puedes entrar, configúralo en tu perfil.</div>";
+       } else {
+         $lockedUntil = trim((string) ($usuario['pin_locked_until'] ?? ''));
+         if ($lockedUntil !== '' && strtotime($lockedUntil) !== false && strtotime($lockedUntil) > time()) {
+           $mensaje = "<div class='alert alert-warning'>Demasiados intentos. Espera un momento e intenta de nuevo.</div>";
+         } elseif (!appVerifyRecoveryPin($pin, (string) $usuario['recovery_pin_hash'])) {
+           // Registra intentos fallidos de PIN para evitar fuerza bruta.
+           if ($hasAttemptsCol || $hasLockedCol) {
+             $intentos = (int) ($usuario['pin_failed_attempts'] ?? 0);
+             $intentos++;
 
-            $setLocked = false;
-            $lockedValue = null;
-            if ($intentos >= 5 && $hasLockedCol) {
-              $setLocked = true;
-              $lockedValue = date('Y-m-d H:i:s', time() + 15 * 60);
-            }
+             $setLocked = false;
+             $lockedValue = null;
+             if ($intentos >= 5 && $hasLockedCol) {
+               $setLocked = true;
+               $lockedValue = date('Y-m-d H:i:s', time() + 15 * 60);
+             }
 
-            $parts = [];
-            $params = [];
-            if ($hasAttemptsCol) {
-              $parts[] = 'pin_failed_attempts = ?';
-              $params[] = $intentos;
-            }
-            if ($hasLockedCol && $setLocked) {
-              $parts[] = 'pin_locked_until = ?';
-              $params[] = $lockedValue;
-            }
+             $parts = [];
+             $params = [];
+             if ($hasAttemptsCol) {
+               $parts[] = 'pin_failed_attempts = ?';
+               $params[] = $intentos;
+             }
+             if ($hasLockedCol && $setLocked) {
+               $parts[] = 'pin_locked_until = ?';
+               $params[] = $lockedValue;
+             }
 
-            if ($parts) {
-              $params[] = (int) $usuario['id'];
-              $conn->prepare('UPDATE usuarios SET ' . implode(', ', $parts) . ' WHERE id = ?')->execute($params);
-            }
-          }
+             if ($parts) {
+               $params[] = (int) $usuario['id'];
+               $conn->prepare('UPDATE usuarios SET ' . implode(', ', $parts) . ' WHERE id = ?')->execute($params);
+             }
+           }
 
-          $mensaje = "<div class='alert alert-danger'>❌ No fue posible validar los datos. Verifica e intenta de nuevo.</div>";
+           $mensaje = "<div class='alert alert-danger'>No fue posible validar los datos. Verifica e intenta de nuevo.</div>";
         } else {
           // OK: generar token y redirigir a restablecer.
           $token = bin2hex(random_bytes(32));
@@ -102,7 +102,7 @@ include 'header.php';
 ?>
 
 <div class="container py-5">
-  <h1 class="text-center mb-4">🔑 Recuperar Contraseña</h1>
+  <h1 class="text-center mb-4">Recuperar contraseña</h1>
 
   <?php if ($mensaje): ?>
     <div class="mb-4"><?= $mensaje ?></div>
