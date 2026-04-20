@@ -1,4 +1,6 @@
-USE tiendaropa;
+-- Ejecuta este script sobre la base de datos donde tengas las tablas (por ejemplo: tiendaropa / railway).
+-- Si tu cliente SQL no selecciona la BD automáticamente, descomenta el USE y ajusta el nombre.
+-- USE tiendaropa;
 
 START TRANSACTION;
 
@@ -52,6 +54,8 @@ SET color = COALESCE(NULLIF(TRIM(color), ''),
 
 ALTER TABLE pedidos
   ADD COLUMN IF NOT EXISTS subtotal_productos DECIMAL(10,2) NULL DEFAULT 0 AFTER total,
+  ADD COLUMN IF NOT EXISTS iva_rate DECIMAL(6,4) NULL DEFAULT NULL AFTER subtotal_productos,
+  ADD COLUMN IF NOT EXISTS iva_monto DECIMAL(10,2) NULL DEFAULT NULL AFTER iva_rate,
   ADD COLUMN IF NOT EXISTS costo_envio DECIMAL(10,2) NULL DEFAULT 0 AFTER subtotal_productos,
   ADD COLUMN IF NOT EXISTS zona_envio VARCHAR(100) NULL AFTER ciudad_envio,
   ADD COLUMN IF NOT EXISTS dias_entrega_min INT NULL AFTER zona_envio,
@@ -63,6 +67,14 @@ ALTER TABLE pedidos
   ADD COLUMN IF NOT EXISTS estado_enviado_at DATETIME NULL AFTER estado_preparando_at,
   ADD COLUMN IF NOT EXISTS estado_entregado_at DATETIME NULL AFTER estado_enviado_at,
   ADD COLUMN IF NOT EXISTS estado_cancelado_at DATETIME NULL AFTER estado_entregado_at;
+
+-- PIN de recuperación (4 dígitos)
+-- Se guarda hasheado (nunca en texto plano) y se controla fuerza bruta con intentos/bloqueo.
+ALTER TABLE usuarios
+  ADD COLUMN IF NOT EXISTS recovery_pin_hash VARCHAR(255) NULL AFTER password,
+  ADD COLUMN IF NOT EXISTS recovery_pin_set_at DATETIME NULL AFTER recovery_pin_hash,
+  ADD COLUMN IF NOT EXISTS pin_failed_attempts INT NOT NULL DEFAULT 0 AFTER recovery_pin_set_at,
+  ADD COLUMN IF NOT EXISTS pin_locked_until DATETIME NULL AFTER pin_failed_attempts;
 
 UPDATE pedidos
 SET estado = 'pagado'
