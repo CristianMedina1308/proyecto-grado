@@ -1,0 +1,9 @@
+# Carpeta de reportes - No versionar
+/reports/logs/
+/reports/latest-report.json
+/reports/coverage/
+
+# Excepto el archivo HTML del panel
+!reports/index.html
+!reports/api.php
+

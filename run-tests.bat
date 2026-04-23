@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
 set TARGET=%1
 if "%TARGET%"=="" set TARGET=all
@@ -17,7 +17,34 @@ if "%PHPUNIT_CMD%"=="" (
   exit /b 1
 )
 
-if /I "%TARGET%"=="all" %PHPUNIT_CMD%
-if /I "%TARGET%"=="unit" %PHPUNIT_CMD% tests\Unit
-if /I "%TARGET%"=="security" %PHPUNIT_CMD% --group Security
-if /I "%TARGET%"=="coverage" %PHPUNIT_CMD% --coverage-html .phpunit.cache\code-coverage
+REM Ejecutar con el nuevo sistema de reportes
+echo.
+echo ========================================
+echo TAURO STORE - TEST RUNNER
+echo ========================================
+echo.
+
+if /I "%TARGET%"=="all" (
+  echo Ejecutando todas las pruebas con reportes...
+  %PHP_BIN% run-tests-reporter.php
+) else if /I "%TARGET%"=="unit" (
+  echo Ejecutando pruebas unitarias con reportes...
+  %PHP_BIN% run-tests-reporter.php
+) else if /I "%TARGET%"=="coverage" (
+  echo Ejecutando con reporte de cobertura...
+  %PHPUNIT_CMD% --coverage-html .phpunit.cache\code-coverage
+) else if /I "%TARGET%"=="reports" (
+  echo Abriendo panel de reportes...
+  start reports\index.html
+) else (
+  echo Uso: run-tests.bat [all^|unit^|coverage^|reports]
+  echo.
+  echo Opciones:
+  echo   all      - Ejecutar todas las pruebas y generar reporte
+  echo   unit     - Ejecutar pruebas unitarias
+  echo   coverage - Generar reporte de cobertura
+  echo   reports  - Abrir panel de reportes en navegador
+  exit /b 1
+)
+
+endlocal
