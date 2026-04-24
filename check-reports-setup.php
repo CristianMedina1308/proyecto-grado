@@ -128,9 +128,7 @@ if (version_compare($phpVersion, '7.4.0', '>=')) {
 // 10. Verificar documentación
 echo "10. Verificando documentación...\n";
 $docs = [
-    'REPORTE_PRUEBAS.md' => 'Guía técnica',
-    'SETUP_REPORTES.md' => 'Guía inicio rápido',
-    'IMPLEMENTACION_REPORTES.md' => 'Resumen ejecutivo',
+    'TESTING.md' => 'Guía completa de pruebas',
     'START_HERE_REPORTES.txt' => 'Instrucciones'
 ];
 

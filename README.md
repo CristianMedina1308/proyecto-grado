@@ -22,7 +22,7 @@ Aplicación web e-commerce para venta de ropa y accesorios masculinos.
 ### Testing
 
 - PHPUnit 11
-- Suite unitaria propia del proyecto en `tests/`
+- Suite de pruebas del proyecto en `tests/`
 
 ### Infraestructura
 
@@ -35,6 +35,4 @@ Aplicación web e-commerce para venta de ropa y accesorios masculinos.
 - Manual de usuario: [MANUAL_USUARIO.md](MANUAL_USUARIO.md)
 - Manual de instalación: [MANUAL_INSTALACION.md](MANUAL_INSTALACION.md)
 - Manual de director: [MANUAL_DIRECTOR.md](MANUAL_DIRECTOR.md)
-- Pruebas unitarias: [TESTING.md](TESTING.md)
-- Resumen de pruebas: [TEST_SUMMARY.md](TEST_SUMMARY.md)
-
+- Pruebas: [TESTING.md](TESTING.md)

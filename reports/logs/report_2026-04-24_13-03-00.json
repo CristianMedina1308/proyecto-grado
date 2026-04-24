@@ -1,363 +1,363 @@
 {
-    "timestamp": "2026-04-24 08:42:55",
-    "timestamp_unix": 1777038175,
-    "exit_code": 0,
-    "status": "EXITOSO",
+    "timestamp": "2026-04-24 13:03:00",
+    "timestamp_unix": 1777035780,
+    "exit_code": 1,
+    "status": "FALL\u00d3",
     "tests": {
         "tests": [
             {
                 "name": "AppFunctionsTest::testAppSesionUsuarioCreatesValidSessionArray",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.000175
+                "time": 0.000219
             },
             {
                 "name": "AppFunctionsTest::testAppSesionUsuarioDefaultsClienteRole",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 8.9e-5
+                "time": 0.000126
             },
             {
                 "name": "AppFunctionsTest::testAppSesionUsuarioTrimsWhitespace",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 6.8e-5
+                "time": 7.6e-5
             },
             {
                 "name": "AppFunctionsTest::testAppLoginUsuarioCreatesSession",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.000646
+                "time": 0.000678
             },
             {
                 "name": "AppFunctionsTest::testAppCsrfTokenGeneratesValidToken",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.00012
+                "time": 0.000139
             },
             {
                 "name": "AppFunctionsTest::testAppCsrfTokenReturnsSameTokenForSameKey",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 8.4e-5
+                "time": 7.3e-5
             },
             {
                 "name": "AppFunctionsTest::testAppValidarCsrfValidatesCorrectToken",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.000282
+                "time": 0.000378
             },
             {
                 "name": "AppFunctionsTest::testAppValidarCsrfRegeneratesTokenAfterSuccess",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 9.1e-5
+                "time": 0.000201
             },
             {
                 "name": "AppFunctionsTest::testAppValidarCsrfRejectsInvalidToken",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 7.6e-5
+                "time": 0.000149
             },
             {
                 "name": "AppFunctionsTest::testAppValidarCsrfRejectsNullToken",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 7.2e-5
+                "time": 0.000132
             },
             {
                 "name": "AppFunctionsTest::testAppFlashAddsMessageToSession",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 7.3e-5
+                "time": 0.000124
             },
             {
                 "name": "AppFunctionsTest::testAppPullFlashesClearsMessages",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 7.0e-5
+                "time": 0.000114
             },
             {
                 "name": "AppFunctionsTest::testAppPullFlashesReturnsEmptyArrayWhenNoFlashes",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 6.8e-5
+                "time": 7.8e-5
             },
             {
                 "name": "AppFunctionsTest::testAppDeleteProductImageFileIgnoresDefaultImage",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.001534
+                "time": 0.002463
             },
             {
                 "name": "AppFunctionsTest::testAppDeleteProductImageFileIgnoresEmptyName",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 0.000498
+                "time": 0.000642
             },
             {
                 "name": "AppFunctionsTest::testAppRedirectFunctionExists",
                 "status": "pass",
                 "classname": "AppFunctionsTest",
-                "time": 9.8e-5
+                "time": 0.000111
             },
             {
                 "name": "BusinessLogicTest::testCartSubtotalCalculation",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 7.4e-5
+                "time": 0.000106
             },
             {
                 "name": "BusinessLogicTest::testCartTotalWithMultipleItems",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.4e-5
+                "time": 7.7e-5
             },
             {
                 "name": "BusinessLogicTest::testCartTotalWithShippingCost",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.8e-5
+                "time": 6.8e-5
             },
             {
                 "name": "BusinessLogicTest::testPriceFormattingWithThousandsSeparator",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 7.4e-5
+                "time": 8.3e-5
             },
             {
                 "name": "BusinessLogicTest::testPriceFormattingWithDecimals",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.3e-5
+                "time": 7.3e-5
             },
             {
                 "name": "BusinessLogicTest::testValidOrderStatuses",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.1e-5
+                "time": 6.3e-5
             },
             {
                 "name": "BusinessLogicTest::testOrderStateTransition",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 0.00127
+                "time": 0.001424
             },
             {
                 "name": "BusinessLogicTest::testTaxCalculation",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.9e-5
+                "time": 9.6e-5
             },
             {
                 "name": "BusinessLogicTest::testShippingDaysCalculation",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.8e-5
+                "time": 8.0e-5
             },
             {
                 "name": "BusinessLogicTest::testCartQuantityValidation",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.6e-5
+                "time": 0.000164
             },
             {
                 "name": "BusinessLogicTest::testRejectInvalidQuantity",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.2e-5
+                "time": 0.00011
             },
             {
                 "name": "BusinessLogicTest::testSimpleQuantityDiscount",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.2e-5
+                "time": 0.000105
             },
             {
                 "name": "BusinessLogicTest::testValidClothingSizes",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.9e-5
+                "time": 8.8e-5
             },
             {
                 "name": "BusinessLogicTest::testInvalidClothingSize",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.1e-5
+                "time": 8.1e-5
             },
             {
                 "name": "BusinessLogicTest::testTallaMustNotExceedMaxLength",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.8e-5
+                "time": 8.0e-5
             },
             {
                 "name": "BusinessLogicTest::testOpcionesEstadoPedidoIncludeCurrentStatus",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.6e-5
+                "time": 8.0e-5
             },
             {
                 "name": "BusinessLogicTest::testColumnaFechaEstadoPedidoReturnsExpectedColumn",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.1e-5
+                "time": 7.0e-5
             },
             {
                 "name": "BusinessLogicTest::testTextoTituloPedidoFormatsNormalizedText",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 6.3e-5
+                "time": 7.5e-5
             },
             {
                 "name": "BusinessLogicTest::testTauroChatbotFormatPriceUsesColombianStyle",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 5.6e-5
+                "time": 7.0e-5
             },
             {
                 "name": "BusinessLogicTest::testTauroChatbotExtractOrderIdFindsPedidoNumber",
                 "status": "pass",
                 "classname": "BusinessLogicTest",
-                "time": 0.000107
+                "time": 0.000144
             },
             {
                 "name": "ValidationTest::testDataProviderValidEmails with data set #0",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 0.000909
+                "time": 0.00089
             },
             {
                 "name": "ValidationTest::testDataProviderValidEmails with data set #1",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 8.4e-5
+                "time": 0.000114
             },
             {
                 "name": "ValidationTest::testDataProviderValidEmails with data set #2",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.7e-5
+                "time": 7.4e-5
             },
             {
                 "name": "ValidationTest::testDataProviderValidEmails with data set #3",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 0.000133
+                "time": 7.5e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #0",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.6e-5
+                "time": 7.2e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #1",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.1e-5
+                "time": 6.8e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #2",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.2e-5
+                "time": 6.7e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #3",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.0e-5
+                "time": 6.9e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #4",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.0e-5
+                "time": 6.4e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #5",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.0e-5
+                "time": 6.5e-5
             },
             {
                 "name": "ValidationTest::testDataProviderInvalidEmails with data set #6",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.1e-5
+                "time": 6.4e-5
             },
             {
                 "name": "ValidationTest::testValidEmailAddresses",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.5e-5
+                "time": 8.0e-5
             },
             {
                 "name": "ValidationTest::testInvalidEmailAddresses",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 9.4e-5
+                "time": 0.000157
             },
             {
                 "name": "ValidationTest::testHtmlspecialcharsEscapesXSS",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 0.001044
+                "time": 0.001004
             },
             {
                 "name": "ValidationTest::testHtmlspecialcharsPreservesText",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 7.0e-5
+                "time": 9.2e-5
             },
             {
                 "name": "ValidationTest::testValidatePositiveInteger",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 5.7e-5
+                "time": 6.6e-5
             },
             {
                 "name": "ValidationTest::testRejectNegativeInteger",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 5.2e-5
+                "time": 5.9e-5
             },
             {
                 "name": "ValidationTest::testValidateFloat",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 4.8e-5
+                "time": 5.3e-5
             },
             {
                 "name": "ValidationTest::testTrimRemovesWhitespace",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 5.0e-5
+                "time": 5.2e-5
             },
             {
                 "name": "ValidationTest::testValidateURLFormat",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 0.000365
+                "time": 0.000392
             },
             {
                 "name": "ValidationTest::testValidateIntegerRange",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.2e-5
+                "time": 8.0e-5
             },
             {
                 "name": "ValidationTest::testValidateCartQuantity",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 5.2e-5
+                "time": 5.8e-5
             },
             {
                 "name": "ValidationTest::testRejectZeroQuantity",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 6.1e-5
+                "time": 5.4e-5
             },
             {
                 "name": "ValidationTest::testBasenamePreventsPathTraversal",
@@ -369,14 +369,13 @@
                 "name": "ValidationTest::testBasenameWithNormalFilenames",
                 "status": "pass",
                 "classname": "ValidationTest",
-                "time": 5.2e-5
+                "time": 5.4e-5
             }
         ],
         "source": "junit"
     },
     "php_version": "8.5.3",
     "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
-    "phpunit_warnings": 2,
     "stats": {
         "total": 61,
         "passed": 61,

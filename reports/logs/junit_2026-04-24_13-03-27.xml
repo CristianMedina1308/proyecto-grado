@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="61" assertions="103" errors="0" failures="0" skipped="0" time="0.007219">
+    <testsuite name="AppFunctionsTest" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" tests="16" assertions="23" errors="0" failures="0" skipped="0" time="0.003294">
+      <testcase name="testAppSesionUsuarioCreatesValidSessionArray" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="15" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000220"/>
+      <testcase name="testAppSesionUsuarioDefaultsClienteRole" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="33" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000095"/>
+      <testcase name="testAppSesionUsuarioTrimsWhitespace" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="45" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="3" time="0.000073"/>
+      <testcase name="testAppLoginUsuarioCreatesSession" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="61" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="3" time="0.000606"/>
+      <testcase name="testAppCsrfTokenGeneratesValidToken" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="77" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="2" time="0.000115"/>
+      <testcase name="testAppCsrfTokenReturnsSameTokenForSameKey" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="86" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000078"/>
+      <testcase name="testAppValidarCsrfValidatesCorrectToken" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="96" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000076"/>
+      <testcase name="testAppValidarCsrfRegeneratesTokenAfterSuccess" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="105" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000073"/>
+      <testcase name="testAppValidarCsrfRejectsInvalidToken" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="116" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000068"/>
+      <testcase name="testAppValidarCsrfRejectsNullToken" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="125" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000065"/>
+      <testcase name="testAppFlashAddsMessageToSession" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="133" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="2" time="0.000068"/>
+      <testcase name="testAppPullFlashesClearsMessages" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="142" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="2" time="0.000068"/>
+      <testcase name="testAppPullFlashesReturnsEmptyArrayWhenNoFlashes" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="153" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000067"/>
+      <testcase name="testAppDeleteProductImageFileIgnoresDefaultImage" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="159" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.001105"/>
+      <testcase name="testAppDeleteProductImageFileIgnoresEmptyName" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="177" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000435"/>
+      <testcase name="testAppRedirectFunctionExists" file="C:\xampp\htdocs\integrador-main\tests\Unit\AppFunctionsTest.php" line="191" class="AppFunctionsTest" classname="AppFunctionsTest" assertions="1" time="0.000081"/>
+    </testsuite>
+    <testsuite name="BusinessLogicTest" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" tests="20" assertions="39" errors="0" failures="0" skipped="0" time="0.001888">
+      <testcase name="testCartSubtotalCalculation" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="10" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000071"/>
+      <testcase name="testCartTotalWithMultipleItems" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="17" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000436"/>
+      <testcase name="testCartTotalWithShippingCost" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="30" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000062"/>
+      <testcase name="testPriceFormattingWithThousandsSeparator" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="41" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000065"/>
+      <testcase name="testPriceFormattingWithDecimals" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="48" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000058"/>
+      <testcase name="testValidOrderStatuses" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="55" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000059"/>
+      <testcase name="testOrderStateTransition" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="65" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="3" time="0.000137"/>
+      <testcase name="testTaxCalculation" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="74" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000099"/>
+      <testcase name="testShippingDaysCalculation" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="81" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="2" time="0.000075"/>
+      <testcase name="testCartQuantityValidation" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="89" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="6" time="0.000066"/>
+      <testcase name="testRejectInvalidQuantity" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="98" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="4" time="0.000057"/>
+      <testcase name="testSimpleQuantityDiscount" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="107" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="2" time="0.000063"/>
+      <testcase name="testValidClothingSizes" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="115" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="6" time="0.000058"/>
+      <testcase name="testInvalidClothingSize" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="124" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="3" time="0.000058"/>
+      <testcase name="testTallaMustNotExceedMaxLength" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="133" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000075"/>
+      <testcase name="testOpcionesEstadoPedidoIncludeCurrentStatus" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="139" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000069"/>
+      <testcase name="testColumnaFechaEstadoPedidoReturnsExpectedColumn" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="145" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000066"/>
+      <testcase name="testTextoTituloPedidoFormatsNormalizedText" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="151" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000072"/>
+      <testcase name="testTauroChatbotFormatPriceUsesColombianStyle" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="157" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000104"/>
+      <testcase name="testTauroChatbotExtractOrderIdFindsPedidoNumber" file="C:\xampp\htdocs\integrador-main\tests\Unit\BusinessLogicTest.php" line="163" class="BusinessLogicTest" classname="BusinessLogicTest" assertions="1" time="0.000135"/>
+    </testsuite>
+    <testsuite name="ValidationTest" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" tests="25" assertions="41" errors="0" failures="0" skipped="0" time="0.002037">
+      <testsuite name="ValidationTest::testDataProviderValidEmails" tests="4" assertions="4" errors="0" failures="0" skipped="0" time="0.000851">
+        <testcase name="testDataProviderValidEmails with data set #0" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="12" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000610"/>
+        <testcase name="testDataProviderValidEmails with data set #1" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="12" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000092"/>
+        <testcase name="testDataProviderValidEmails with data set #2" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="12" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000076"/>
+        <testcase name="testDataProviderValidEmails with data set #3" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="12" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000073"/>
+      </testsuite>
+      <testsuite name="ValidationTest::testDataProviderInvalidEmails" tests="7" assertions="7" errors="0" failures="0" skipped="0" time="0.000422">
+        <testcase name="testDataProviderInvalidEmails with data set #0" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000064"/>
+        <testcase name="testDataProviderInvalidEmails with data set #1" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000060"/>
+        <testcase name="testDataProviderInvalidEmails with data set #2" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000060"/>
+        <testcase name="testDataProviderInvalidEmails with data set #3" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000060"/>
+        <testcase name="testDataProviderInvalidEmails with data set #4" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000059"/>
+        <testcase name="testDataProviderInvalidEmails with data set #5" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000059"/>
+        <testcase name="testDataProviderInvalidEmails with data set #6" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="20" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000060"/>
+      </testsuite>
+      <testcase name="testValidEmailAddresses" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="27" class="ValidationTest" classname="ValidationTest" assertions="4" time="0.000061"/>
+      <testcase name="testInvalidEmailAddresses" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="43" class="ValidationTest" classname="ValidationTest" assertions="7" time="0.000067"/>
+      <testcase name="testHtmlspecialcharsEscapesXSS" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="62" class="ValidationTest" classname="ValidationTest" assertions="2" time="0.000071"/>
+      <testcase name="testHtmlspecialcharsPreservesText" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="73" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000053"/>
+      <testcase name="testValidatePositiveInteger" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="82" class="ValidationTest" classname="ValidationTest" assertions="3" time="0.000052"/>
+      <testcase name="testRejectNegativeInteger" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="91" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000049"/>
+      <testcase name="testValidateFloat" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="102" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000047"/>
+      <testcase name="testTrimRemovesWhitespace" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="109" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000048"/>
+      <testcase name="testValidateURLFormat" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="116" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000062"/>
+      <testcase name="testValidateIntegerRange" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="123" class="ValidationTest" classname="ValidationTest" assertions="2" time="0.000051"/>
+      <testcase name="testValidateCartQuantity" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="134" class="ValidationTest" classname="ValidationTest" assertions="3" time="0.000050"/>
+      <testcase name="testRejectZeroQuantity" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="143" class="ValidationTest" classname="ValidationTest" assertions="2" time="0.000048"/>
+      <testcase name="testBasenamePreventsPathTraversal" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="151" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000054"/>
+      <testcase name="testBasenameWithNormalFilenames" file="C:\xampp\htdocs\integrador-main\tests\Unit\ValidationTest.php" line="157" class="ValidationTest" classname="ValidationTest" assertions="1" time="0.000051"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

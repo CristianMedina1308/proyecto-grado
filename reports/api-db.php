@@ -104,7 +104,7 @@ function getLatestReport()
                 skipped_tests,
                 success_rate,
                 exit_code,
-                JSON_EXTRACT(test_data, '$.tests') as tests
+                 test_data
             FROM reportes_pruebas
             ORDER BY timestamp DESC
             LIMIT 1
@@ -117,10 +117,17 @@ function getLatestReport()
             return;
         }
 
-        // Parsear el JSON de tests
-        if ($report['tests']) {
-            $report['tests'] = json_decode($report['tests'], true);
+        // Parsear test_data y extraer tests (compatible con MySQL y MariaDB)
+        $tests = null;
+        if (!empty($report['test_data'])) {
+            $decoded = json_decode($report['test_data'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $tests = $decoded['tests'] ?? null;
+            }
         }
+
+        $report['tests'] = $tests;
+        unset($report['test_data']);
 
         echo json_encode([
             'success' => true,
@@ -164,8 +171,14 @@ function getReportById($id)
 
         // Parsear JSON
         if ($report['test_data']) {
-            $report['test_data'] = json_decode($report['test_data'], true);
+            $decoded = json_decode($report['test_data'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Devolver tests directamente para el panel
+                $report['tests'] = $decoded['tests'] ?? null;
+            }
         }
+
+        unset($report['test_data']);
 
         echo json_encode([
             'success' => true,

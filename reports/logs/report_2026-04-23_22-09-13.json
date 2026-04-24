@@ -1,0 +1,159 @@
+{
+    "timestamp": "2026-04-23 22:09:13",
+    "timestamp_unix": 1776982155,
+    "exit_code": 2,
+    "status": "FALL\u00d3",
+    "tests": {
+        "timestamp": "2026-04-23 21:50:50",
+        "timestamp_unix": 1776981051,
+        "exit_code": 2,
+        "status": "FALL\u00d3",
+        "tests": {
+            "timestamp": "2026-04-23 21:48:01",
+            "timestamp_unix": 1776980881,
+            "exit_code": 2,
+            "status": "FALL\u00d3",
+            "tests": {
+                "timestamp": "2026-04-23 21:26:39",
+                "timestamp_unix": 1776979599,
+                "exit_code": 2,
+                "status": "FALL\u00d3",
+                "tests": {
+                    "timestamp": "2026-04-23 21:26:06",
+                    "timestamp_unix": 1776979567,
+                    "exit_code": 2,
+                    "status": "FALL\u00d3",
+                    "tests": {
+                        "timestamp": "2026-04-23 21:24:09",
+                        "timestamp_unix": 1776979449,
+                        "exit_code": 1,
+                        "status": "FALL\u00d3",
+                        "tests": {
+                            "timestamp": "2026-04-23 14:45:30",
+                            "timestamp_unix": 1713894330,
+                            "exit_code": 0,
+                            "status": "EXITOSO",
+                            "php_version": "8.2.0",
+                            "platform": "Windows 10",
+                            "stats": {
+                                "total": 10,
+                                "passed": 9,
+                                "failed": 1,
+                                "skipped": 0,
+                                "success_rate": 90
+                            },
+                            "tests": {
+                                "tests": [
+                                    {
+                                        "name": "Tests\\Unit\\AppFunctionsTest::testValidateEmail",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\AppFunctionsTest::testValidateEmailInvalid",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\AppFunctionsTest::testHashPassword",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\AppFunctionsTest::testVerifyPassword",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\BusinessLogicTest::testCalculateEnvio",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\BusinessLogicTest::testCalculateIVA",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\BusinessLogicTest::testCalculateTotal",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\ValidationTest::testValidarTelefono",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\ValidationTest::testValidarTelefonoInvalid",
+                                        "status": "pass",
+                                        "message": null
+                                    },
+                                    {
+                                        "name": "Tests\\Unit\\ValidationTest::testSanitizeString",
+                                        "status": "fail",
+                                        "message": "Failed asserting that two strings are identical"
+                                    }
+                                ]
+                            }
+                        },
+                        "php_version": "8.5.3",
+                        "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+                        "stats": {
+                            "total": 1,
+                            "passed": 0,
+                            "failed": 0,
+                            "skipped": 0,
+                            "success_rate": 0
+                        }
+                    },
+                    "php_version": "8.5.3",
+                    "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+                    "stats": {
+                        "total": 8,
+                        "passed": 0,
+                        "failed": 0,
+                        "skipped": 0,
+                        "success_rate": 0
+                    }
+                },
+                "php_version": "8.5.3",
+                "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+                "stats": {
+                    "total": 8,
+                    "passed": 0,
+                    "failed": 0,
+                    "skipped": 0,
+                    "success_rate": 0
+                }
+            },
+            "php_version": "8.5.3",
+            "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+            "stats": {
+                "total": 8,
+                "passed": 0,
+                "failed": 0,
+                "skipped": 0,
+                "success_rate": 0
+            }
+        },
+        "php_version": "8.5.3",
+        "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+        "stats": {
+            "total": 8,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "success_rate": 0
+        }
+    },
+    "php_version": "8.5.3",
+    "platform": "Windows NT DESKTOP-VQUIEA8 10.0 build 26200 (Windows 11) AMD64",
+    "stats": {
+        "total": 8,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "success_rate": 0
+    }
+}

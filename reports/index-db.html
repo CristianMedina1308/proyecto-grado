@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes de Pruebas - Tauro Store</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <style>
+        .reports-page {
+            padding: 28px 16px;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .reports-hero {
+            background: var(--bg-surface);
+            border: 1px solid rgba(215, 181, 109, 0.28);
+            border-radius: var(--radius-lg);
+            padding: 22px 22px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 18px;
+        }
+
+        .reports-hero p {
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .reports-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid rgba(184, 146, 71, 0.45);
+            background: rgba(184, 146, 71, 0.12);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(184, 146, 71, 0.98), rgba(138, 101, 33, 0.92));
+            color: var(--text-inverse);
+            border-color: rgba(138, 101, 33, 0.6);
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .report-card {
+            background: var(--bg-surface);
+            border: 1px solid rgba(215, 181, 109, 0.28);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: 0 16px 34px rgba(12, 9, 6, 0.08);
+        }
+
+        .report-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .report-date {
+            font-weight: 800;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge.success {
+            background: rgba(59, 153, 96, 0.16);
+            color: #1f6b3c;
+            border: 1px solid rgba(59, 153, 96, 0.35);
+        }
+
+        .status-badge.failure {
+            background: rgba(215, 68, 66, 0.12);
+            color: #a62a28;
+            border: 1px solid rgba(215, 68, 66, 0.35);
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0 14px;
+        }
+
+        .stat {
+            background: rgba(23, 19, 15, 0.04);
+            border: 1px solid rgba(216, 200, 173, 0.55);
+            border-radius: 14px;
+            padding: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .success-rate {
+            background: rgba(184, 146, 71, 0.10);
+            border: 1px solid rgba(184, 146, 71, 0.25);
+            border-radius: 14px;
+            padding: 10px;
+            margin-top: 8px;
+        }
+
+        .success-rate-value {
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .muted {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .is-hidden {
+            display: none;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 8, 6, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 9999;
+        }
+
+        .modal {
+            width: min(920px, 100%);
+            max-height: 84vh;
+            overflow: auto;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(215, 181, 109, 0.28);
+            box-shadow: var(--shadow-soft);
+            padding: 18px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .tests-list {
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .test-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(216, 200, 173, 0.55);
+            background: rgba(23, 19, 15, 0.03);
+        }
+
+        .test-name {
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .test-status {
+            font-weight: 900;
+            white-space: nowrap;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(216, 200, 173, 0.6);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .test-status.pass { color: #1f6b3c; border-color: rgba(59,153,96,.35); background: rgba(59,153,96,.12); }
+        .test-status.fail { color: #a62a28; border-color: rgba(215,68,66,.35); background: rgba(215,68,66,.10); }
+        .test-status.skip { color: #6a4a12; border-color: rgba(184,146,71,.35); background: rgba(184,146,71,.10); }
+    </style>
+</head>
+<body>
+    <main class="reports-page">
+        <section class="reports-hero">
+            <h1>Reportes de Pruebas Unitarias</h1>
+            <p>Panel de control de calidad. Los reportes se guardan en <strong>Base de Datos</strong> (historial) y en <strong>JSON</strong> (respaldo).</p>
+            <div class="reports-actions">
+                <button class="btn btn-primary" id="toggleHistoryBtn" type="button">Mostrar historial</button>
+                <a class="btn" href="api-db.php?action=latest">API: último reporte</a>
+                <a class="btn" href="api-db.php?action=list">API: listar</a>
+            </div>
+            <p class="muted" style="margin-top:10px;">
+                Nota: se muestran varios porque se guarda el <strong>historial</strong> de ejecuciones. Por defecto se ve el último.
+            </p>
+        </section>
+
+        <section class="reports-grid" id="reportsGrid">            <article class="report-card " data-report-id="10">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 13:11:49</div>
+                        <div class="muted">Reporte ID: 10</div>
+                    </div>
+                    <span class="status-badge success">EXITOSO</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(10)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="9">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 13:05:21</div>
+                        <div class="muted">Reporte ID: 9</div>
+                    </div>
+                    <span class="status-badge success">EXITOSO</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(9)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="8">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 13:03:27</div>
+                        <div class="muted">Reporte ID: 8</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(8)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="7">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 13:03:00</div>
+                        <div class="muted">Reporte ID: 7</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(7)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="13">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 08:42:55</div>
+                        <div class="muted">Reporte ID: 13</div>
+                    </div>
+                    <span class="status-badge success">EXITOSO</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(13)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="12">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 08:42:09</div>
+                        <div class="muted">Reporte ID: 12</div>
+                    </div>
+                    <span class="status-badge success">EXITOSO</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(12)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="11">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">24/04/2026 08:18:20</div>
+                        <div class="muted">Reporte ID: 11</div>
+                    </div>
+                    <span class="status-badge success">EXITOSO</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value high">100.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">61</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">61</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(11)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="6">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 22:09:13</div>
+                        <div class="muted">Reporte ID: 6</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">8</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(6)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="5">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 21:50:50</div>
+                        <div class="muted">Reporte ID: 5</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">8</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(5)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="4">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 21:48:01</div>
+                        <div class="muted">Reporte ID: 4</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">8</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(4)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="3">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 21:26:39</div>
+                        <div class="muted">Reporte ID: 3</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">8</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(3)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="2">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 21:26:06</div>
+                        <div class="muted">Reporte ID: 2</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">8</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(2)">Ver pruebas ejecutadas</button>
+            </article>            <article class="report-card is-hidden" data-report-id="1">
+                <div class="report-meta">
+                    <div>
+                        <div class="report-date">23/04/2026 21:24:09</div>
+                        <div class="muted">Reporte ID: 1</div>
+                    </div>
+                    <span class="status-badge failure">FALLÓ</span>
+                </div>
+
+                <div class="success-rate">
+                    <div class="muted">Tasa de éxito</div>
+                    <div class="success-rate-value low">0.00%</div>
+                </div>
+
+                <div class="report-stats">
+                    <div class="stat"><div class="stat-label">Exitosas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Fallidas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Saltadas</div><div class="stat-value">0</div></div>
+                    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">1</div></div>
+                </div>
+
+                <button class="btn btn-primary" type="button" onclick="openDetails(1)">Ver pruebas ejecutadas</button>
+            </article>        </section>
+
+        <div class="muted" style="margin-top:18px; text-align:center;">Generado automáticamente | Persistencia en BD | Compatible con Railway</div>
+    </main>
+
+    <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 style="margin:0;">Pruebas ejecutadas</h2>
+                <button class="btn" type="button" onclick="closeModal()">Cerrar</button>
+            </div>
+            <div class="muted" id="modalMeta"></div>
+            <div id="modalBody" class="tests-list" style="margin-top:12px;"></div>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleHistoryBtn');
+        let showingHistory = false;
+
+        toggleBtn?.addEventListener('click', () => {
+            showingHistory = !showingHistory;
+            document.querySelectorAll('.report-card.is-hidden').forEach(el => {
+                el.style.display = showingHistory ? '' : 'none';
+            });
+            toggleBtn.textContent = showingHistory ? 'Ocultar historial' : 'Mostrar historial';
+        });
+
+        // Ocultar historial al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.report-card.is-hidden').forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+
+        const backdrop = document.getElementById('modalBackdrop');
+        const modalBody = document.getElementById('modalBody');
+        const modalMeta = document.getElementById('modalMeta');
+
+        function closeModal() {
+            backdrop.style.display = 'none';
+            modalBody.innerHTML = '';
+            modalMeta.textContent = '';
+        }
+
+        backdrop?.addEventListener('click', (e) => {
+            if (e.target === backdrop) closeModal();
+        });
+
+        async function openDetails(id) {
+            if (!id) return;
+            backdrop.style.display = 'flex';
+            modalBody.innerHTML = '<div class="muted">Cargando...</div>';
+            modalMeta.textContent = `Reporte ID: ${id}`;
+
+            try {
+                const res = await fetch(`api-db.php?action=by-id&id=${encodeURIComponent(id)}`);
+                const data = await res.json();
+                if (!data.success) {
+                    modalBody.innerHTML = `<div class="muted">Error: ${data.error || 'No se pudo cargar'}</div>`;
+                    return;
+                }
+
+                const report = data.report || {};
+                const tests = report.tests || (report.test_data && report.test_data.tests) || [];
+                const when = report.timestamp ? report.timestamp : '';
+                modalMeta.textContent = `Reporte ID: ${id}${when ? ' | ' + when : ''}`;
+
+                if (!tests || tests.length === 0) {
+                    modalBody.innerHTML = '<div class="muted">Este reporte no tiene detalle de pruebas.</div>';
+                    return;
+                }
+
+                modalBody.innerHTML = tests.map(t => {
+                    const status = (t.status || '').toLowerCase();
+                    const name = t.name || 'Test';
+                    const msg = t.message ? `<div class="muted" style="margin-top:4px;">${escapeHtml(String(t.message))}</div>` : '';
+                    return `
+                        <div class="test-row">
+                            <div>
+                                <div class="test-name">${escapeHtml(String(name))}</div>
+                                ${msg}
+                            </div>
+                            <div class="test-status ${status}">${(status || 'pass').toUpperCase()}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                modalBody.innerHTML = `<div class="muted">Error al cargar: ${escapeHtml(String(err))}</div>`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[c]));
+        }
+    </script>
+</body>
+</html>

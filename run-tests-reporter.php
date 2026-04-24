@@ -10,6 +10,9 @@ define('BASE_PATH', __DIR__);
 define('REPORTS_DIR', BASE_PATH . DIRECTORY_SEPARATOR . 'reports');
 define('PHPUNIT_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'phpunit.phar');
 
+// Zona horaria consistente para timestamps
+date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'America/Bogota');
+
 // Crear directorios si no existen
 if (!is_dir(REPORTS_DIR)) {
     mkdir(REPORTS_DIR, 0755, true);
@@ -36,6 +39,8 @@ echo "========================================\n\n";
 $jsonReportFile = REPORTS_DIR . DIRECTORY_SEPARATOR . 'latest-report.json';
 $archiveReportFile = REPORTS_DIR . DIRECTORY_SEPARATOR . "logs/report_{$timestamp}.json";
 $htmlReportFile = REPORTS_DIR . DIRECTORY_SEPARATOR . 'index.html';
+$junitReportFile = REPORTS_DIR . DIRECTORY_SEPARATOR . 'latest-junit.xml';
+$archiveJunitFile = REPORTS_DIR . DIRECTORY_SEPARATOR . "logs/junit_{$timestamp}.xml";
 
 // Ejecutar PHPUnit y capturar salida
 echo "Ejecutando pruebas...\n\n";
@@ -49,12 +54,18 @@ $command = sprintf(
 $output = [];
 $returnCode = 0;
 
+// Evitar que se usen archivos viejos si el comando falla
+@unlink($junitReportFile);
+@unlink($jsonReportFile);
+
+$cdCommand = (DIRECTORY_SEPARATOR === '\\') ? 'cd /d %s' : 'cd %s';
+
 // Ejecutar pruebas
 $testCommand = sprintf(
-    'cd %s && php %s --testdox --log-json=%s 2>&1',
-    BASE_PATH,
-    PHPUNIT_PATH,
-    escapeshellarg($jsonReportFile)
+    $cdCommand . ' && php %s --testdox --colors=never --do-not-fail-on-warning --do-not-fail-on-phpunit-warning --log-junit %s tests/ 2>&1',
+    escapeshellarg(BASE_PATH),
+    escapeshellarg(PHPUNIT_PATH),
+    escapeshellarg($junitReportFile)
 );
 
 echo "Ejecutando: {$testCommand}\n\n";
@@ -66,58 +77,58 @@ foreach ($testOutput as $line) {
     echo $line . "\n";
 }
 
+$joinedOutput = implode("\n", $testOutput);
+$phpunitWarnings = 0;
+if (preg_match('/PHPUnit\s+Warnings:\s*(\d+)/i', $joinedOutput, $m)) {
+    $phpunitWarnings = (int) $m[1];
+}
+
 echo "\n========================================\n";
 
 // Procesar resultados
-if (file_exists($jsonReportFile)) {
-    $jsonContent = file_get_contents($jsonReportFile);
-    $testResults = json_decode($jsonContent, true);
+if (file_exists($junitReportFile)) {
+    @copy($junitReportFile, $archiveJunitFile);
+
+    $parsed = parseJUnitReport($junitReportFile);
+    $testResults = [
+        'tests' => $parsed['tests'],
+        'source' => 'junit',
+    ];
 
     // Crear reporte mejorado
     $enhancedReport = [
         'timestamp' => $timestamp_readable,
         'timestamp_unix' => time(),
         'exit_code' => $returnCode,
+        // Se recalcula después en base a fallos reales
         'status' => $returnCode === 0 ? 'EXITOSO' : 'FALLÓ',
         'tests' => $testResults,
         'php_version' => phpversion(),
         'platform' => php_uname(),
+        'phpunit_warnings' => $phpunitWarnings,
     ];
 
-    // Contar resultados
-    if (isset($testResults['tests'])) {
-        $total = count($testResults['tests']);
-        $passed = 0;
-        $failed = 0;
-        $skipped = 0;
+    $total = (int) ($parsed['stats']['total'] ?? 0);
+    $passed = (int) ($parsed['stats']['passed'] ?? 0);
+    $failed = (int) ($parsed['stats']['failed'] ?? 0);
+    $skipped = (int) ($parsed['stats']['skipped'] ?? 0);
 
-        foreach ($testResults['tests'] as $test) {
-            if (isset($test['status'])) {
-                if ($test['status'] === 'pass') {
-                    $passed++;
-                } elseif ($test['status'] === 'fail') {
-                    $failed++;
-                } elseif ($test['status'] === 'skip') {
-                    $skipped++;
-                }
-            }
-        }
+    $enhancedReport['stats'] = [
+        'total' => $total,
+        'passed' => $passed,
+        'failed' => $failed,
+        'skipped' => $skipped,
+        'success_rate' => $total > 0 ? round(($passed / $total) * 100, 2) : 0,
+    ];
 
-        $enhancedReport['stats'] = [
-            'total' => $total,
-            'passed' => $passed,
-            'failed' => $failed,
-            'skipped' => $skipped,
-            'success_rate' => $total > 0 ? round(($passed / $total) * 100, 2) : 0,
-        ];
+    $enhancedReport['status'] = $failed === 0 ? 'EXITOSO' : 'FALLÓ';
 
-        echo "Resultados:\n";
-        echo "  Total: {$total}\n";
-        echo "  Exitosas: {$passed}\n";
-        echo "  Fallidas: {$failed}\n";
-        echo "  Saltadas: {$skipped}\n";
-        echo "  Porcentaje: " . $enhancedReport['stats']['success_rate'] . "%\n";
-    }
+    echo "Resultados:\n";
+    echo "  Total: {$total}\n";
+    echo "  Exitosas: {$passed}\n";
+    echo "  Fallidas: {$failed}\n";
+    echo "  Saltadas: {$skipped}\n";
+    echo "  Porcentaje: " . $enhancedReport['stats']['success_rate'] . "%\n";
 
     // Guardar reporte JSON mejorado
     file_put_contents($jsonReportFile, json_encode($enhancedReport, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
@@ -129,7 +140,7 @@ if (file_exists($jsonReportFile)) {
     echo "Archivo de historial: {$archiveReportFile}\n";
 
 } else {
-    echo "ERROR: No se generó el archivo de reporte JSON.\n";
+    echo "ERROR: No se generó el archivo JUnit XML (phpunit).\n";
 }
 
 // Generar HTML de visualización
@@ -139,6 +150,101 @@ echo "\nPanel de reportes: {$htmlReportFile}\n";
 echo "========================================\n\n";
 
 exit($returnCode);
+
+/**
+ * Parsea un archivo JUnit XML generado por PHPUnit (v9+ / v10+ / v11)
+ * y lo normaliza a una lista de tests con estados pass/fail/skip.
+ *
+ * @return array{tests: array<int, array<string,mixed>>, stats: array{total:int, passed:int, failed:int, skipped:int}}
+ */
+function parseJUnitReport(string $junitFile): array
+{
+    $tests = [];
+    $total = 0;
+    $passed = 0;
+    $failed = 0;
+    $skipped = 0;
+
+    if (!file_exists($junitFile)) {
+        return [
+            'tests' => [],
+            'stats' => [
+                'total' => 0,
+                'passed' => 0,
+                'failed' => 0,
+                'skipped' => 0,
+            ],
+        ];
+    }
+
+    libxml_use_internal_errors(true);
+    $xml = simplexml_load_file($junitFile);
+    if ($xml === false) {
+        return [
+            'tests' => [],
+            'stats' => [
+                'total' => 0,
+                'passed' => 0,
+                'failed' => 0,
+                'skipped' => 0,
+            ],
+        ];
+    }
+
+    $testcases = $xml->xpath('//testcase') ?: [];
+    foreach ($testcases as $case) {
+        $total++;
+
+        $name = (string) ($case['name'] ?? '');
+        $classname = (string) ($case['classname'] ?? '');
+        $time = isset($case['time']) ? (float) $case['time'] : null;
+
+        $status = 'pass';
+        $message = null;
+
+        if (isset($case->skipped)) {
+            $status = 'skip';
+            $skipped++;
+            $message = (string) ($case->skipped['message'] ?? '') ?: trim((string) $case->skipped);
+        } elseif (isset($case->failure)) {
+            $status = 'fail';
+            $failed++;
+            $message = (string) ($case->failure['message'] ?? '') ?: trim((string) $case->failure);
+        } elseif (isset($case->error)) {
+            $status = 'fail';
+            $failed++;
+            $message = (string) ($case->error['message'] ?? '') ?: trim((string) $case->error);
+        } else {
+            $passed++;
+        }
+
+        $displayName = $classname !== '' ? ($classname . '::' . $name) : $name;
+        $row = [
+            'name' => $displayName !== '' ? $displayName : 'Test',
+            'status' => $status,
+        ];
+        if ($classname !== '') {
+            $row['classname'] = $classname;
+        }
+        if ($time !== null) {
+            $row['time'] = $time;
+        }
+        if ($message) {
+            $row['message'] = function_exists('mb_substr') ? mb_substr($message, 0, 2000) : substr($message, 0, 2000);
+        }
+        $tests[] = $row;
+    }
+
+    return [
+        'tests' => $tests,
+        'stats' => [
+            'total' => $total,
+            'passed' => $passed,
+            'failed' => $failed,
+            'skipped' => $skipped,
+        ],
+    ];
+}
 
 /**
  * Genera un archivo HTML para visualizar todos los reportes
