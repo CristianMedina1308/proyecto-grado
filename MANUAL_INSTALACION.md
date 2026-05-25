@@ -136,6 +136,16 @@ En Railway, la conexión ya contempla variables administradas por la plataforma:
 - `MYSQLUSER`
 - `MYSQLPASSWORD`
 - `MYSQLPORT`
+- `MYSQL_URL`
+- `MYSQL_PUBLIC_URL`
+
+Si `mysql.railway.internal` responde con timeout desde PHP, agrega en el servicio web:
+
+```env
+MYSQL_URL=${{MySQL.MYSQL_PUBLIC_URL}}
+```
+
+Esta opcion usa el TCP proxy publico de Railway para evitar problemas de red interna.
 
 ---
 

@@ -234,6 +234,8 @@ Railway inyecta automáticamente:
 - `MYSQLUSER`
 - `MYSQLPASSWORD`
 - `MYSQLPORT`
+- `MYSQL_URL`
+- `MYSQL_PUBLIC_URL`
 
 Para base de datos externa (si aplica):
 - `DB_HOST`

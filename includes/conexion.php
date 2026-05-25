@@ -66,16 +66,18 @@ if (!function_exists('database_config')) {
             }
         }
 
-        // Variables individuales. Se aplican despues para permitir sobreescrituras explicitas.
-        $config['host'] = env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST'], $config['host']);
-        $config['db'] = env_value(['MYSQLDATABASE', 'MYSQL_DATABASE', 'DB_NAME'], $config['db']);
-        $config['user'] = env_value(['MYSQLUSER', 'MYSQL_USER', 'DB_USER'], $config['user']);
-        $config['pass'] = env_value(['MYSQLPASSWORD', 'MYSQL_PASSWORD', 'DB_PASS'], $config['pass']);
-        $port = env_value(['MYSQLPORT', 'MYSQL_PORT', 'DB_PORT'], (string) $config['port']);
-        $config['port'] = max(1, (int) $port);
+        // Si hay URL, esta gana. Asi MYSQL_PUBLIC_URL/MYSQL_URL no se pisa con MYSQLHOST interno.
+        if ($config['source'] !== 'url') {
+            $config['host'] = env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST'], $config['host']);
+            $config['db'] = env_value(['MYSQLDATABASE', 'MYSQL_DATABASE', 'DB_NAME'], $config['db']);
+            $config['user'] = env_value(['MYSQLUSER', 'MYSQL_USER', 'DB_USER'], $config['user']);
+            $config['pass'] = env_value(['MYSQLPASSWORD', 'MYSQL_PASSWORD', 'DB_PASS'], $config['pass']);
+            $port = env_value(['MYSQLPORT', 'MYSQL_PORT', 'DB_PORT'], (string) $config['port']);
+            $config['port'] = max(1, (int) $port);
 
-        if ($config['source'] === 'defaults' && env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST']) !== null) {
-            $config['source'] = 'variables';
+            if (env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST']) !== null) {
+                $config['source'] = 'variables';
+            }
         }
 
         return $config;
