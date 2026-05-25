@@ -242,8 +242,8 @@ Para base de datos externa (si aplica):
 - `DB_PASS`
 - `DB_PORT`
 
-El despliegue incluye `/health.php` como healthcheck para Railway. Ese endpoint responde `200`
-solo cuando PHP puede conectar con MySQL.
+El despliegue incluye `/health.php` como healthcheck para Railway. Ese endpoint valida
+que el contenedor PHP este vivo. Para verificar MySQL manualmente usa `/health-db.php`.
 
 ### Correo SMTP
 
