@@ -8,6 +8,7 @@ require_once __DIR__ . '/includes/conexion.php';
 $config = database_config();
 $connected = false;
 $error = null;
+$stage = 'connect';
 
 try {
     $dsn = sprintf(
@@ -19,10 +20,13 @@ try {
 
     $test = new PDO($dsn, $config['user'], $config['pass'], [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_TIMEOUT => 8,
+        PDO::ATTR_TIMEOUT => 30,
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
     ]);
+    $stage = 'query';
     $test->query('SELECT 1');
     $connected = true;
+    $stage = 'ok';
 } catch (PDOException $e) {
     http_response_code(503);
     $error = $e->getMessage();
@@ -37,6 +41,7 @@ echo json_encode([
     'user' => $config['user'],
     'source' => $config['source'],
     'url_source' => $config['url_source'],
+    'stage' => $stage,
     'env_present' => [
         'MYSQL_URL' => getenv('MYSQL_URL') !== false,
         'MYSQL_PRIVATE_URL' => getenv('MYSQL_PRIVATE_URL') !== false,
