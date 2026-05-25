@@ -240,6 +240,10 @@ Para base de datos externa (si aplica):
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASS`
+- `DB_PORT`
+
+El despliegue incluye `/health.php` como healthcheck para Railway. Ese endpoint responde `200`
+solo cuando PHP puede conectar con MySQL.
 
 ### Correo SMTP
 

@@ -90,6 +90,7 @@ DB_HOST=tu_host
 DB_NAME=tu_db
 DB_USER=tu_usuario
 DB_PASS=tu_contraseña
+DB_PORT=tu_puerto
 
 # OPCIONAL: Para correos (si tu app lo necesita)
 SMTP_HOST=smtp.gmail.com
@@ -146,6 +147,7 @@ En Railway, la conexión ya contempla variables administradas por la plataforma:
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASS`
+- `DB_PORT`
 - `MYSQLHOST`
 - `MYSQLDATABASE`
 - `MYSQLUSER`
