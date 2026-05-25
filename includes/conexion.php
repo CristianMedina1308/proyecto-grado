@@ -17,48 +17,76 @@ if (!function_exists('env_value')) {
     }
 }
 
-$config = [
-    'host' => '127.0.0.1',
-    'db' => 'tiendaropa',
-    'user' => 'root',
-    'pass' => '',
-    'port' => 3306,
-];
+if (!function_exists('database_config')) {
+    function database_config(): array
+    {
+        $config = [
+            'host' => '127.0.0.1',
+            'db' => 'tiendaropa',
+            'user' => 'root',
+            'pass' => '',
+            'port' => 3306,
+            'source' => 'defaults',
+            'url_source' => null,
+        ];
 
-// Railway puede exponer una URL privada o publica. Si existe, es la opcion mas confiable.
-$databaseUrl = env_value([
-    'MYSQL_URL',
-    'MYSQL_PRIVATE_URL',
-    'MYSQL_PUBLIC_URL',
-    'DATABASE_URL',
-    'DATABASE_PRIVATE_URL',
-    'DATABASE_PUBLIC_URL',
-]);
+        // Railway puede exponer una URL privada o publica. Si existe, es la opcion mas confiable.
+        $urlNames = [
+            'MYSQL_URL',
+            'MYSQL_PRIVATE_URL',
+            'MYSQL_PUBLIC_URL',
+            'DATABASE_URL',
+            'DATABASE_PRIVATE_URL',
+            'DATABASE_PUBLIC_URL',
+        ];
 
-if ($databaseUrl !== null) {
-    $parts = parse_url($databaseUrl);
-    $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        foreach ($urlNames as $name) {
+            $databaseUrl = env_value([$name]);
+            if ($databaseUrl === null) {
+                continue;
+            }
 
-    if (is_array($parts) && !empty($parts['host']) && in_array($scheme, ['mysql', 'mariadb'], true)) {
-        $config['host'] = (string) $parts['host'];
-        $config['port'] = (int) ($parts['port'] ?? $config['port']);
-        $config['user'] = rawurldecode((string) ($parts['user'] ?? $config['user']));
-        $config['pass'] = rawurldecode((string) ($parts['pass'] ?? $config['pass']));
+            $parts = parse_url($databaseUrl);
+            $scheme = strtolower((string) ($parts['scheme'] ?? ''));
 
-        $path = ltrim((string) ($parts['path'] ?? ''), '/');
-        if ($path !== '') {
-            $config['db'] = rawurldecode($path);
+            if (is_array($parts) && !empty($parts['host']) && in_array($scheme, ['mysql', 'mariadb'], true)) {
+                $config['host'] = (string) $parts['host'];
+                $config['port'] = (int) ($parts['port'] ?? $config['port']);
+                $config['user'] = rawurldecode((string) ($parts['user'] ?? $config['user']));
+                $config['pass'] = rawurldecode((string) ($parts['pass'] ?? $config['pass']));
+                $config['source'] = 'url';
+                $config['url_source'] = $name;
+
+                $path = ltrim((string) ($parts['path'] ?? ''), '/');
+                if ($path !== '') {
+                    $config['db'] = rawurldecode($path);
+                }
+
+                break;
+            }
         }
+
+        // Variables individuales. Se aplican despues para permitir sobreescrituras explicitas.
+        $config['host'] = env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST'], $config['host']);
+        $config['db'] = env_value(['MYSQLDATABASE', 'MYSQL_DATABASE', 'DB_NAME'], $config['db']);
+        $config['user'] = env_value(['MYSQLUSER', 'MYSQL_USER', 'DB_USER'], $config['user']);
+        $config['pass'] = env_value(['MYSQLPASSWORD', 'MYSQL_PASSWORD', 'DB_PASS'], $config['pass']);
+        $port = env_value(['MYSQLPORT', 'MYSQL_PORT', 'DB_PORT'], (string) $config['port']);
+        $config['port'] = max(1, (int) $port);
+
+        if ($config['source'] === 'defaults' && env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST']) !== null) {
+            $config['source'] = 'variables';
+        }
+
+        return $config;
     }
 }
 
-// Variables individuales. Se aplican despues para permitir sobreescrituras explicitas.
-$config['host'] = env_value(['MYSQLHOST', 'MYSQL_HOST', 'DB_HOST'], $config['host']);
-$config['db'] = env_value(['MYSQLDATABASE', 'MYSQL_DATABASE', 'DB_NAME'], $config['db']);
-$config['user'] = env_value(['MYSQLUSER', 'MYSQL_USER', 'DB_USER'], $config['user']);
-$config['pass'] = env_value(['MYSQLPASSWORD', 'MYSQL_PASSWORD', 'DB_PASS'], $config['pass']);
-$port = env_value(['MYSQLPORT', 'MYSQL_PORT', 'DB_PORT'], (string) $config['port']);
-$config['port'] = max(1, (int) $port);
+$config = database_config();
+
+if (defined('DB_SKIP_CONNECT') && DB_SKIP_CONNECT === true) {
+    return;
+}
 
 try {
     $dsn = sprintf(
